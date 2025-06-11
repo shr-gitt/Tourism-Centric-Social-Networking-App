@@ -1,0 +1,32 @@
+using Backend.Models;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+
+namespace Backend.Services
+{
+    public class PostServices
+    {
+        private readonly IMongoCollection<Post> _postsCollection;
+
+        public PostServices(IOptions<MongoDBSettings> settings, IMongoClient mongoClient)
+        {
+            var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
+            _postsCollection = database.GetCollection<Post>(settings.Value.TouristPostsCollectionName);
+        }
+
+        public async Task<List<Post>> GetAsync() =>
+            await _postsCollection.Find(_ => true).ToListAsync();
+
+        public async Task<Post?> GetByIdAsync(int id) =>
+            await _postsCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+
+        public async Task CreateAsync(Post post) =>
+            await _postsCollection.InsertOneAsync(post);
+
+        public async Task UpdateAsync(int id, Post updated) =>
+            await _postsCollection.ReplaceOneAsync(p => p.Id == id, updated);
+
+        public async Task DeleteAsync(int id) =>
+            await _postsCollection.DeleteOneAsync(p => p.Id == id);
+    }
+}
