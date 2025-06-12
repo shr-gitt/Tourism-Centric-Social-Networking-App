@@ -17,16 +17,16 @@ namespace Backend.Services
         public async Task<List<Post>> GetAsync() =>
             await _postsCollection.Find(_ => true).ToListAsync();
 
-        public async Task<Post?> GetByIdAsync(int id) =>
+        public async Task<Post?> GetByIdAsync(string id) =>
             await _postsCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
 
         public async Task CreateAsync(Post post) =>
             await _postsCollection.InsertOneAsync(post);
 
-        public async Task UpdateAsync(int id, Post updated) =>
+        public async Task UpdateAsync(string id, Post updated) =>
             await _postsCollection.ReplaceOneAsync(p => p.Id == id, updated);
 
-        public async Task DeleteAsync(int id) =>
+        public async Task DeleteAsync(string id) =>
             await _postsCollection.DeleteOneAsync(p => p.Id == id);
     }
 }
