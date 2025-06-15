@@ -1,3 +1,4 @@
+using Backend;
 using Backend.Data;
 using Backend.Services;
 using MongoDB.Driver;
@@ -7,20 +8,37 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure MongoDB settings and services
-builder.Services.Configure<MongoDBSettings>(
-    builder.Configuration.GetSection("MongoDB"));
+// Configure MongoDB settings
+builder.Services.Configure<MongoDbSettings>(
+    builder.Configuration.GetSection("MongoDbSettings"));
 
-builder.Services.AddSingleton<IMongoClient>(
-    s => new MongoClient(builder.Configuration["MongoDB:ConnectionString"]));
+// Register MongoDB client using the connection string from config
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = builder.Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+    return new MongoClient(settings.ConnectionString);
+});
+
+// Register app-specific services
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<PostServices>();
 
-
-// Optional: Register your MongoDB context or service here
-// builder.Services.AddScoped<PostsContext>();
-
 var app = builder.Build();
+
+// Seed initial data if collection is empty
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await SeedData.InitializeAsync(services);
+        Console.WriteLine("✅ Database seeding complete.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error seeding data: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -34,8 +52,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
+// Default route
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Posts}/{action=Index}/{id?}"); // Changed to Posts to go directly to your post list
 
 app.Run();

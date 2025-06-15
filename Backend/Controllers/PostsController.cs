@@ -22,12 +22,12 @@ namespace Backend.Controllers
             return View(posts);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> Post(Post post)
         {
             await _service.CreateAsync(post);
             return RedirectToAction(nameof(Index));
-        }
+        }*/
         
         public IActionResult Create()
         {

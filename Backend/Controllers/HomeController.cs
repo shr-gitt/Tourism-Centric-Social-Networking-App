@@ -4,7 +4,7 @@ using Backend.Models;
 
 namespace Backend.Controllers;
 
-public class HomeController : Controller
+public class HomeController: Controller
 {
     private readonly ILogger<HomeController> _logger;
 
@@ -19,6 +19,11 @@ public class HomeController : Controller
     }
 
     public IActionResult Privacy()
+    {
+        return View();
+    }
+
+    public IActionResult Posts()
     {
         return View();
     }

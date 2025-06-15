@@ -6,14 +6,14 @@ namespace Backend.Data
 {
     public class PostsContext
     {
-        public PostsContext(IOptions<MongoDBSettings> settings, IMongoClient client)
+        private readonly IMongoDatabase _database;
+
+        public PostsContext(IOptions<MongoDbSettings> settings, IMongoClient client)
         {
-            var config = settings.Value;
-            var database = client.GetDatabase(config.DatabaseName);
-            Posts = database.GetCollection<Post>(config.TouristPostsCollectionName);
+            _database = client.GetDatabase(settings.Value.DatabaseName);
         }
 
-        public IMongoCollection<Post> Posts { get; }
+        public IMongoCollection<Post> Posts =>
+            _database.GetCollection<Post>("TouristPosts");
     }
-
 }
