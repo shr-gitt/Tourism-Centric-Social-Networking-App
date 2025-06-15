@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/createpost.dart';
 
 class posts extends StatelessWidget {
   const posts({super.key});
@@ -65,7 +66,15 @@ class posts extends StatelessWidget {
           ),
         ],
       ),
-      
+      floatingActionButton: FloatingActionButton(
+        child:Text('+'),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Createpost()),
+          );
+        },
+      ),
     );
   }
 }

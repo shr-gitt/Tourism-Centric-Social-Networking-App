@@ -3,7 +3,7 @@ using Backend.Data;
 using Backend.Services;
 using MongoDB.Driver;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -11,6 +11,8 @@ builder.Services.AddControllersWithViews();
 // Configure MongoDB settings
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
+
+builder.Services.AddOpenApi();
 
 // Register MongoDB client using the connection string from config
 builder.Services.AddSingleton<IMongoClient>(sp =>
@@ -51,6 +53,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles(); 
 app.UseRouting();
 app.UseAuthorization();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
 
 // Default route
 app.MapControllerRoute(
