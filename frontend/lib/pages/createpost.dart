@@ -10,16 +10,16 @@ class Createpost extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(5),
-            decoration: BoxDecoration(border: Border.all(width: 5)),
+            margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            decoration: BoxDecoration(border: Border.all(width: 2)),
             child: Column(
               children: [
                 Text('Title'),
                 TextField(keyboardType: TextInputType.numberWithOptions()),
                 Text('Location'),
                 TextField(),
-                Text('Content'),
-                TextField(),
+                Text('Content',softWrap: true,),
+                TextField(maxLines: null,),
                 ElevatedButton(
                   child: Text('Submit'),
                   onPressed: () {

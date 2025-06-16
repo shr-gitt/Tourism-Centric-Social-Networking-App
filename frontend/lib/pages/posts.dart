@@ -10,7 +10,7 @@ class posts extends StatelessWidget {
       appBar: AppBar(
         title: Text('Posts'),
         leading: ElevatedButton(
-          child: Text('Back'),
+          child: Text('<'),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -19,10 +19,12 @@ class posts extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(5), // padding inside container
+            margin:EdgeInsets.all(15),
+            padding:EdgeInsets.fromLTRB(5, 5, 5, 5),
             decoration: BoxDecoration(
               // styling container
-              border: Border.all(width: 5),
+              border: Border.all(width: 2),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               children: [
@@ -42,17 +44,19 @@ class posts extends StatelessWidget {
             ),
           ),
           Container(
-            padding: EdgeInsets.all(5), // padding inside container
+            margin: EdgeInsets.all(15),
+            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
             decoration: BoxDecoration(
               // styling container
-              border: Border.all(width: 5),
+              border: Border.all(width: 2),
+              borderRadius: BorderRadius.circular(20)
             ),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Column(children: [Text('1'), Text('2')]),
-                    Column(children: [Text('1'), Text('2')]),
+                    SizedBox(height: 20),
+                    Column(children: ([Text('Title',style: TextStyle(fontWeight: FontWeight.bold),)])),
                   ],
                 ),
                 Row(
@@ -67,7 +71,7 @@ class posts extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child:Text('+'),
+        child: Text('+'),
         onPressed: () {
           Navigator.push(
             context,
