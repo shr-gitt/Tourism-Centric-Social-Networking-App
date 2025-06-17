@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dart:developer';
 
 class ApiService {
   // Use your computer's local network IP address instead of 'localhost'
@@ -17,12 +18,20 @@ class ApiService {
   }
 
   Future<bool> createPost(Map<String, dynamic> postData) async {
+  try {
     final response = await http.post(
       Uri.parse('$baseUrl/posts'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(postData),
     );
-
-    return response.statusCode == 201; // Created
+    if (response.statusCode == 201) {
+      return true;
+    }
+    return false;
+  } catch (e) {
+    log("Error creating post", error: e);
+    return false;
   }
+}
+
 }

@@ -8,7 +8,7 @@ public class Post
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
+    public string? Id { get; set; }
     public string Title { get; set; }
     public string Location { get; set; } = "Nepal";
     public string Content { get; set; }

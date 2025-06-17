@@ -32,6 +32,7 @@ builder.Services.AddScoped<PostServices>();
 builder.Services.AddScoped<CreatePost>();
 builder.Services.AddScoped<EditPost>();
 builder.Services.AddScoped<DeletePost>();
+builder.Services.AddScoped<SavePost>();
 
 // Swagger services
 builder.Services.AddEndpointsApiExplorer();
@@ -43,8 +44,12 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
@@ -56,11 +61,11 @@ await using (var scope = app.Services.CreateAsyncScope())
     try
     {
         await SeedData.InitializeAsync(services);
-        Console.WriteLine("✅ Database seeding complete.");
+        Console.WriteLine("Database seeding complete.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Error seeding data: {ex.Message}");
+        Console.WriteLine($"Error seeding data: {ex.Message}");
     }
 }
 
@@ -79,7 +84,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger"; // Swagger at root
 });
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseRouting();
 

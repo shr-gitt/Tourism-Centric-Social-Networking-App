@@ -13,12 +13,14 @@ namespace Backend.Controllers
         private readonly CreatePost _createService;
         private readonly EditPost _editService;
         private readonly DeletePost _deleteService;
+        private readonly SavePost _saveService;
 
         public PostsController(
             PostServices postServices,
             CreatePost createService,
             EditPost editService,
-            DeletePost deleteService)
+            DeletePost deleteService,
+            SavePost saveService)
         {
             _postServices = postServices;
             _createService = createService;
@@ -50,8 +52,10 @@ namespace Backend.Controllers
 
         // POST: api/posts
         [HttpPost]
-        public async Task<IActionResult> Create(Post post)
+        public async Task<IActionResult> Create([FromBody]Post post)
         {
+            Console.WriteLine($"📥 Received: {post?.Title}, {post?.Location}, {post?.Content}");
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -95,5 +99,16 @@ namespace Backend.Controllers
 
             return NoContent(); // 204 No Content on successful delete
         }
+        
+        [HttpPost("save")]
+        public async Task<IActionResult> SaveData([FromBody] Post input)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            await _saveService.SaveInputAsync(input);
+            return Ok();
+        }
+
     }
 }
