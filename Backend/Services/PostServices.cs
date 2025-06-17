@@ -11,7 +11,7 @@ namespace Backend.Services
         public PostServices(IOptions<MongoDbSettings> settings, IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-            _postsCollection = database.GetCollection<Post>(settings.Value.TouristPostsCollectionName);
+            _postsCollection = database.GetCollection<Post>(settings.Value.PostsCollectionName);
         }
 
         public async Task<List<Post>> GetAsync() =>

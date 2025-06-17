@@ -1,5 +1,5 @@
 using Backend.Models;
-using Microsoft.Extensions.DependencyInjection;
+using Backend.Services.userPostService;
 
 namespace Backend.Services;
 
@@ -8,12 +8,11 @@ public static class SeedData
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
         var postService = serviceProvider.GetRequiredService<PostServices>();
+        var createService = serviceProvider.GetRequiredService<CreatePost>();
 
         var existingPosts = await postService.GetAsync();
         if (existingPosts.Any())
-        {
             return;
-        }
 
         var posts = new List<Post>
         {
@@ -42,7 +41,7 @@ public static class SeedData
 
         foreach (var post in posts)
         {
-            await postService.CreateAsync(post);
+            await createService.CreateAsync(post);
         }
     }
 }

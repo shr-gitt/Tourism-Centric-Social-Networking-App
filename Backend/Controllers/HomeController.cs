@@ -2,35 +2,37 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Models;
 
-namespace Backend.Controllers;
-
-public class HomeController: Controller
-{
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+namespace Backend.Controllers{
+    [ApiController]
+    [Route("[controller]/[action]")]
+    public class HomeController : ControllerBase
     {
-        _logger = logger;
-    }
+        private readonly ILogger<HomeController> _logger;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public IActionResult Index()
+        {
+            return Ok();
+        }
 
-    public IActionResult Posts()
-    {
-        return View();
-    }
+        public IActionResult Privacy()
+        {
+            return Ok();
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        public IActionResult Posts()
+        {
+            return Ok();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return Ok(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
     }
 }

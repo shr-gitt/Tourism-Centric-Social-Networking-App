@@ -1,37 +1,44 @@
 using Backend.Models;
 using Backend.Services;
+using Backend.Services.userPostService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
 {
-    // [ApiController]
-    // [Route("api/[controller]")]
-    public class PostsController: Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PostsController: ControllerBase
     {
-        private readonly PostServices _service;
+        private readonly PostServices _postServices;
+        private readonly CreatePost _createservice;
+        private readonly EditPost _editservice;
+        private readonly DeletePost _deleteservice;
 
-        public PostsController(PostServices service)
+        public PostsController(PostServices service, CreatePost createservice, EditPost editservice, DeletePost deleteservice)
         {
-            _service = service;
+            _postServices = service;
+            _createservice = createservice;
+            _editservice = editservice;
+            _deleteservice = deleteservice;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var posts = await _service.GetAsync();
-            return View(posts);
+            var posts = await _postServices.GetAsync();
+            return Ok(posts);
         }
 
-        /*[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> Post(Post post)
         {
-            await _service.CreateAsync(post);
+            await _postServices.GetAsync();
             return RedirectToAction(nameof(Index));
-        }*/
+        }
         
         public IActionResult Create()
         {
-            return View();
+            return Ok();
         }
         
         [HttpPost]
@@ -40,10 +47,10 @@ namespace Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _service.CreateAsync(post);
+                await _createservice.CreateAsync(post);
                 return RedirectToAction(nameof(Index));
             }
-            return View(post);
+            return Ok(post);
         }
         
         public async Task<IActionResult> Edit(string id)
@@ -53,13 +60,13 @@ namespace Backend.Controllers
                 return NotFound();
             }
         
-            var post = await _service.GetByIdAsync(id);
+            var post = await _postServices.GetByIdAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
         
-            return View(post);
+            return Ok(post);
         }
         
         [HttpPost]
@@ -73,11 +80,11 @@ namespace Backend.Controllers
         
             if (ModelState.IsValid)
             {
-                await _service.UpdateAsync(id, post);
+                await _editservice.EditAsync(id, post);
                 return RedirectToAction(nameof(Index));
             }
         
-            return View(post);
+            return Ok(post);
         }
 
         public async Task<IActionResult> Delete(string id)
@@ -87,20 +94,20 @@ namespace Backend.Controllers
                 return NotFound();
             }
         
-            var post = await _service.GetByIdAsync(id);
+            var post = await _postServices.GetByIdAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
         
-            return View(post);
+            return Ok(post);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id, Post post)
         {
-            await _service.DeleteAsync(id);
+            await _deleteservice.DeleteAsync(id,post);
             return RedirectToAction(nameof(Index));
         }
     }

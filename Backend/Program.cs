@@ -1,20 +1,23 @@
 using Backend;
 using Backend.Data;
 using Backend.Services;
+using Backend.Services.userPostService;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
+using Microsoft.OpenApi.Models;
 
-var builder = WebApplication.CreateBuilder();
+var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllersWithViews();
 
 // Configure MongoDB settings
 builder.Services.Configure<MongoDbSettings>(
     builder.Configuration.GetSection("MongoDbSettings"));
 
-builder.Services.AddOpenApi();
-
-// Register MongoDB client using the connection string from config
+// Register MongoDB client
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var settings = builder.Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
@@ -24,11 +27,21 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 // Register app-specific services
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<PostServices>();
+builder.Services.AddScoped<CreatePost>();
+builder.Services.AddScoped<EditPost>();
+builder.Services.AddScoped<DeletePost>();
+
+// Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+});
 
 var app = builder.Build();
 
-// Seed initial data if collection is empty
-using (var scope = app.Services.CreateScope())
+// Seed data if needed
+await using (var scope = app.Services.CreateAsyncScope())
 {
     var services = scope.ServiceProvider;
     try
@@ -42,25 +55,30 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles(); 
-app.UseRouting();
-app.UseAuthorization();
-if (app.Environment.IsDevelopment())
+// Enable Swagger middleware
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.MapOpenApi();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    c.RoutePrefix = string.Empty; // Swagger at root
+});
 
-// Default route
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Posts}/{action=Index}/{id?}"); // Changed to Posts to go directly to your post list
+    pattern: "{controller=Posts}/{action=Index}/{id?}");
 
 app.Run();

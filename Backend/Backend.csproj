@@ -14,6 +14,15 @@
         <PrivateAssets>all</PrivateAssets>
       </PackageReference>
       <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="openApi\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="openApi\appsettings.json" />
+      <_ContentIncludedByDefault Remove="openApi\obj\openApi.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="openApi\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="openApi\Properties\launchSettings.json" />
     </ItemGroup>
 
 </Project>
