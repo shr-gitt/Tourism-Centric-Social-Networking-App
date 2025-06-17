@@ -1,8 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/createpost.dart';
+import 'package:frontend/data/posts_data.dart';
 
-class posts extends StatelessWidget {
-  const posts({super.key});
+class Posts extends StatefulWidget {
+  const Posts({super.key});
+
+  @override
+  State<Posts> createState() => _PostsState();
+}
+
+class _PostsState extends State<Posts> {
+  // Method to build each post container
+  Widget buildPost(post) {
+    return Container(
+      margin: EdgeInsets.all(15),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(width: 2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            post['title'] ?? 'No Title',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          SizedBox(height: 8),
+          Text(post['content'] ?? 'No Content'),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,59 +45,9 @@ class posts extends StatelessWidget {
           },
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            margin:EdgeInsets.all(15),
-            padding:EdgeInsets.fromLTRB(5, 5, 5, 5),
-            decoration: BoxDecoration(
-              // styling container
-              border: Border.all(width: 2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Column(children: [Text('1'), Text('2')]),
-                    Column(children: [Text('1'), Text('2')]),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Column(children: [Text('1'), Text('2')]),
-                    Column(children: [Text('1'), Text('2')]),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.all(15),
-            padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
-            decoration: BoxDecoration(
-              // styling container
-              border: Border.all(width: 2),
-              borderRadius: BorderRadius.circular(20)
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    SizedBox(height: 20),
-                    Column(children: ([Text('Title',style: TextStyle(fontWeight: FontWeight.bold),)])),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Column(children: [Text('1'), Text('2')]),
-                    Column(children: [Text('1'), Text('2')]),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: ListView.builder(
+        itemCount: postList.length,
+        itemBuilder: (context, index) => buildPost(postList[index]),
       ),
       floatingActionButton: FloatingActionButton(
         child: Text('+'),

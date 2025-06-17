@@ -1,0 +1,16 @@
+List<Map<String, String>> postList = [
+  {'title': 'Post 1', 'body': 'This is post 1'},
+  {'title': 'Post 2', 'body': 'This is post 2'},
+  {'title': 'Post 3', 'body': 'This is post 1'},
+  {'title': 'Post 4', 'body': 'This is post 2'},
+  {'title': 'Post 5', 'body': 'This is post 1'},
+  {'title': 'Post 6', 'body': 'This is post 2'},
+  {'title': 'Post 7', 'body': 'This is post 1'},
+  {'title': 'Post 8', 'body': 'This is post 2'},
+  {'title': 'Post 9', 'body': 'This is post 1'},
+  {'title': 'Post 10', 'body': 'This is post 2'},
+  {'title': 'Post 11', 'body': 'This is post 1'},
+  {'title': 'Post 12', 'body': 'This is post 2'},
+  {'title': 'Post 13', 'body': 'This is post 1'},
+  {'title': 'Post 14', 'body': 'This is post 2'},
+];

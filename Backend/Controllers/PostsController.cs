@@ -29,19 +29,20 @@ namespace Backend.Controllers
             return Ok(posts);
         }
 
-        [HttpPost]
+        [HttpPost("Post")]
         public async Task<IActionResult> Post(Post post)
         {
             await _postServices.GetAsync();
             return RedirectToAction(nameof(Index));
         }
         
+        [HttpGet("Create")]
         public IActionResult Create()
         {
             return Ok();
         }
         
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Post post)
         {
@@ -53,6 +54,7 @@ namespace Backend.Controllers
             return Ok(post);
         }
         
+        [HttpGet("Edit{id}")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -69,7 +71,7 @@ namespace Backend.Controllers
             return Ok(post);
         }
         
-        [HttpPost]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, Post post)
         {
@@ -86,7 +88,7 @@ namespace Backend.Controllers
         
             return Ok(post);
         }
-
+        [HttpPost("Delete")]
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -103,7 +105,7 @@ namespace Backend.Controllers
             return Ok(post);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("DeleteConfirmed/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id, Post post)
         {
