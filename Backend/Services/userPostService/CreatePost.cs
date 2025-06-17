@@ -8,11 +8,10 @@ public class CreatePost
 {
     private readonly IMongoCollection<Post> _postsCollection;
     
-    public CreatePost(IOptions<MongoDbSettings> mongoDbSettings)
+    public CreatePost(IOptions<MongoDbSettings> settings, IMongoClient mongoClient)
     {
-        var mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
-        var mongoDatabase = mongoClient.GetDatabase(mongoDbSettings.Value.DatabaseName);
-        _postsCollection = mongoDatabase.GetCollection<Post>(mongoDbSettings.Value.PostsCollectionName);
+        var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
+        _postsCollection = database.GetCollection<Post>(settings.Value.PostsCollectionName);
     }
     
     public async Task CreateAsync(Post post) => 
