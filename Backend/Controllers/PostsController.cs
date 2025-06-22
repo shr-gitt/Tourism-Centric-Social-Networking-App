@@ -26,6 +26,7 @@ namespace Backend.Controllers
             _createService = createService;
             _editService = editService;
             _deleteService = deleteService;
+            _saveService = saveService;
         }
 
         // GET: api/posts
@@ -54,7 +55,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody]Post post)
         {
-            Console.WriteLine($"📥 Received: {post?.Title}, {post?.Location}, {post?.Content}");
+            Console.WriteLine($"Received: {post?.Title}, {post?.Location}, {post?.Content}");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

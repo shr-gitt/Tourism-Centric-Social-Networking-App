@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/api_service.dart';
 import 'package:frontend/pages/createpost.dart';
+import 'package:frontend/pages/editpost.dart';
+import 'package:frontend/pages/deletepost.dart';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
@@ -31,12 +33,44 @@ class _PostsPageState extends State<PostsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            post['title'] ?? 'No Title',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ListTile(
+            title: Text(
+              post['title'] ?? 'No Title',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            //subtitle: const SizedBox(height: 8),
+            subtitle: Text(post['content'] ?? 'No Content'),
+            trailing: PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert), // triple dot icon
+              onSelected: (String value) {
+                if (value == 'edit') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Editpost(
+                        id: post['id'],
+                      ),
+                    ),
+                  );
+                } else if (value == 'delete') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Deletepost(id: post['id']),
+                    ),
+                  );
+                }
+              },
+
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+                const PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Text('Delete'),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Text(post['content'] ?? 'No Content'),
         ],
       ),
     );
