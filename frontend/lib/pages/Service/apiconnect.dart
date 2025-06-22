@@ -19,6 +19,7 @@ class Apiconnect {
 
   Future<void> submitPost(BuildContext context) async {
     final postData = {
+      "id": id,
       "title": titleController.text,
       "location": locationController.text,
       "content": contentController.text,
@@ -39,7 +40,7 @@ class Apiconnect {
 
       if (!context.mounted) return;
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Post submitted!')),
         );
