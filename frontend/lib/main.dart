@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/posts.dart';
+import 'package:frontend/pages/mainscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,7 +34,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.blue, title: Text(widget.title)),
+      appBar: AppBar(backgroundColor: Colors.grey
+      , title: Text(widget.title)),
       body: Center(
         child: Column(
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
@@ -47,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PostsPage()),
+                  MaterialPageRoute(builder: (context) => MainScreen()),
                 );
               },
             ),

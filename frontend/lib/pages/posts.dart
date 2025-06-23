@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/api_service.dart';
-import 'package:frontend/pages/createpost.dart';
 import 'package:frontend/pages/editpost.dart';
 import 'package:frontend/pages/deletepost.dart';
 
@@ -21,7 +20,6 @@ class _PostsPageState extends State<PostsPage> {
     postsFuture = api.fetchPosts();
   }
 
-  // Method to build each post container
   Widget buildPost(post) {
     return Container(
       margin: const EdgeInsets.all(15),
@@ -100,15 +98,6 @@ class _PostsPageState extends State<PostsPage> {
           return ListView.builder(
             itemCount: posts.length,
             itemBuilder: (context, index) => buildPost(posts[index]),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Createpost()),
           );
         },
       ),
