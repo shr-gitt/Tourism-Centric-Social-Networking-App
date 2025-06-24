@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/api_service.dart';
 import 'package:frontend/pages/editpost.dart';
 import 'package:frontend/pages/deletepost.dart';
+import 'dart:convert';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
@@ -37,7 +38,16 @@ class _PostsPageState extends State<PostsPage> {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             //subtitle: const SizedBox(height: 8),
-            subtitle: Text(post['content'] ?? 'No Content'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(post['location'] ?? 'No Location'),
+                Text(post['content'] ?? 'No Content'),
+                (post['image'] != null && post['image'] != '')
+                    ? Image.memory(base64Decode(post['image']))
+                    : const SizedBox.shrink(),
+              ],
+            ),
             trailing: PopupMenuButton<String>(
               icon: Icon(Icons.more_vert), // triple dot icon
               onSelected: (String value) {
@@ -45,9 +55,7 @@ class _PostsPageState extends State<PostsPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Editpost(
-                        id: post['id'],
-                      ),
+                      builder: (context) => Editpost(id: post['id']),
                     ),
                   );
                 } else if (value == 'delete') {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class Apiconnect {
   final String? id;
@@ -8,6 +9,7 @@ class Apiconnect {
   final TextEditingController titleController;
   final TextEditingController locationController;
   final TextEditingController contentController;
+  final XFile? pickedImage;
 
   Apiconnect({
     this.id,
@@ -15,14 +17,23 @@ class Apiconnect {
     required this.titleController,
     required this.locationController,
     required this.contentController,
+    required this.pickedImage,
   });
 
   Future<void> submitPost(BuildContext context) async {
+    String? base64Image;
+
+    if (pickedImage != null) {
+      final bytes = await pickedImage!.readAsBytes();
+      base64Image = base64Encode(bytes);
+    }
+
     final postData = {
       "id": id,
       "title": titleController.text,
       "location": locationController.text,
       "content": contentController.text,
+      "image": base64Image ?? '',
     };
 
     try {
@@ -40,10 +51,12 @@ class Apiconnect {
 
       if (!context.mounted) return;
 
-      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post submitted!')),
-        );
+      if (response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Post submitted!')));
         Navigator.pop(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,9 +65,9 @@ class Apiconnect {
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
