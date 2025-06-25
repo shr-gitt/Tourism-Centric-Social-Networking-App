@@ -25,7 +25,7 @@ class Inputpost extends StatefulWidget {
 
 class _InputpostState extends State<Inputpost> {
   final ImagePicker _picker = ImagePicker();
-  XFile? pickedImage;
+  List<XFile>? pickedImage;
 
   @override
   Widget build(BuildContext context) {
@@ -51,25 +51,37 @@ class _InputpostState extends State<Inputpost> {
               const Text('Images'),
               ElevatedButton(
                 onPressed: () async {
-                  final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+                  final List<XFile> image = await _picker.pickMultiImage();
                   if (!mounted) return;
-                  if (image != null) {
+                  //if (image != null) {
                     setState(() {
                       pickedImage = image;
                     });
                     if(!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Selected image: ${image.name}')),
+                      SnackBar(content: Text('Images Selected')),
                     );
-                  }
+                  //}
                 },
                 child: const Text('Pick Image'),
               ),
               if (pickedImage != null) ...[
                 const SizedBox(height: 10),
-                Image.file(
-                  File(pickedImage!.path),
+                SizedBox(
                   height: 150,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: pickedImage!.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Image.file(
+                          File(pickedImage![index].path),
+                          height: 150,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
               const SizedBox(height: 10),

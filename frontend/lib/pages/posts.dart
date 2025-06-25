@@ -37,7 +37,6 @@ class _PostsPageState extends State<PostsPage> {
               post['title'] ?? 'No Title',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            //subtitle: const SizedBox(height: 8),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

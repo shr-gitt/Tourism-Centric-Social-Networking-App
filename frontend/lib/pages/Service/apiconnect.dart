@@ -9,7 +9,7 @@ class Apiconnect {
   final TextEditingController titleController;
   final TextEditingController locationController;
   final TextEditingController contentController;
-  final XFile? pickedImage;
+  final List<XFile>? pickedImage;
 
   Apiconnect({
     this.id,
@@ -23,8 +23,8 @@ class Apiconnect {
   Future<void> submitPost(BuildContext context) async {
     String? base64Image;
 
-    if (pickedImage != null) {
-      final bytes = await pickedImage!.readAsBytes();
+    for (var img in pickedImage!) {
+      final bytes = await img.readAsBytes();
       base64Image = base64Encode(bytes);
     }
 
