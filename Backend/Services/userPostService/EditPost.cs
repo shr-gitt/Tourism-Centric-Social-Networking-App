@@ -1,6 +1,7 @@
 using Backend.Models;
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
+using Backend.Data;
 
 namespace Backend.Services.userPostService;
 
@@ -8,10 +9,9 @@ public class EditPost
 {
     private readonly IMongoCollection<Post> _postsCollection;
     
-    public EditPost(IOptions<MongoDbSettings> settings, IMongoClient mongoClient)
+    public EditPost(PostsContext postsContext)
     {
-        var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-        _postsCollection = database.GetCollection<Post>(settings.Value.PostsCollectionName);
+        _postsCollection = postsContext.Posts;
     }
     
     public async Task EditAsync(string id,Post post)=>

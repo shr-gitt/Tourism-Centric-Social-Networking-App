@@ -1,6 +1,7 @@
 using Backend.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Backend.Data;
 
 namespace Backend.Services
 {
@@ -8,10 +9,9 @@ namespace Backend.Services
     {
         private readonly IMongoCollection<Post> _postsCollection;
 
-        public PostServices(IOptions<MongoDbSettings> settings, IMongoClient mongoClient)
+        public PostServices(PostsContext postsContext)
         {
-            var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-            _postsCollection = database.GetCollection<Post>(settings.Value.PostsCollectionName);
+            _postsCollection = postsContext.Posts;
         }
 
         public async Task<List<Post>> GetAsync() =>

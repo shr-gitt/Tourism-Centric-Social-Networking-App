@@ -1,6 +1,6 @@
 using Backend.Models;
+using Backend.Data;
 using MongoDB.Driver;
-using Microsoft.Extensions.Options;
 
 namespace Backend.Services.userPostService;
 
@@ -8,10 +8,9 @@ public class DeletePost
 {
     private readonly IMongoCollection<Post> _postsCollection;
    
-    public DeletePost(IOptions<MongoDbSettings> settings, IMongoClient mongoClient)
+    public DeletePost(PostsContext postsContext)
     {
-        var database = mongoClient.GetDatabase(settings.Value.DatabaseName);
-        _postsCollection = database.GetCollection<Post>(settings.Value.PostsCollectionName);
+        _postsCollection = postsContext.Posts;
     }
     
     public async Task DeleteAsync(string id, Post post)=>
