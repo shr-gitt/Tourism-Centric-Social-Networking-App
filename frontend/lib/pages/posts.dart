@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/api_service.dart';
-import 'package:frontend/pages/editpost.dart';
-import 'package:frontend/pages/deletepost.dart';
-import 'dart:convert';
+import 'package:frontend/pages/Service/displaymultiplepost.dart';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
@@ -19,66 +17,6 @@ class _PostsPageState extends State<PostsPage> {
   void initState() {
     super.initState();
     postsFuture = api.fetchPosts();
-  }
-
-  Widget buildPost(post) {
-    return Container(
-      margin: const EdgeInsets.all(15),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(width: 2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(
-              post['title'] ?? 'No Title',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(post['location'] ?? 'No Location'),
-                Text(post['content'] ?? 'No Content'),
-                (post['image'] != null && post['image'] != '')
-                    ? Image.memory(base64Decode(post['image']))
-                    : const SizedBox.shrink(),
-              ],
-            ),
-            trailing: PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert), // triple dot icon
-              onSelected: (String value) {
-                if (value == 'edit') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Editpost(id: post['id']),
-                    ),
-                  );
-                } else if (value == 'delete') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Deletepost(id: post['id']),
-                    ),
-                  );
-                }
-              },
-
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-                const PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Text('Delete'),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -104,7 +42,9 @@ class _PostsPageState extends State<PostsPage> {
           final posts = snapshot.data!;
           return ListView.builder(
             itemCount: posts.length,
-            itemBuilder: (context, index) => buildPost(posts[index]),
+            itemBuilder: (context, index) {
+              return Displaymultiplepost(post: posts[index]);
+            },
           );
         },
       ),

@@ -1,6 +1,7 @@
 using Backend;
 using Backend.Data;
 using Backend.Services;
+using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,14 @@ builder.Services.AddScoped<CreatePost>();
 builder.Services.AddScoped<EditPost>();
 builder.Services.AddScoped<DeletePost>();
 builder.Services.AddScoped<SavePost>();
+
+builder.Services.AddScoped<FeedbacksContext>();
+builder.Services.AddScoped<FeedbacksService>();
+builder.Services.AddScoped<CreateFeedback>();
+builder.Services.AddScoped<EditFeedback>();
+builder.Services.AddScoped<DeleteFeedback>();
+builder.Services.AddScoped<SaveFeedback>();
+
 
 // Swagger services
 builder.Services.AddEndpointsApiExplorer();
@@ -72,8 +81,18 @@ await using (var scope = app.Services.CreateAsyncScope())
 // Configure middleware
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+            var error = new { message = "An unexpected error occurred." };
+            await context.Response.WriteAsJsonAsync(error);
+        });
+    });
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 // Enable Swagger middleware
@@ -81,7 +100,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-    c.RoutePrefix = "swagger"; // Swagger at root
+    c.RoutePrefix = String.Empty; // Swagger at root
 });
 
 //app.UseHttpsRedirection();
