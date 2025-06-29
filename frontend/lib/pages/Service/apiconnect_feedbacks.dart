@@ -1,77 +1,88 @@
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:frontend/pages/api_service_feedbacks.dart';
 import 'dart:developer';
 
 class ApiconnectFeedbacks {
-  final String? id;
-  final String postid;
+  final String? postId;
+  final String? feedbackId;
   final bool? like;
-  final String? comments;
+  final String? comment;
 
-  ApiconnectFeedbacks(this.id, this.postid, this.like, this.comments);
+  ApiconnectFeedbacks({this.postId, this.feedbackId, this.like, this.comment});
 
-  static const String baseUrl = "http://localhost:5259/api/feedbacks";
+  Future<void> submitFeedback(BuildContext context) async {
+    final service = FeedbackService();
 
-  Map<String, dynamic> _buildRequestBody() {
-    return {
-      "id": id,
-      "post_id": postid,
-      "like": like, // null = no reaction
-      "comment": comments,
-    };
-  }
+    final success = await service.submitFeedback(
+      id: postId,
+      like: like,
+      comment: comment,
+    );
 
-  Future<void> _sendFeedback(BuildContext context) async {
-    try {
-      final response = await http.post(
-        Uri.parse(baseUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(_buildRequestBody()),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        log("Feedback submitted successfully.");
-      } else {
-        log("Failed to submit feedback: ${response.statusCode}");
-      }
-    } catch (e) {
-      log("Error submitting feedback: $e");
+    if (success) {
+      log("Feedback submitted successfully.");
+    } else {
+      log("Failed to submit feedback.");
     }
   }
 
   Future<void> addLike(BuildContext context) async {
-    await _sendFeedback(context);
-  }
-
-  Future<void> removeLike(BuildContext context) async {
     await ApiconnectFeedbacks(
-      id,
-      postid,
-      null,
-      comments,
-    )._sendFeedback(context);
+      postId: postId,
+      like: true,
+    ).submitFeedback(context);
   }
 
   Future<void> adddisLike(BuildContext context) async {
-    await _sendFeedback(context);
-  }
-
-  Future<void> removedisLike(BuildContext context) async {
     await ApiconnectFeedbacks(
-      id,
-      postid,
-      null,
-      comments,
-    )._sendFeedback(context);
+      postId: postId,
+      like: false,
+    ).submitFeedback(context);
   }
 
   Future<void> addComment(BuildContext context) async {
     await ApiconnectFeedbacks(
-      id,
-      postid,
-      like,
-      comments,
-    )._sendFeedback(context);
+      postId: postId,
+      comment: comment,
+    ).submitFeedback(context);
+  }
+
+  Future<void> editReaction(BuildContext context) async {
+    //Edit reaction works only when a liked post is disliked and then disliked but doesn't work when a liked post is directly disliked
+    if (feedbackId == null) {
+      log("No feedback ID provided for editing.");
+      return;
+    }
+
+    final service = FeedbackService();
+
+    final success = await service.editFeedbackById(
+      feedbackId!,
+      like: like,
+      comment: comment,
+    );
+
+    if (success) {
+      log("Feedback updated successfully.");
+    } else {
+      log("Failed to update feedback.");
+    }
+  }
+
+  Future<void> removeReaction(BuildContext context) async {
+    if (feedbackId == null) {
+      log("No feedback ID provided for removal.");
+      return;
+    }
+
+    final service = FeedbackService();
+
+    final success = await service.deleteFeedbackById(feedbackId!);
+
+    if (success) {
+      log("Reaction removed successfully.");
+    } else {
+      log("Failed to remove reaction.");
+    }
   }
 }

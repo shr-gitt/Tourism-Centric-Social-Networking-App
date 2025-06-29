@@ -12,10 +12,29 @@ public class EditFeedback
     {
         _feedbackCollection = feedbacksContext.Feedbacks;
     }
-    
+
     public async Task<bool> Edit(Feedback feedback)
     {
-        var result = await _feedbackCollection.ReplaceOneAsync(f => f.Id == feedback.Id, feedback);
+        if (feedback == null || string.IsNullOrEmpty(feedback.Id))
+            throw new ArgumentException("Feedback or Feedback.Id cannot be null.");
+
+        var updates = new List<UpdateDefinition<Feedback>>();
+
+        if (feedback.Like != null)
+            updates.Add(Builders<Feedback>.Update.Set(f => f.Like, feedback.Like));
+
+        if (feedback.Comment != null)
+            updates.Add(Builders<Feedback>.Update.Set(f => f.Comment, feedback.Comment));
+
+        if (updates.Count == 0)
+            return false;
+
+        var updateDefinition = Builders<Feedback>.Update.Combine(updates);
+
+        var result = await _feedbackCollection.UpdateOneAsync(
+            f => f.Id == feedback.Id,
+            updateDefinition);
+
         return result.IsAcknowledged && result.ModifiedCount > 0;
     }
 }
