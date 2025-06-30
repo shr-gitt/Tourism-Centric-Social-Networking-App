@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/mainscreen.dart';
 import 'package:frontend/pages/Service/apiconnect.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -25,12 +26,106 @@ class Inputpost extends StatefulWidget {
 
 class _InputpostState extends State<Inputpost> {
   final ImagePicker _picker = ImagePicker();
-  List<XFile>? pickedImage;
+  List<XFile> pickedImage = [];
+
+  Future<void> _pickImages() async {
+    final List<XFile> images = await _picker.pickMultiImage();
+
+    if (!mounted || images.isEmpty) return;
+
+    final maxCount = 5;
+    final maxSizeInBytes = 5 * 1024 * 1024; // 5MB
+
+    List<XFile> validImages = [];
+
+    for (XFile image in images) {
+      final file = File(image.path);
+      final fileSize = await file.length();
+
+      if (pickedImage.length >= maxCount) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Maximum of $maxCount images allowed.')),
+          );
+        }
+        return;
+      }
+
+      if (pickedImage.length + validImages.length >= maxCount) {
+        break;
+      }
+
+      if (fileSize <= maxSizeInBytes) {
+        validImages.add(image);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Image "${image.name}" is larger than 5MB. Skipped.',
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    if (validImages.isEmpty) return;
+
+    setState(() {
+      pickedImage.addAll(validImages);
+    });
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${validImages.length} image(s) added')),
+    );
+  }
+
+  void _confirm(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Submit'),
+        content: const Text('Are you sure you want to submit this post?'),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: const Text('Submit', style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MainScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      if (context.mounted) {
+        Apiconnect(
+          id: widget.id,
+          isEditing: widget.isEditing,
+          titleController: widget.titleController,
+          locationController: widget.locationController,
+          contentController: widget.contentController,
+          pickedImage: pickedImage,
+        ).submitPost(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.isEditing ? 'Edit Post' : 'Create Post')),
+      appBar: AppBar(
+        title: Text(widget.isEditing ? 'Edit Post' : 'Create Post'),
+      ),
       body: SingleChildScrollView(
         child: Container(
           margin: const EdgeInsets.all(12),
@@ -50,53 +145,61 @@ class _InputpostState extends State<Inputpost> {
               const SizedBox(height: 20),
               const Text('Images'),
               ElevatedButton(
-                onPressed: () async {
-                  final List<XFile> image = await _picker.pickMultiImage();
-                  if (!mounted) return;
-                  //if (image != null) {
-                    setState(() {
-                      pickedImage = image;
-                    });
-                    if(!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Images Selected')),
-                    );
-                  //}
-                },
-                child: const Text('Pick Image'),
+                onPressed: pickedImage.length >= 5 ? null : _pickImages,
+                child: Text("Pick Image (${pickedImage.length}/5)"),
               ),
-              if (pickedImage != null) ...[
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 150,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: pickedImage!.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Image.file(
-                          File(pickedImage![index].path),
-                          height: 150,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
               const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Apiconnect(
-                    id: widget.id,
-                    isEditing: widget.isEditing,
-                    titleController: widget.titleController,
-                    locationController: widget.locationController,
-                    contentController: widget.contentController,
-                    pickedImage: pickedImage,
-                  ).submitPost(context);
-                },
-                child: const Text('Submit'),
+              SizedBox(
+                height: 150,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: pickedImage.length,
+                  itemBuilder: (context, index) {
+                    return Stack(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(right: 8),
+                          child: Image.file(
+                            File(pickedImage[index].path),
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 12,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                pickedImage.removeAt(index);
+                              });
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                  onPressed: () => _confirm(context),
+                  child: const Text('Submit'),
+                ),
               ),
             ],
           ),

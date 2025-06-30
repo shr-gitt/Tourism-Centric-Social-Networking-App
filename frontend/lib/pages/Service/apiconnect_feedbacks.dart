@@ -47,7 +47,7 @@ class ApiconnectFeedbacks {
     ).submitFeedback(context);
   }
 
-  Future<void> editReaction(BuildContext context) async {
+  Future<void> editReaction(BuildContext context,bool like) async {
     //Edit reaction works only when a liked post is disliked and then disliked but doesn't work when a liked post is directly disliked
     if (feedbackId == null) {
       log("No feedback ID provided for editing.");
@@ -57,6 +57,7 @@ class ApiconnectFeedbacks {
     final service = FeedbackService();
 
     final success = await service.editFeedbackById(
+      postId,
       feedbackId!,
       like: like,
       comment: comment,

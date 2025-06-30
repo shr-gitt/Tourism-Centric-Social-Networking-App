@@ -52,6 +52,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
+            ElevatedButton(
+              child: Text('Use as Guest User'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MainScreen()),
+                );
+              },
+            ),
           ],
         ),
       ),

@@ -32,7 +32,7 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: currentIndex,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Posts'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: 'New Post'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notification_add),

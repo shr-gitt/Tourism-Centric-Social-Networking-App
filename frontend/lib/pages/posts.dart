@@ -24,10 +24,10 @@ class _PostsPageState extends State<PostsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Posts'),
-        leading: IconButton(
+        /*leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
-        ),
+        ),*/
       ),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,

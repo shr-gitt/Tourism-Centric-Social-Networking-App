@@ -74,6 +74,7 @@ class FeedbackService {
   }
 
   Future<bool> editFeedbackById(
+    String? id,
     String? feedbackId, {
     bool? like,
     String? comment,
@@ -84,12 +85,13 @@ class FeedbackService {
     }
 
     final url = Uri.parse('$baseUrl/$feedbackId');
+    final body = {"id": feedbackId,"postId":id, "like": like, "comment": comment ?? ""};
 
-    final body = <String, dynamic>{'id': feedbackId};
+    /*final body = <String, dynamic>{'id': feedbackId};
     if (like != null) body['like'] = like;
-    if (comment != null) body['comment'] = comment;
+    if (comment != null) body['comment'] = comment;*/
 
-    final response = await http.put(
+    final response = await http.patch(
       url,
       headers: _headers,
       body: jsonEncode(body),

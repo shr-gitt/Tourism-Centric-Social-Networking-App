@@ -38,9 +38,11 @@ class _EditpostState extends State<Editpost> {
         final post = snapshot.data!;
         return Inputpost(
           id: widget.id,
-          titleController: TextEditingController(text: post['title']),
-          locationController: TextEditingController(text: post['location']),
-          contentController: TextEditingController(text: post['content']),
+          titleController: TextEditingController(text: post['title'] ?? ''),
+          locationController: TextEditingController(
+            text: post['location'] ?? '',
+          ),
+          contentController: TextEditingController(text: post['content'] ?? ''),
           isEditing: true,
         );
       },

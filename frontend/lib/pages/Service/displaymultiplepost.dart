@@ -39,7 +39,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         _isdisLiked = postFeedbacks.any((f) => f['like'] == false);
 
         if (postFeedbacks.isNotEmpty) {
-          _feedbackId = postFeedbacks[0]['id'] ?? postFeedbacks[0]['_id'];
+          _feedbackId = postFeedbacks[0]['id'];// ?? postFeedbacks[0]['_id'];
         } else {
           _feedbackId = null;
         }
@@ -50,18 +50,19 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
   }
 
   Future<void> _edit(bool? like) async {
-    
+    //Edit reaction works only when a liked post is disliked and then disliked but doesn't work when a liked post is directly disliked
+
     if (_feedbackId == null) return;
 
     if (like == null) {
       await ApiconnectFeedbacks(
-        feedbackId: _feedbackId!,
+        feedbackId: _feedbackId,
       ).removeReaction(context);
     } else {
       await ApiconnectFeedbacks(
-        feedbackId: _feedbackId!,
+        feedbackId: _feedbackId,
         like: like,
-      ).editReaction(context);
+      ).editReaction(context,like);
     }
     _refreshFeedbacks();
   }
@@ -195,7 +196,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Editpost(id: post['_id']),
+                      builder: (context) => Editpost(id: post['id']),
                     ),
                   );
                 } else if (value == 'delete') {
