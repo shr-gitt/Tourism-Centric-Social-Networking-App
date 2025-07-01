@@ -51,20 +51,41 @@ namespace Backend.Controllers
             return Ok(post);
         }
 
-        // POST: api/posts
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody]Post post)
+        public class CreatePostRequest
         {
-            Console.WriteLine($"Received: {post?.Title}, {post?.Location}, {post?.Content}");
+            public string? Title { get; set; }
+            public string? Location { get; set; }
+            public string? Content { get; set; }
+            public List<IFormFile>? Images { get; set; }
+        }
+        
+        // POST: api/posts
+        [HttpPost("create")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] CreatePostRequest request)
+        {
+            var imagePaths = new List<string>();
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            foreach (var file in request.Images)
+            {
+                var imagePath = new UploadImage().Upload(file);
+                imagePaths.Add(imagePath);
+            }
+
+            var post = new Post
+            {
+                Title = request.Title,
+                Location = request.Location,
+                Content = request.Content,
+                Created = DateTime.Now,
+                Image = imagePaths
+            };
 
             await _createService.CreateAsync(post);
 
-            // Return 201 Created with location header pointing to GetById
             return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
         }
+
 
         // PUT: api/posts/{id}
         [HttpPut("{id}")]
@@ -84,7 +105,7 @@ namespace Backend.Controllers
 
             return NoContent(); // 204 No Content on successful update
         }
-
+        
         // DELETE: api/posts/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)

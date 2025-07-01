@@ -81,7 +81,7 @@ namespace Backend.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateFeedback(string id, [FromBody] Feedback feedback)
         {
             if(id!=feedback.Id)

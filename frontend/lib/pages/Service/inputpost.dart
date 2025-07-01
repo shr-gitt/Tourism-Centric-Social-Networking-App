@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/mainscreen.dart';
 import 'package:frontend/pages/Service/apiconnect.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -95,12 +94,7 @@ class _InputpostState extends State<Inputpost> {
           ),
           TextButton(
             child: const Text('Submit', style: TextStyle(color: Colors.black)),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MainScreen()),
-              );
-            },
+            onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
       ),

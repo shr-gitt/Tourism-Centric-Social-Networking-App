@@ -12,5 +12,5 @@ public class Post
     public required string Location { get; set; } = "Nepal";
     public required string Content { get; set; }
     public DateTime? Created { get; set; } = DateTime.Now;
-    public string? Image { get; set; }
+    public List<string>? Image { get; set; }
 }

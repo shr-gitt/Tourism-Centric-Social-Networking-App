@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/editpost.dart';
 import 'package:frontend/pages/deletepost.dart';
+import 'package:frontend/pages/Service/imagedisplaywithbuttons.dart';
 import 'package:frontend/pages/Service/apiconnect_feedbacks.dart';
 import 'package:frontend/pages/api_service_feedbacks.dart';
-import 'dart:convert';
 
 class Displaymultiplepost extends StatefulWidget {
   final String? id;
@@ -39,7 +39,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         _isdisLiked = postFeedbacks.any((f) => f['like'] == false);
 
         if (postFeedbacks.isNotEmpty) {
-          _feedbackId = postFeedbacks[0]['id'];// ?? postFeedbacks[0]['_id'];
+          _feedbackId = postFeedbacks[0]['id']; // ?? postFeedbacks[0]['_id'];
         } else {
           _feedbackId = null;
         }
@@ -62,7 +62,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
       await ApiconnectFeedbacks(
         feedbackId: _feedbackId,
         like: like,
-      ).editReaction(context,like);
+      ).editReaction(context, like);
     }
     _refreshFeedbacks();
   }
@@ -91,8 +91,13 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
               children: [
                 Text(post['location'] ?? 'No Location'),
                 Text(post['content'] ?? 'No Content'),
-                if (post['image'] != null && post['image'] != '')
-                  Image.memory(base64Decode(post['image'])),
+                if (post['image'] != null && post['image'] is List)
+                  ImageDisplayWithButtons(
+                    imageUrls: List<String>.from(post['image']),
+                  )
+                else
+                  const SizedBox.shrink(),
+
                 const Divider(height: 10, thickness: 2, color: Colors.black),
                 FutureBuilder<List<dynamic>>(
                   future: feedbacksFuture,

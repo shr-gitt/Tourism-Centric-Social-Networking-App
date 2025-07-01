@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart';
 
 class Apiconnect {
   final String? id;
@@ -21,53 +22,61 @@ class Apiconnect {
   });
 
   Future<void> submitPost(BuildContext context) async {
-    String? base64Image;
-
-    for (var img in pickedImage!) {
-      final bytes = await img.readAsBytes();
-      base64Image = base64Encode(bytes);
-    }
-
-    final postData = {
-      "id": id,
-      "title": titleController.text,
-      "location": locationController.text,
-      "content": contentController.text,
-      "image": base64Image ?? '',
-    };
-
     try {
-      final response = isEditing
-          ? await http.put(
-              Uri.parse('http://localhost:5259/api/posts/$id'),
-              headers: {"Content-Type": "application/json"},
-              body: jsonEncode(postData),
-            )
-          : await http.post(
-              Uri.parse('http://localhost:5259/api/posts'),
-              headers: {"Content-Type": "application/json"},
-              body: jsonEncode(postData),
-            );
+      final uri = isEditing
+          ? Uri.parse('http://localhost:5259/api/posts/${id!}')
+          : Uri.parse('http://localhost:5259/api/posts/create');
 
-      if (!context.mounted) return;
+      final method = isEditing ? 'PUT' : 'POST';
 
-      if (response.statusCode == 200 ||
-          response.statusCode == 201 ||
-          response.statusCode == 204) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Post submitted!')));
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: ${response.statusCode}')),
+      final request = http.MultipartRequest(method, uri);
+
+      // Add text fields
+      request.fields['title'] = titleController.text;
+      request.fields['location'] = locationController.text;
+      request.fields['content'] = contentController.text;
+
+      // Add images if any
+      if (pickedImage != null && pickedImage!.isNotEmpty) {
+        for (final image in pickedImage!) {
+          final fileName = basename(image.path);
+          final mimeType = extension(image.path).replaceAll('.', '');
+
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              'Images', // must match backend property name
+              image.path,
+              contentType: MediaType('image', mimeType),
+              filename: fileName,
+            ),
+          );
+        }
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception(
+          '${isEditing ? 'Update' : 'Creation'} failed: ${response.body}',
         );
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Post ${isEditing ? 'updated' : 'created'} successfully!',
+            ),
+          ),
+        );
+        Navigator.pop(context);
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
       }
     }
   }

@@ -11,6 +11,11 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -42,7 +47,6 @@ builder.Services.AddScoped<EditFeedback>();
 builder.Services.AddScoped<DeleteFeedback>();
 builder.Services.AddScoped<SaveFeedback>();
 
-
 // Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -51,6 +55,7 @@ builder.Services.AddSwaggerGen(c =>
     c.EnableAnnotations();
 });
 
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -78,7 +83,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     }
 }
 
-// Configure middleware
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler(errorApp =>
@@ -92,7 +97,7 @@ if (!app.Environment.IsDevelopment())
         });
     });
     app.UseHsts();
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
 }
 
 // Enable Swagger middleware
@@ -104,6 +109,8 @@ app.UseSwaggerUI(c =>
 });
 
 //app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseRouting();
 
