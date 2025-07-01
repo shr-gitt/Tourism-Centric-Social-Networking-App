@@ -22,13 +22,9 @@ class _PostsPageState extends State<PostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Posts'),
-        /*leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),*/
-      ),
+      //appBar: AppBar(
+        //title: const Text('Posts'),
+      //),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {

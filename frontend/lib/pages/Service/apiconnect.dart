@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
+import 'dart:developer';
 
 class Apiconnect {
   final String? id;
@@ -24,10 +25,10 @@ class Apiconnect {
   Future<void> submitPost(BuildContext context) async {
     try {
       final uri = isEditing
-          ? Uri.parse('http://localhost:5259/api/posts/${id!}')
+          ? Uri.parse('http://localhost:5259/api/posts/update/${id!}')
           : Uri.parse('http://localhost:5259/api/posts/create');
 
-      final method = isEditing ? 'PUT' : 'POST';
+      final method = 'POST';
 
       final request = http.MultipartRequest(method, uri);
 
@@ -56,7 +57,8 @@ class Apiconnect {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        log('Response body: ${response.body}'); // Add this line
         throw Exception(
           '${isEditing ? 'Update' : 'Creation'} failed: ${response.body}',
         );

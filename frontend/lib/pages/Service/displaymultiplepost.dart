@@ -208,7 +208,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Deletepost(id: post['_id']),
+                      builder: (context) => Deletepost(id: post['id']),
                     ),
                   );
                 }

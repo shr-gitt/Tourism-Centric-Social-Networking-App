@@ -88,22 +88,42 @@ namespace Backend.Controllers
 
 
         // PUT: api/posts/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, Post post)
+        [HttpPost("update/{id}")]
+        public async Task<IActionResult> Update(string id, [FromForm] CreatePostRequest request)
         {
-            if (id != post.Id)
-                return BadRequest("Id in URL and body do not match.");
-
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { Errors = errors });
+            }
+            
             var existingPost = await _postServices.GetByIdAsync(id);
             if (existingPost == null)
                 return NotFound();
 
-            await _editService.EditAsync(id, post);
+            var imagePaths = new List<string>();
 
-            return NoContent(); // 204 No Content on successful update
+            if (request.Images != null)
+            {
+                foreach (var file in request.Images)
+                {
+                    var imagePath = new UploadImage().Upload(file);
+                    imagePaths.Add(imagePath);
+                }
+            }
+
+            var post = new Post
+            {
+                Id = id,
+                Title = request.Title,
+                Location = request.Location,
+                Content = request.Content,
+                Image = imagePaths,
+                Created = existingPost.Created
+            };
+            
+            await _editService.EditAsync(id, post);
+            return NoContent();
         }
         
         // DELETE: api/posts/{id}

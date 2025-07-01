@@ -58,7 +58,7 @@ class ApiconnectFeedbacks {
 
     final success = await service.editFeedbackById(
       postId,
-      feedbackId!,
+      feedbackId,
       like: like,
       comment: comment,
     );
