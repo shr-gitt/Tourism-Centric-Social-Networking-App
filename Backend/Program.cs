@@ -3,18 +3,9 @@ using Backend.Data;
 using Backend.Services;
 using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Backend.Services.userService;
 using MongoDB.Driver;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.SwaggerGen;
-
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +24,13 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 // Register app-specific services
+builder.Services.AddScoped<UsersContext>();
+builder.Services.AddScoped<UserServices>();
+builder.Services.AddScoped<CreateUser>();
+builder.Services.AddScoped<EditUser>();
+builder.Services.AddScoped<DeleteUser>();
+builder.Services.AddScoped<SaveUser>();
+
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<PostServices>();
 builder.Services.AddScoped<CreatePost>();

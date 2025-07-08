@@ -8,10 +8,18 @@ public class Feedback
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string? Id { get; set; }
-
+    [BsonElement("id")] 
+    public string? FeedbackId { get; set; }
+    
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? UserId { get; set; }
+    
+    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonElement("PostId")]
     public string PostId { get; set; } = null!;
     public bool? Like { get; set; }
     public string? Comment { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
+
+

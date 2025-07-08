@@ -18,6 +18,6 @@ namespace Backend.Services
             await _postsCollection.Find(_ => true).ToListAsync();
 
         public async Task<Post?> GetByIdAsync(string id) =>
-            await _postsCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+            await _postsCollection.Find(p => p.PostId == id).FirstOrDefaultAsync();
     }
 }

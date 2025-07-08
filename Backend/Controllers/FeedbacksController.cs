@@ -31,17 +31,27 @@ namespace Backend.Controllers
             return Ok(interactions);
         }
         
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        [HttpGet("{feedbackid}")]
+        public async Task<IActionResult> GetById(string feedbackid)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(feedbackid))
                 return BadRequest("Id cannot be null or empty.");
 
-            var post = await _feedbacksService.GetByIdAsync(id);
+            var post = await _feedbacksService.GetByIdAsync(feedbackid);
             if (post == null)
                 return NotFound();
 
             return Ok(post);
+        }
+        
+        [HttpGet("post/{postId}")]
+        public async Task<IActionResult> GetByPostId(string postId)
+        {
+            if (string.IsNullOrWhiteSpace(postId))
+                return BadRequest("Post ID is required.");
+    
+            var feedbacks = await _feedbacksService.GetByPostIdAsync(postId);
+            return Ok(feedbacks);
         }
         
         [HttpPost]
@@ -57,49 +67,46 @@ namespace Backend.Controllers
             if (!created)
                 return BadRequest("Post not found. Feedback cannot be added.");
 
-            return CreatedAtAction(nameof(GetById), new { id = feedback.Id }, feedback);
+            return CreatedAtAction(nameof(GetById), new { feedbackid = feedback.FeedbackId }, feedback);
         }
 
-        
-        [HttpGet("post/{postId}")]
-        public async Task<IActionResult> GetByPostId(string postId)
+        public class UpdateFeedbackRequest
         {
-            if (string.IsNullOrWhiteSpace(postId))
-                return BadRequest("Post ID is required.");
-    
-            var feedbacks = await _feedbacksService.GetByPostIdAsync(postId);
-            return Ok(feedbacks);
+            public bool? Like { get; set; }
+            public string? Comment { get; set; }
         }
         
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFeedback(string id)
+        [HttpPatch("{feedbackid}")]
+        public async Task<IActionResult> UpdateFeedback(string feedbackid, [FromBody] UpdateFeedbackRequest request)
         {
-            var deleted = await _deleteFeedback.DeleteAsync(id);
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            var feedback = await _feedbacksService.GetByIdAsync(feedbackid);
+            if (feedback == null)
+                return NotFound();
+
+            if (request.Like != null)
+                feedback.Like = request.Like;
+
+            if (!string.IsNullOrEmpty(request.Comment))
+                feedback.Comment = request.Comment;
+
+            await _editFeedback.Edit(feedback);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{feedbackid}")]
+        public async Task<IActionResult> DeleteFeedback(string feedbackid)
+        {
+            var deleted = await _deleteFeedback.DeleteAsync(feedbackid);
             if (!deleted)
                 return NotFound("Feedback not found.");
     
             return NoContent();
         }
-
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateFeedback(string id, [FromBody] Feedback feedback)
-        {
-            if(id!=feedback.Id)
-                return BadRequest("Feedback IDs do not match.");
-            
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState);
-            
-            var existingFeedback = await _feedbacksService.GetByIdAsync(id);
-            
-            if(existingFeedback == null)
-                return NotFound();
-            
-            await _editFeedback.Edit(feedback);
-            
-            return NoContent();
-        }
-
+        
         [HttpPost("save")]
         public async Task<IActionResult> SaveFeedback([FromBody] Feedback feedback)
         {
@@ -107,7 +114,7 @@ namespace Backend.Controllers
                 return BadRequest(ModelState);
             
             await _saveFeedback.SaveAsync(feedback);
-            return CreatedAtAction(nameof(GetById), new { id = feedback.Id }, feedback);
+            return CreatedAtAction(nameof(GetById), new { feedbackid = feedback.FeedbackId }, feedback);
         }
     }
 }

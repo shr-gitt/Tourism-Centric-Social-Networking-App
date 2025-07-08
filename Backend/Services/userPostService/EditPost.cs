@@ -15,5 +15,5 @@ public class EditPost
     }
     
     public async Task EditAsync(string id,Post post)=>
-    await _postsCollection.ReplaceOneAsync(p => p.Id == post.Id, post);
+    await _postsCollection.ReplaceOneAsync(p => p.PostId == post.PostId, post);
 }

@@ -1,5 +1,6 @@
 using Backend.Models;
 using Backend.Services.userPostService;
+using MongoDB.Bson;
 
 namespace Backend.Services;
 
@@ -18,6 +19,7 @@ public static class SeedData
         {
             new Post
             {
+                UserId ="686b8bc91d177681dc98f1b7",
                 Title = "Post1",
                 Location = "Kathmandu",
                 Content = "This is a test post.",
@@ -25,6 +27,7 @@ public static class SeedData
             },
             new Post
             {
+                UserId = "686b8bc91d177681dc98f1b7",
                 Title = "Post2",
                 Location = "Pokhara",
                 Content = "This is another test post.",
@@ -32,6 +35,7 @@ public static class SeedData
             },
             new Post
             {
+                UserId = "686b8cbb066e4019760b0583",
                 Title = "Post3",
                 Location = "Lalitpur",
                 Content = "And another post.",

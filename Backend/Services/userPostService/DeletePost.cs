@@ -14,5 +14,5 @@ public class DeletePost
     }
     
     public async Task DeleteAsync(string id, Post post)=>
-        await _postsCollection.DeleteOneAsync(p => p.Id == post.Id);
+        await _postsCollection.DeleteOneAsync(p => p.PostId == post.PostId);
 }

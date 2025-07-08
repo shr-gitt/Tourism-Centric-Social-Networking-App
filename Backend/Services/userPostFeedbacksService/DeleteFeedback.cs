@@ -20,7 +20,7 @@ public class DeleteFeedback
         if (string.IsNullOrWhiteSpace(id))
             throw new ArgumentException("Feedback id cannot be null or empty.", nameof(id));
 
-        var result = await _feedbacksCollection.DeleteOneAsync(f => f.Id == id);
+        var result = await _feedbacksCollection.DeleteOneAsync(f => f.FeedbackId == id);
         return result.DeletedCount > 0;
     }
 }

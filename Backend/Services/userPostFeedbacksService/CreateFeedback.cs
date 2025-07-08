@@ -20,7 +20,7 @@ public class CreateFeedback
         if (feedback == null) 
             throw new ArgumentNullException(nameof(feedback));
 
-        var postExists = await _postsCollection.Find(p => p.Id == feedback.PostId).AnyAsync();
+        var postExists = await _postsCollection.Find(p => p.PostId == feedback.PostId).AnyAsync();
         if (!postExists)
         {
             throw new InvalidOperationException($"Post with id {feedback.PostId} does not exist.");

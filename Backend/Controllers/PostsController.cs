@@ -38,13 +38,13 @@ namespace Backend.Controllers
         }
 
         // GET: api/posts/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        [HttpGet("{postid}")]
+        public async Task<IActionResult> GetById(string postid)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(postid))
                 return BadRequest("Id cannot be null or empty.");
 
-            var post = await _postServices.GetByIdAsync(id);
+            var post = await _postServices.GetByIdAsync(postid);
             if (post == null)
                 return NotFound();
 
@@ -53,6 +53,7 @@ namespace Backend.Controllers
 
         public class CreatePostRequest
         {
+            public string? UserId { get; set; }
             public string? Title { get; set; }
             public string? Location { get; set; }
             public string? Content { get; set; }
@@ -74,6 +75,7 @@ namespace Backend.Controllers
 
             var post = new Post
             {
+                UserId = request.UserId,
                 Title = request.Title,
                 Location = request.Location,
                 Content = request.Content,
@@ -83,13 +85,12 @@ namespace Backend.Controllers
 
             await _createService.CreateAsync(post);
 
-            return CreatedAtAction(nameof(GetById), new { id = post.Id }, post);
+            return CreatedAtAction(nameof(GetById), new { id = post.PostId }, post);
         }
-
-
+        
         // PUT: api/posts/{id}
-        [HttpPost("update/{id}")]
-        public async Task<IActionResult> Update(string id, [FromForm] CreatePostRequest request)
+        [HttpPost("update/{postid}")]
+        public async Task<IActionResult> Update(string postid, [FromForm] CreatePostRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -97,7 +98,7 @@ namespace Backend.Controllers
                 return BadRequest(new { Errors = errors });
             }
             
-            var existingPost = await _postServices.GetByIdAsync(id);
+            var existingPost = await _postServices.GetByIdAsync(postid);
             if (existingPost == null)
                 return NotFound();
 
@@ -114,7 +115,8 @@ namespace Backend.Controllers
 
             var post = new Post
             {
-                Id = id,
+                PostId = postid,
+                UserId = request.UserId,
                 Title = request.Title,
                 Location = request.Location,
                 Content = request.Content,
@@ -122,22 +124,22 @@ namespace Backend.Controllers
                 Created = existingPost.Created
             };
             
-            await _editService.EditAsync(id, post);
+            await _editService.EditAsync(postid, post);
             return NoContent();
         }
         
         // DELETE: api/posts/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        [HttpDelete("{postid}")]
+        public async Task<IActionResult> Delete(string postid)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(postid))
                 return BadRequest("Id cannot be null or empty.");
 
-            var post = await _postServices.GetByIdAsync(id);
+            var post = await _postServices.GetByIdAsync(postid);
             if (post == null)
                 return NotFound();
 
-            await _deleteService.DeleteAsync(id, post);
+            await _deleteService.DeleteAsync(postid, post);
 
             return NoContent(); // 204 No Content on successful delete
         }
