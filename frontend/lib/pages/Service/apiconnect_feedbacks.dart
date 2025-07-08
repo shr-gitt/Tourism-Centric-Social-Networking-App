@@ -1,20 +1,30 @@
-import 'package:flutter/widgets.dart';
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:frontend/pages/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
 import 'dart:developer';
 
 class ApiconnectFeedbacks {
-  final String? postId;
+  final String? PostId;
+  final String? UserId;
   final String? feedbackId;
   final bool? like;
   final String? comment;
 
-  ApiconnectFeedbacks({this.postId, this.feedbackId, this.like, this.comment});
+  ApiconnectFeedbacks({
+    this.PostId,
+    this.UserId,
+    this.feedbackId,
+    this.like,
+    this.comment,
+  });
 
-  Future<void> submitFeedback(BuildContext context) async {
+  Future<bool> submitFeedback() async {
     final service = FeedbackService();
-
+    String? uid = await AuthStorage.getUserId();
     final success = await service.submitFeedback(
-      id: postId,
+      UserId: uid,
+      PostId: PostId,
       like: like,
       comment: comment,
     );
@@ -24,40 +34,49 @@ class ApiconnectFeedbacks {
     } else {
       log("Failed to submit feedback.");
     }
+
+    return success; // <---- Return success here
   }
 
-  Future<void> addLike(BuildContext context) async {
-    await ApiconnectFeedbacks(
-      postId: postId,
+  Future<bool> addLike() async {
+    String? uid = await AuthStorage.getUserId();
+    return await ApiconnectFeedbacks(
+      UserId: uid,
+      PostId: PostId,
       like: true,
-    ).submitFeedback(context);
+    ).submitFeedback();
   }
 
-  Future<void> adddisLike(BuildContext context) async {
-    await ApiconnectFeedbacks(
-      postId: postId,
+  Future<bool> adddisLike() async {
+    String? uid = await AuthStorage.getUserId();
+    return await ApiconnectFeedbacks(
+      UserId: uid,
+      PostId: PostId,
       like: false,
-    ).submitFeedback(context);
+    ).submitFeedback();
   }
 
-  Future<void> addComment(BuildContext context) async {
-    await ApiconnectFeedbacks(
-      postId: postId,
+  Future<bool> addComment() async {
+    String? uid = await AuthStorage.getUserId();
+    return await ApiconnectFeedbacks(
+      UserId: uid,
+      PostId: PostId,
       comment: comment,
-    ).submitFeedback(context);
+    ).submitFeedback();
   }
 
-  Future<void> editReaction(BuildContext context,bool like) async {
-    //Edit reaction works only when a liked post is disliked and then disliked but doesn't work when a liked post is directly disliked
+  Future<bool> editReaction(bool like) async {
+    String? uid = await AuthStorage.getUserId();
     if (feedbackId == null) {
       log("No feedback ID provided for editing.");
-      return;
+      return false;
     }
 
     final service = FeedbackService();
 
     final success = await service.editFeedbackById(
-      postId,
+      uid,
+      PostId,
       feedbackId,
       like: like,
       comment: comment,
@@ -65,15 +84,17 @@ class ApiconnectFeedbacks {
 
     if (success) {
       log("Feedback updated successfully.");
+      return true;
     } else {
       log("Failed to update feedback.");
+      return false;
     }
   }
 
-  Future<void> removeReaction(BuildContext context) async {
+  Future<bool> removeReaction() async {
     if (feedbackId == null) {
       log("No feedback ID provided for removal.");
-      return;
+      return false;
     }
 
     final service = FeedbackService();
@@ -82,8 +103,10 @@ class ApiconnectFeedbacks {
 
     if (success) {
       log("Reaction removed successfully.");
+      return true;
     } else {
       log("Failed to remove reaction.");
+      return false;
     }
   }
 }

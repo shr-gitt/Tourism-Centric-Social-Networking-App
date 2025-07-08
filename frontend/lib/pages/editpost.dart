@@ -3,8 +3,8 @@ import 'package:frontend/pages/Service/inputpost.dart';
 import 'package:frontend/api_service.dart';
 
 class Editpost extends StatefulWidget {
-  final String id;
-  const Editpost({super.key, required this.id});
+  final String postId;
+  const Editpost({super.key, required this.postId});
 
   @override
   State<Editpost> createState() => _EditpostState();
@@ -17,7 +17,7 @@ class _EditpostState extends State<Editpost> {
   @override
   void initState() {
     super.initState();
-    postFuture = api.fetchPostById(widget.id);
+    postFuture = api.fetchPostById(widget.postId);
   }
 
   @override
@@ -37,12 +37,13 @@ class _EditpostState extends State<Editpost> {
 
         final post = snapshot.data!;
         return Inputpost(
-          id: widget.id,
+          id: widget.postId,
           titleController: TextEditingController(text: post['title'] ?? ''),
           locationController: TextEditingController(
             text: post['location'] ?? '',
           ),
           contentController: TextEditingController(text: post['content'] ?? ''),
+          existingImageUrls: List<String>.from(post['images'] ?? []),
           isEditing: true,
         );
       },

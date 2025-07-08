@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
@@ -8,8 +10,18 @@ class FeedbackService {
   Map<String, String> get _headers => {'Content-Type': 'application/json'};
 
   /// Submit new feedback (like/comment) for a post
-  Future<bool> submitFeedback({String? id, bool? like, String? comment}) async {
-    final body = {"postId": id, "like": like, "comment": comment ?? ""};
+  Future<bool> submitFeedback({
+    String? UserId,
+    String? PostId,
+    bool? like,
+    String? comment,
+  }) async {
+    final body = {
+      "UserId": UserId,
+      "PostId": PostId,
+      "like": like,
+      "comment": comment ?? "",
+    };
 
     log("Submitting feedback with body: $body");
 
@@ -48,9 +60,9 @@ class FeedbackService {
   }
 
   /// Fetch a specific feedback by its id
-  Future<Map<String, dynamic>> fetchFeedbackById(String id) async {
+  Future<Map<String, dynamic>> fetchFeedbackById(String feedbackid) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/$id'),
+      Uri.parse('$baseUrl/$feedbackid'),
       headers: _headers,
     );
     if (response.statusCode == 200) {
@@ -74,7 +86,8 @@ class FeedbackService {
   }
 
   Future<bool> editFeedbackById(
-    String? id,
+    String? uid,
+    String? pid,
     String? feedbackId, {
     bool? like,
     String? comment,
@@ -85,11 +98,12 @@ class FeedbackService {
     }
 
     final url = Uri.parse('$baseUrl/$feedbackId');
-    final body = {"id": feedbackId,"postId":id, "like": like, "comment": comment ?? ""};
 
-    /*final body = <String, dynamic>{'id': feedbackId};
+    final body = <String, dynamic>{};
     if (like != null) body['like'] = like;
-    if (comment != null) body['comment'] = comment;*/
+    if (comment != null) body['comment'] = comment;
+
+    log("PATCH Body: $body");
 
     final response = await http.patch(
       url,
@@ -97,7 +111,7 @@ class FeedbackService {
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 204) {
       return true;
     } else {
       log(
@@ -114,7 +128,7 @@ class FeedbackService {
       headers: _headers,
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 204) {
       return true;
     } else {
       log(

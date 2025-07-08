@@ -36,9 +36,10 @@ class ApiService {
 
   Future<Map<String, dynamic>> fetchPostById(String id) async {
     final response = await http.get(Uri.parse('$baseUrl/posts/$id'));
-    if (response.statusCode == 200) {
+    if (response.statusCode >= 200 && response.statusCode<300) {
       return jsonDecode(response.body);
     } else {
+      log('Response body: ${response.body}');
       throw Exception('Failed to load post');
     }
   }

@@ -39,7 +39,7 @@ class _ProfileState extends State<Profile> {
             ),
           ),
           const Divider(height: 10, thickness: 2, color: Colors.black),
-          Expanded(child: PostsPage()),
+          Expanded(child: PostsPage(state: true,)),
         ],
       ),
     );

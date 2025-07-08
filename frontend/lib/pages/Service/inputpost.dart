@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/apiconnect.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -9,6 +10,7 @@ class Inputpost extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController locationController;
   final TextEditingController contentController;
+  final List<String>? existingImageUrls;
 
   const Inputpost({
     super.key,
@@ -16,6 +18,7 @@ class Inputpost extends StatefulWidget {
     required this.titleController,
     required this.locationController,
     required this.contentController,
+    this.existingImageUrls,
     required this.isEditing,
   });
 
@@ -26,6 +29,13 @@ class Inputpost extends StatefulWidget {
 class _InputpostState extends State<Inputpost> {
   final ImagePicker _picker = ImagePicker();
   List<XFile> pickedImage = [];
+  late List<String> existingImages;
+
+  @override
+  void initState() {
+    super.initState();
+    existingImages = widget.existingImageUrls ?? [];
+  }
 
   Future<void> _pickImages() async {
     final List<XFile> images = await _picker.pickMultiImage();
@@ -99,11 +109,13 @@ class _InputpostState extends State<Inputpost> {
         ],
       ),
     );
+    String? uid = await AuthStorage.getUserId();
 
     if (confirm == true) {
       if (context.mounted) {
         Apiconnect(
           id: widget.id,
+          userId:uid,
           isEditing: widget.isEditing,
           titleController: widget.titleController,
           locationController: widget.locationController,

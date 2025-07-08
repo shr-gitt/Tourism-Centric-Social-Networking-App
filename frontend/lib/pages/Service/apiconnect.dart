@@ -7,6 +7,7 @@ import 'dart:developer';
 
 class Apiconnect {
   final String? id;
+  final String? userId;
   final bool isEditing;
   final TextEditingController titleController;
   final TextEditingController locationController;
@@ -15,6 +16,7 @@ class Apiconnect {
 
   Apiconnect({
     this.id,
+    this.userId,
     required this.isEditing,
     required this.titleController,
     required this.locationController,
@@ -33,6 +35,7 @@ class Apiconnect {
       final request = http.MultipartRequest(method, uri);
 
       // Add text fields
+      request.fields['UserId'] = userId ?? '';
       request.fields['title'] = titleController.text;
       request.fields['location'] = locationController.text;
       request.fields['content'] = contentController.text;
@@ -41,13 +44,18 @@ class Apiconnect {
       if (pickedImage != null && pickedImage!.isNotEmpty) {
         for (final image in pickedImage!) {
           final fileName = basename(image.path);
-          final mimeType = extension(image.path).replaceAll('.', '');
+          final ext = extension(image.path).toLowerCase();
+          final mimeType = ext == '.png'
+              ? 'image/png'
+              : ext == '.gif'
+              ? 'image/gif'
+              : 'image/jpeg'; // default
 
           request.files.add(
             await http.MultipartFile.fromPath(
-              'Images', // must match backend property name
+              'Images',
               image.path,
-              contentType: MediaType('image', mimeType),
+              contentType: MediaType.parse(mimeType),
               filename: fileName,
             ),
           );

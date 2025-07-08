@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/api_service.dart';
 import 'package:frontend/pages/Service/displaymultiplepost.dart';
+import 'package:frontend/pages/search.dart';
 
 class PostsPage extends StatefulWidget {
-  const PostsPage({super.key});
+  final bool state;
+  const PostsPage({super.key, this.state = false});
 
   @override
   State<PostsPage> createState() => _PostsPageState();
@@ -22,9 +24,19 @@ class _PostsPageState extends State<PostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: AppBar(
-        //title: const Text('Posts'),
-      //),
+      appBar: widget.state
+      ? null
+      : AppBar(
+        title: const Text('Posts'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              Search();
+            },
+          ),
+        ],
+      ),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
