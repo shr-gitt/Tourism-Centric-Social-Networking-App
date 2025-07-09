@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/api_service.dart';
-import 'package:frontend/pages/Service/displaymultiplepost.dart';
+import 'dart:developer';
+import 'package:frontend/pages/Service/api_service.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/displaymultiplepost.dart';
 import 'package:frontend/pages/search.dart';
 
 class PostsPage extends StatefulWidget {
   final bool state;
-  const PostsPage({super.key, this.state = false});
+  final Map<String, dynamic>? post;
+
+  const PostsPage({super.key, this.state = false, this.post});
 
   @override
   State<PostsPage> createState() => _PostsPageState();
@@ -25,18 +29,23 @@ class _PostsPageState extends State<PostsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: widget.state
-      ? null
-      : AppBar(
-        title: const Text('Posts'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              Search();
-            },
-          ),
-        ],
-      ),
+          ? null
+          : AppBar(
+              title: const Text('Posts'),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Search(),
+                  ),
+                );
+                  },
+                ),
+              ],
+            ),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
@@ -48,10 +57,32 @@ class _PostsPageState extends State<PostsPage> {
           }
 
           final posts = snapshot.data!;
-          return ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              return Displaymultiplepost(post: posts[index]);
+          return FutureBuilder<String?>(
+            future: AuthStorage.getUserId(),
+            builder: (context, userIdSnapshot) {
+              if (userIdSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (userIdSnapshot.hasError) {
+                return Center(child: Text('Error: ${userIdSnapshot.error}'));
+              }
+              final String? uid = userIdSnapshot.data;
+              final bool state = widget.state;
+              List<Map<String, dynamic>> filteredPosts = posts
+                  .where((post) {
+                    final String? postUserId = post['userId'];
+                    log('userId:$postUserId and uid:$uid');
+                    return state ? postUserId == uid : postUserId != uid;
+                  })
+                  .cast<Map<String, dynamic>>()
+                  .toList();
+
+              return ListView.builder(
+                itemCount: filteredPosts.length,
+                itemBuilder: (context, index) {
+                  return Displaymultiplepost(post: filteredPosts[index]);
+                },
+              );
             },
           );
         },

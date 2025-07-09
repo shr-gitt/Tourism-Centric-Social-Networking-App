@@ -11,8 +11,8 @@ class _NotifyState extends State<Notify> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notifications')),
-      body:Text('Notifications')
+      appBar: AppBar(title: const Text('Notifications')),
+      body: Center(child: Text('Work in Progress....')),
     );
   }
 }

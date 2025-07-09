@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/posts.dart';
-import 'package:frontend/pages/search.dart';
+import 'package:frontend/pages/map.dart';
 import 'package:frontend/pages/createpost.dart';
 import 'package:frontend/pages/notification.dart';
 import 'package:frontend/pages/profile.dart';
@@ -17,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
   int index = 0;
 
-  List pages = [PostsPage(), Search(), Createpost(), Notify(), Profile()];
+  List pages = [PostsPage(), Map(), Createpost(), Notify(), Profile()];
 
   @override
   Widget build(BuildContext context) {

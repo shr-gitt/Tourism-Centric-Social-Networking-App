@@ -1,6 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:frontend/pages/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/api_service_feedbacks.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'dart:developer';
 

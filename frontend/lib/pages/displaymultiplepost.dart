@@ -1,12 +1,13 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/feedbacks.dart';
+import 'package:frontend/pages/feedbacks.dart';
+import 'package:frontend/pages/Service/api_service_user.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:frontend/pages/createpost.dart';
 import 'package:frontend/pages/editpost.dart';
 import 'package:frontend/pages/deletepost.dart';
-import 'package:frontend/pages/Service/imagedisplaywithbuttons.dart';
-import 'package:frontend/pages/api_service_feedbacks.dart';
+import 'package:frontend/pages/fullpost.dart';
+import 'package:frontend/pages/imagedisplaywithbuttons.dart';
+import 'package:frontend/pages/Service/api_service_feedbacks.dart';
 
 class Displaymultiplepost extends StatefulWidget {
   //final String? id;
@@ -21,11 +22,23 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
   final FeedbackService api = FeedbackService();
   late Future<List<dynamic>> feedbacksFuture;
   String? id;
-
+  final UserService userapi = UserService();
+  Map<String, dynamic>? user;
 
   @override
   void initState() {
     super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    final userId = widget.post['userId'];
+    final userData = await userapi.fetchUserData(userId); // cleaner
+    if (userData != null) {
+      setState(() {
+        user = userData;
+      });
+    }
   }
 
   @override
@@ -37,10 +50,11 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Createpost(id: post['postId']),
+            builder: (context) => FullPostPage(postId: post['postId']),
           ),
         );
       },
+
       child: GFCard(
         boxFit: BoxFit.cover,
         image: Image.asset('assets/images/_MG_6890.jpeg'),
@@ -48,8 +62,8 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
           avatar: GFAvatar(
             backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
           ),
-          title: Text('Card Title'),
-          subTitle: Text('Card Sub Title'),
+          title: Text(user?['userName'] ?? "No username"),
+          subTitle: Text(user?['name'] ?? "No name"),
           icon: PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (String value) {
@@ -74,7 +88,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                 );
               }
             },
-            itemBuilder: (BuildContext context) => const [
+            itemBuilder: (BuildContext context) => [
               PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
               PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
             ],
@@ -95,7 +109,11 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(post['location'] ?? 'No Location'),
-                  Text(post['content'] ?? 'No Content'),
+                  Text(
+                    post['content'] ?? 'No Content',
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (post['image'] != null &&
                       post['image'] is List &&
                       (post['image'] as List).isNotEmpty) ...[

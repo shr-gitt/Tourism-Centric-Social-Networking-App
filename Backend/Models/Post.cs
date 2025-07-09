@@ -4,7 +4,6 @@ using Backend.Models;
 
 namespace Backend.Models
 {
-
     public class Post
     {
         [BsonId]
@@ -22,11 +21,12 @@ namespace Backend.Models
 
         public FeedbackSummary? Feedback { get; set; }
 
-        public class FeedbackSummary
-        {
-            public int likeCount { get; set; }
-            public int dislikeCount { get; set; }
-            public int commentCount { get; set; }
-        }
+        
+    }
+    public class FeedbackSummary
+    {
+        public int likeCount { get; set; }
+        public int dislikeCount { get; set; }
+        public int commentCount { get; set; }
     }
 }

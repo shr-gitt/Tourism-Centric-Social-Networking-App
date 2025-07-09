@@ -2,7 +2,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/apiconnect_feedbacks.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
-import 'package:frontend/pages/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/api_service_feedbacks.dart';
+import 'package:frontend/pages/fullpost.dart';
 import 'package:getwidget/getwidget.dart';
 
 class Feedbacks extends StatefulWidget {
@@ -16,7 +17,7 @@ class Feedbacks extends StatefulWidget {
 
 class _FeedbacksState extends State<Feedbacks> {
   final api = FeedbackService();
-  late Future<List<dynamic>> feedbacksFuture;
+  Future<List<dynamic>> feedbacksFuture = Future.value([]);
 
   bool _isLiked = false;
   bool _isDisLiked = false;
@@ -25,21 +26,30 @@ class _FeedbacksState extends State<Feedbacks> {
   @override
   void initState() {
     super.initState();
-    final postId = widget.post['postid'];
-    feedbacksFuture = api.fetchAllFeedbacks().then((feedbacks) {
-      final postFeedbacks = feedbacks
-          .where((f) => (f['PostId'] == postId) || (f['postId'] == postId))
-          .toList();
+    final postId = widget.post['postid'] ?? widget.post['postId'];
 
-      _isLiked = postFeedbacks.any((f) => f['like'] == true);
-      _isDisLiked = postFeedbacks.any((f) => f['like'] == false);
+    AuthStorage.getUserId().then((userId) {
+      feedbacksFuture = api.fetchAllFeedbacks().then((feedbacks) {
+        final postFeedbacks = feedbacks.where((f) {
+          return (f['postId'] == postId || f['PostId'] == postId) &&
+              (f['userId'] == userId);
+        }).toList();
 
-      if (postFeedbacks.isNotEmpty) {
-        feedbackId = postFeedbacks[0]['feedbackid'];
-      } else {
-        feedbackId = null;
-      }
-      return feedbacks;
+        setState(() {
+          if (postFeedbacks.isNotEmpty) {
+            final userFeedback = postFeedbacks[0];
+            _isLiked = userFeedback['like'] == true;
+            _isDisLiked = userFeedback['like'] == false;
+            feedbackId = userFeedback['feedbackId'];
+          } else {
+            _isLiked = false;
+            _isDisLiked = false;
+            feedbackId = null;
+          }
+        });
+
+        return feedbacks;
+      });
     });
   }
 
@@ -203,7 +213,15 @@ class _FeedbacksState extends State<Feedbacks> {
                     type: GFButtonType.transparent,
                   ),
                   GFButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FullPostPage(postId: post['postId']),
+                        ),
+                      );
+                    },
                     text: "",
                     icon: Icon(Icons.comment_outlined),
                     type: GFButtonType.transparent,

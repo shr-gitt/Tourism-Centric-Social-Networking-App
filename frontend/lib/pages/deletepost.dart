@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/api_service.dart';
+import 'package:frontend/pages/Service/api_service.dart';
 
 class Deletepost extends StatefulWidget {
   final String id;

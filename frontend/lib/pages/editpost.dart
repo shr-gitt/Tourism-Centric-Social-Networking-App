@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/inputpost.dart';
-import 'package:frontend/api_service.dart';
+import 'package:frontend/pages/inputpost.dart';
+import 'package:frontend/pages/Service/api_service.dart';
 
 class Editpost extends StatefulWidget {
   final String postId;

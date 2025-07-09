@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/inputpost.dart';
+import 'package:frontend/pages/inputpost.dart';
 
 class Createpost extends StatelessWidget {
   const Createpost({super.key, String? id});

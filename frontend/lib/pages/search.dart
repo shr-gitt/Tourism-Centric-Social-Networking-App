@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
@@ -11,17 +12,27 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
-    return GFCard(
-      boxFit: BoxFit.cover,
-      image: Image.asset('assets/images/_MG_6890.jpeg'),
-      title: GFListTile(
-        avatar: GFAvatar(
-          backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
-          // or use the icon parameter if you want an icon:
-          // icon: Icon(Icons.person),
-        ),
-        title: Text('Card Title'),
-        subTitle: Text('Card Sub Title'),
+    List list = ["Kathmandu", "Lalitpur", "Bhaktapur", "Pokhara"];
+    return Scaffold(
+      appBar: AppBar(title:Text('Search Page'),),
+      body: GFSearchBar(
+        searchList: list,
+        searchQueryBuilder: (query, list) {
+          return list
+              .where((item) => item.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+        },
+        overlaySearchListItemBuilder: (item) {
+          return Container(
+            padding: const EdgeInsets.all(5),
+            child: Text(item, style: const TextStyle(fontSize: 18)),
+          );
+        },
+        onItemSelected: (item) {
+          setState(() {
+            log('$item');
+          });
+        },
       ),
     );
   }

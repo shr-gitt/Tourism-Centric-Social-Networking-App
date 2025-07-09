@@ -44,10 +44,10 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
       child: Row(
         children: [
           // Prev Button
-          IconButton(
+          /*IconButton(
             onPressed: _currentPage > 0 ? _goToPreviousPage : null,
             icon: const Icon(Icons.arrow_back_ios),
-          ),
+          ),*/
           // Image carousel
           Expanded(
             child: PageView.builder(
@@ -71,12 +71,12 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
             ),
           ),
           // Next Button
-          IconButton(
+          /*IconButton(
             onPressed: _currentPage < widget.imageUrls.length - 1
                 ? _goToNextPage
                 : null,
             icon: const Icon(Icons.arrow_forward_ios),
-          ),
+          ),*/
         ],
       ),
     );
