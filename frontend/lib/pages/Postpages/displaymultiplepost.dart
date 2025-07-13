@@ -1,11 +1,10 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/feedbacks.dart';
+import 'package:frontend/pages/avatar.dart';
+import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
 import 'package:frontend/pages/Service/api_service_user.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:frontend/pages/editpost.dart';
-import 'package:frontend/pages/deletepost.dart';
-import 'package:frontend/pages/fullpost.dart';
+import 'package:frontend/pages/Postpages/fullpost.dart';
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
 import 'package:frontend/pages/Service/api_service_feedbacks.dart';
 
@@ -50,7 +49,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FullPostPage(postId: post['postId']),
+            builder: (context) => FullPostPage(postId: post['postId'],scrollToComment: false,),
           ),
         );
       },
@@ -58,45 +57,10 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
       child: GFCard(
         boxFit: BoxFit.cover,
         image: Image.asset('assets/images/_MG_6890.jpeg'),
-        title: GFListTile(
-          avatar: GFAvatar(
-            backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
-          ),
-          title: Text(user?['userName'] ?? "No username"),
-          subTitle: Text(user?['name'] ?? "No name"),
-          icon: PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (String value) {
-              final String? postId = post['postId'];
-              if (postId == null) {
-                log("Error: post['_id'] is null");
-                return;
-              }
-              if (value == 'edit') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Editpost(postId: post['postId']),
-                  ),
-                );
-              } else if (value == 'delete') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Deletepost(id: post['postId']),
-                  ),
-                );
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-              PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
-            ],
-          ),
-        ),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Avatar(data: post, isPost: true),
             ListTile(
               title: Text(
                 post['title'] ?? 'No Title',
@@ -113,6 +77,18 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                     post['content'] ?? 'No Content',
                     maxLines: 5,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FullPostPage(postId: post['postId'],scrollToComment: false,),
+                        ),
+                      );
+                    },
+                    child: const Text("Show more"),
                   ),
                   if (post['image'] != null &&
                       post['image'] is List &&

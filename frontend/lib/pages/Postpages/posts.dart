@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:frontend/pages/Service/api_service.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
-import 'package:frontend/pages/displaymultiplepost.dart';
+import 'package:frontend/pages/Postpages/displaymultiplepost.dart';
 import 'package:frontend/pages/search.dart';
 
 class PostsPage extends StatefulWidget {

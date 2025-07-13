@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/inputpost.dart';
+import 'package:frontend/pages/Postpages/inputpost.dart';
 import 'package:frontend/pages/Service/api_service.dart';
 
 class Editpost extends StatefulWidget {

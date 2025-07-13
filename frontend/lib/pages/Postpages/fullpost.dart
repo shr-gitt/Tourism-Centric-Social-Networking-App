@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/api_service.dart';
 import 'package:frontend/pages/Service/api_service_user.dart';
+import 'package:frontend/pages/avatar.dart';
+import 'package:frontend/pages/Feedbackpages/feedbackscomments.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
-import 'package:frontend/pages/feedbacks.dart';
+import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
 
 class FullPostPage extends StatefulWidget {
   final String? postId;
-  const FullPostPage({super.key, required this.postId});
+  final bool scrollToComment;
+
+  const FullPostPage({
+    super.key,
+    required this.postId,
+    required this.scrollToComment,
+  });
   @override
   State<FullPostPage> createState() => _FullPostPageState();
 }
 
 class _FullPostPageState extends State<FullPostPage> {
+  //final ScrollController _scrollController = ScrollController();
+  final GlobalKey _commentKey = GlobalKey();
   final ApiService api = ApiService();
 
   late Future<Map<String, dynamic>> postFuture;
@@ -21,12 +31,26 @@ class _FullPostPageState extends State<FullPostPage> {
   Map<String, dynamic>? post;
   bool isLoading = true;
   String? errorMessage;
+  final FocusNode _commentFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     postFuture = api.fetchPostById(widget.postId!);
     loadPostAndUser();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.scrollToComment) {
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (_commentKey.currentContext != null) {
+          Scrollable.ensureVisible(
+            _commentKey.currentContext!,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+        FocusScope.of(context).requestFocus(_commentFocusNode);
+      }
+    });
   }
 
   Future<void> loadPostAndUser() async {
@@ -45,6 +69,18 @@ class _FullPostPageState extends State<FullPostPage> {
         errorMessage = 'Failed to load post or user: $e';
         isLoading = false;
       });
+    }
+  }
+
+  void focusCommentInput() {
+    FocusScope.of(context).requestFocus(_commentFocusNode);
+    // Optionally scroll to comment key here, too
+    if (_commentKey.currentContext != null) {
+      Scrollable.ensureVisible(
+        _commentKey.currentContext!,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -72,16 +108,10 @@ class _FullPostPageState extends State<FullPostPage> {
               GFCard(
                 boxFit: BoxFit.cover,
                 image: Image.asset('assets/images/_MG_6890.jpeg'),
-                title: GFListTile(
-                  avatar: GFAvatar(
-                    backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
-                  ),
-                  title: Text(user?['userName'] ?? "No username"),
-                  subTitle: Text(user?['name'] ?? "No name"),
-                ),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Avatar(data: post, isPost: true),
                     Text(post['title'] ?? 'No Title'),
                     Text(post['location'] ?? 'No Location'),
                     Text(
@@ -108,12 +138,22 @@ class _FullPostPageState extends State<FullPostPage> {
 
               const SizedBox(height: 10),
 
-              Feedbacks(post: post),
+              Feedbacks(
+                post: post,
+                onCommentPressed: focusCommentInput, // pass the callback here
+              ),
               const SizedBox(height: 10),
 
-              Text(
-                "Comments",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Column(
+                key: _commentKey,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Comments",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Comments(post: post, focusNode: _commentFocusNode),
+                ],
               ),
             ],
           ),

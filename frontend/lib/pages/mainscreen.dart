@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/posts.dart';
+import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/map.dart';
-import 'package:frontend/pages/createpost.dart';
+import 'package:frontend/pages/Postpages/createpost.dart';
 import 'package:frontend/pages/notification.dart';
 import 'package:frontend/pages/profile.dart';
 

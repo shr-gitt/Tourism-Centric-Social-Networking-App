@@ -1,0 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:frontend/pages/Service/api_service_user.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:frontend/pages/Postpages/deletepost.dart';
+import 'package:frontend/pages/Postpages/editpost.dart';
+
+class Avatar extends StatefulWidget {
+  final Map<String, dynamic> data;
+  final bool isPost;
+
+  const Avatar({super.key, required this.data, required this.isPost});
+
+  @override
+  State<Avatar> createState() => _AvatarState();
+}
+
+class _AvatarState extends State<Avatar> {
+  final UserService userapi = UserService();
+  Map<String, dynamic>? user;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
+    final userId = widget.data['userId'];
+    final userData = await userapi.fetchUserData(userId);
+    if (userData != null) {
+      setState(() {
+        user = userData;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPost = widget.isPost;
+    final data = widget.data;
+
+    return Row(
+      children: [
+        GFAvatar(
+          backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
+          size: 40,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user?['userName'] ?? "No username",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                user?['name'] ?? "No name",
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        if (isPost)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {
+              final String? postId = data['postId'];
+              if (postId == null) return;
+
+              if (value == 'edit') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Editpost(postId: postId),
+                  ),
+                );
+              } else if (value == 'delete') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Deletepost(id: postId),
+                  ),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) => const [
+              PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+              PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+            ],
+          ),
+      ],
+    );
+  }
+}

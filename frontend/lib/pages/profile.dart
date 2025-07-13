@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/posts.dart';
+import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/settings.dart';
 import 'package:frontend/pages/Service/api_service_user.dart';
 import 'package:frontend/pages/Service/authstorage.dart';

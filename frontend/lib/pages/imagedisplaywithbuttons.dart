@@ -11,9 +11,9 @@ class ImageDisplayWithButtons extends StatefulWidget {
 
 class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
   final PageController _pageController = PageController();
-  int _currentPage = 0;
+  //int _currentPage = 0;
 
-  void _goToNextPage() {
+  /*void _goToNextPage() {
     if (_currentPage < widget.imageUrls.length - 1) {
       _currentPage++;
       _pageController.animateToPage(
@@ -33,7 +33,7 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
         curve: Curves.easeInOut,
       );
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
             child: PageView.builder(
               controller: _pageController,
               itemCount: widget.imageUrls.length,
-              onPageChanged: (index) => setState(() => _currentPage = index),
+              //onPageChanged: (index) => setState(() => _currentPage = index),
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),

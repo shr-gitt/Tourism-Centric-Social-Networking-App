@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/apiconnect_feedbacks.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/api_service_feedbacks.dart';
-import 'package:frontend/pages/fullpost.dart';
+import 'package:frontend/pages/Postpages/fullpost.dart';
 import 'package:getwidget/getwidget.dart';
 
 class Feedbacks extends StatefulWidget {
   final Map<String, dynamic> post;
+  final VoidCallback? onCommentPressed; // <-- add this
 
-  const Feedbacks({super.key, required this.post});
+  const Feedbacks({super.key, required this.post, this.onCommentPressed});
 
   @override
   State<Feedbacks> createState() => _FeedbacksState();
@@ -214,13 +215,19 @@ class _FeedbacksState extends State<Feedbacks> {
                   ),
                   GFButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              FullPostPage(postId: post['postId']),
-                        ),
-                      );
+                      if (widget.onCommentPressed != null) {
+                        widget.onCommentPressed!();
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FullPostPage(
+                              postId: post['postId'],
+                              scrollToComment: true,
+                            ),
+                          ),
+                        );
+                      }
                     },
                     text: "",
                     icon: Icon(Icons.comment_outlined),
