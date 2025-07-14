@@ -73,7 +73,7 @@ class _FeedbacksState extends State<Feedbacks> {
       try {
         final success = await ApiconnectFeedbacks(
           feedbackId: feedbackId,
-        ).removeReaction();
+        ).remove();
         if (success) {
           log('Like removed');
         }

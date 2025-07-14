@@ -62,12 +62,12 @@ class _CommentsState extends State<Comments> {
             ElevatedButton(
               onPressed: () async {
                 final updatedComment = editController.text.trim();
+                log('editted comment is: $updatedComment');
                 if (updatedComment.isNotEmpty) {
                   await ApiconnectFeedbacks(
                     PostId: widget.post['postId'],
-                    feedbackId: comment['commentId'], // pass feedback ID!
+                    feedbackId: comment['feedbackId'], // pass feedback ID!
                   ).editComment(updatedComment);
-
                   Navigator.pop(context);
 
                   setState(() {
@@ -87,7 +87,8 @@ class _CommentsState extends State<Comments> {
     await ApiconnectFeedbacks(
       PostId: widget.post['postId'],
       feedbackId: commentId,
-    ).removeReaction();
+    ).remove();
+    log('Deleted the comment');
 
     setState(() {
       commentsFuture = api.fetchAllFeedbacks();
@@ -189,9 +190,11 @@ class _CommentsState extends State<Comments> {
                           PopupMenuButton<String>(
                             onSelected: (String value) {
                               if (value == 'edit') {
+                                log('value=$value');
                                 _showEditDialog(comment);
                               } else if (value == 'delete') {
-                                _deleteComment(comment['commentId']);
+                                log('value=$value');
+                                _deleteComment(comment['feedbackId']);
                               }
                             },
                             itemBuilder: (BuildContext context) => const [

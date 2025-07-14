@@ -118,7 +118,7 @@ class ApiconnectFeedbacks {
     }
   }
 
-  Future<bool> removeReaction() async {
+  Future<bool> remove() async {
     if (feedbackId == null) {
       log("No feedback ID provided for removal.");
       return false;
@@ -129,10 +129,10 @@ class ApiconnectFeedbacks {
     final success = await service.deleteFeedbackById(feedbackId!);
 
     if (success) {
-      log("Reaction removed successfully.");
+      log("Removed successfully.");
       return true;
     } else {
-      log("Failed to remove reaction.");
+      log("Failed to remove.");
       return false;
     }
   }
