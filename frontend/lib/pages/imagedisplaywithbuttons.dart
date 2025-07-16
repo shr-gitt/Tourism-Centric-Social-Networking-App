@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ImageDisplayWithButtons extends StatefulWidget {
   final List<String> imageUrls;
@@ -41,7 +42,7 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
 
     return SizedBox(
       height: 250,
-      child: Row(
+      child: Column(
         children: [
           // Prev Button
           /*IconButton(
@@ -77,6 +78,16 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
                 : null,
             icon: const Icon(Icons.arrow_forward_ios),
           ),*/
+          SizedBox(height: 10),
+          SmoothPageIndicator(
+            controller: _pageController,
+            count: widget.imageUrls.length,
+            effect: WormEffect(
+              dotHeight: 8,
+              dotWidth: 8,
+              activeDotColor: Colors.blue,
+            ),
+          ),
         ],
       ),
     );
