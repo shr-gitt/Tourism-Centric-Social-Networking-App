@@ -1,14 +1,14 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/apiconnect_feedbacks.dart';
-import 'package:frontend/pages/Service/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/feedbacks_apiconnect.dart';
+import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:getwidget/components/card/gf_card.dart';
 import 'package:getwidget/getwidget.dart';
 
 class Comments extends StatefulWidget {
   final Map<String, dynamic> post;
-  final FocusNode? focusNode; // Add this
+  final FocusNode? focusNode;
 
   const Comments({super.key, required this.post, this.focusNode});
 
@@ -20,6 +20,7 @@ class _CommentsState extends State<Comments> {
   final TextEditingController _commentController = TextEditingController();
   final FeedbackService api = FeedbackService();
   late Future<List<dynamic>> commentsFuture;
+  final Map<String, bool> _isEditing = {};
 
   @override
   void initState() {
@@ -35,70 +36,53 @@ class _CommentsState extends State<Comments> {
 
   Future<void> sendComment(String comment) async {
     log("User comment: $comment");
-    final post = widget.post;
-    final postId = post['postId'];
-    await ApiconnectFeedbacks(PostId: postId).addComment(comment);
-  }
-
-  void _showEditDialog(Map<String, dynamic> comment) {
-    final TextEditingController editController = TextEditingController(
-      text: comment['comment'],
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Edit Comment'),
-          content: TextField(
-            controller: editController,
-            decoration: InputDecoration(hintText: "Edit your comment"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final updatedComment = editController.text.trim();
-                log('editted comment is: $updatedComment');
-                if (updatedComment.isNotEmpty) {
-                  await ApiconnectFeedbacks(
-                    PostId: widget.post['postId'],
-                    feedbackId: comment['feedbackId'], // pass feedback ID!
-                  ).editComment(updatedComment);
-                  Navigator.pop(context);
-
-                  setState(() {
-                    commentsFuture = api.fetchAllFeedbacks();
-                  });
-                }
-              },
-              child: Text("Save"),
-            ),
-          ],
-        );
-      },
-    );
+    final postId = widget.post['postId'];
+    final success = await ApiconnectFeedbacks(PostId: postId).addComment(comment);
+    if (!mounted) return;
+    if (success) {
+      _commentController.clear();
+      setState(() {
+        commentsFuture = api.fetchFeedbacksByPostId(postId);
+      });
+    }
   }
 
   Future<void> _deleteComment(String commentId) async {
-    await ApiconnectFeedbacks(
-      PostId: widget.post['postId'],
-      feedbackId: commentId,
-    ).remove();
-    log('Deleted the comment');
+    log('Attempting to delete comment with id: $commentId');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Comment"),
+        content: const Text("Are you sure you want to delete this comment?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
 
-    setState(() {
-      commentsFuture = api.fetchAllFeedbacks();
-    });
+    if (confirmed == true) {
+      await ApiconnectFeedbacks(
+        PostId: widget.post['postId'],
+        feedbackId: commentId,
+      ).remove();
+      if (!mounted) return;
+      setState(() {
+        commentsFuture = api.fetchFeedbacksByPostId(widget.post['postId']);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final post = widget.post;
-    final postId = post['postId'];
+    final postId = widget.post['postId'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -109,7 +93,7 @@ class _CommentsState extends State<Comments> {
           controller: _commentController,
           decoration: InputDecoration(
             hintText: "Add a comment...",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
             suffixIcon: ElevatedButton(
               onPressed: () {
                 final commentText = _commentController.text.trim();
@@ -122,10 +106,11 @@ class _CommentsState extends State<Comments> {
                   });
                 }
               },
-              child: Text("Submit"),
+              child: const Text("Submit"),
             ),
           ),
         ),
+        const SizedBox(height: 16),
         FutureBuilder<List<dynamic>>(
           future: commentsFuture,
           builder: (context, snapshot) {
@@ -138,15 +123,7 @@ class _CommentsState extends State<Comments> {
 
             final comments = snapshot.data!;
             log('All comments: ${comments.toString()}');
-            /*return FutureBuilder<String?>(
-              future: AuthStorage.getUserId(),
-              builder: (context, userIdSnapshot) {
-                if (userIdSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (userIdSnapshot.hasError) {
-                  return Center(child: Text('Error: ${userIdSnapshot.error}'));
-                }*/
+
             List<Map<String, dynamic>> filteredComments = comments
                 .where((comment) {
                   final String? commentPostId = comment['postId'];
@@ -155,30 +132,19 @@ class _CommentsState extends State<Comments> {
                 })
                 .cast<Map<String, dynamic>>()
                 .toList();
+
             log('Filtered comments: ${filteredComments.toString()}');
 
-            /*return ListView.builder(
-              itemCount: filteredComments.length,
-              itemBuilder: (context, index) {
-                return GFCard(
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: filteredComments.map((comment) {
-                      return ListTile(
-                        title: Text(comment['user'] ?? 'Unknown User'),
-                        subtitle: Text(comment['text'] ?? 'comments'),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
-            );*/
             return ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: filteredComments.length,
               itemBuilder: (context, index) {
                 final comment = filteredComments[index];
+                final commentId = comment['feedbackId'];
+                final isEditing = _isEditing[commentId] ?? false;
+                final TextEditingController editController =
+                    TextEditingController(text: comment['comment']);
 
                 return GFCard(
                   content: Column(
@@ -188,38 +154,82 @@ class _CommentsState extends State<Comments> {
                         children: [
                           Expanded(child: Avatar(data: comment, isPost: false)),
                           PopupMenuButton<String>(
-                            onSelected: (String value) {
+                            onSelected: (String value) async {
+                              log('value=$value');
                               if (value == 'edit') {
-                                log('value=$value');
-                                _showEditDialog(comment);
+                                setState(() {
+                                  _isEditing[commentId] = true;
+                                });
                               } else if (value == 'delete') {
-                                log('value=$value');
-                                _deleteComment(comment['feedbackId']);
+                                await _deleteComment(commentId);
                               }
                             },
                             itemBuilder: (BuildContext context) => const [
                               PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text('Delete'),
-                              ),
+                              PopupMenuItem(value: 'delete', child: Text('Delete')),
                             ],
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        comment['comment'] ?? 'Cannot fetch comment',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      isEditing
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextField(
+                                  controller: editController,
+                                  decoration: const InputDecoration(
+                                    hintText: "Edit comment",
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  maxLines: null,
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _isEditing[commentId] = false;
+                                        });
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        final updatedComment =
+                                            editController.text.trim();
+                                        if (updatedComment.isNotEmpty) {
+                                          log('Saving edited comment: $updatedComment');
+                                          await ApiconnectFeedbacks(
+                                            PostId: postId,
+                                            feedbackId: commentId,
+                                          ).editComment(updatedComment);
+
+                                          setState(() {
+                                            _isEditing[commentId] = false;
+                                            commentsFuture = api
+                                                .fetchFeedbacksByPostId(postId);
+                                          });
+                                        }
+                                      },
+                                      child: const Text("Save"),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          : Text(
+                              comment['comment'] ?? 'No comment',
+                              style: const TextStyle(fontSize: 14),
+                            ),
                     ],
                   ),
                 );
               },
             );
           },
-          //);
-          //},
         ),
       ],
     );

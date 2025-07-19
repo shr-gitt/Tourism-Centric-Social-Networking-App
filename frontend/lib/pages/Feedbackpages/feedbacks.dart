@@ -1,8 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/apiconnect_feedbacks.dart';
+import 'package:frontend/pages/Service/feedbacks_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
-import 'package:frontend/pages/Service/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 import 'package:frontend/pages/Postpages/fullpost.dart';
 import 'package:getwidget/getwidget.dart';
 
@@ -35,7 +35,7 @@ class _FeedbacksState extends State<Feedbacks> {
           return (f['postId'] == postId || f['PostId'] == postId) &&
               (f['userId'] == userId);
         }).toList();
-
+        if (!mounted) return feedbacks;
         setState(() {
           if (postFeedbacks.isNotEmpty) {
             final userFeedback = postFeedbacks[0];
@@ -57,6 +57,7 @@ class _FeedbacksState extends State<Feedbacks> {
   Future<void> edit(String state, String? uid, String? pid) async {
     final feedbacks = await feedbacksFuture;
 
+    log('For editting, postId is $pid and userId is $uid');
     final postFeedbacks = feedbacks
         .where((f) => (f['postId'] == pid && (f['userId'] == uid)))
         .toList();
