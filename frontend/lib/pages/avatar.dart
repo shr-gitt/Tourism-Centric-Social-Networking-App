@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/api_service_user.dart';
+import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Postpages/deletepost.dart';
 import 'package:frontend/pages/Postpages/editpost.dart';
@@ -28,6 +28,7 @@ class _AvatarState extends State<Avatar> {
     final userId = widget.data['userId'];
     final userData = await userapi.fetchUserData(userId);
     if (userData != null) {
+      if (!mounted) return;
       setState(() {
         user = userData;
       });
@@ -42,8 +43,13 @@ class _AvatarState extends State<Avatar> {
     return Row(
       children: [
         GFAvatar(
-          backgroundImage: AssetImage('assets/images/_MG_6890.jpeg'),
-          size: 40,
+          radius: isPost ? 25 : 15,
+          backgroundImage: user?['image'] != null
+              ? NetworkImage(user!['image'])
+              : null,
+          child: user?['image'] == null
+              ? Icon(Icons.person, size: isPost ? 30 : 20)
+              : null,
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -58,10 +64,11 @@ class _AvatarState extends State<Avatar> {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
-                user?['name'] ?? "No name",
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
+              if (isPost)
+                Text(
+                  user?['name'] ?? "No name",
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
             ],
           ),
         ),
