@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/map.dart';
@@ -5,22 +7,31 @@ import 'package:frontend/pages/Postpages/createpost.dart';
 import 'package:frontend/pages/notification.dart';
 import 'package:frontend/pages/profile.dart';
 
-
+// ignore: must_be_immutable
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  int currentIndex;
+  MainScreen({super.key, required this.currentIndex});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int currentIndex = 0;
   int index = 0;
+  late int currentIndex;
 
   List pages = [PostsPage(), Map(), Createpost(), Notify(), Profile()];
+  
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = widget.currentIndex; // Initialize from parent
+    log('In MainScreen, initial tab: $currentIndex');
+  }
 
   @override
   Widget build(BuildContext context) {
+    log('In mainscreen');
     return Scaffold(
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -38,10 +49,7 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.notification_add),
             label: 'Notification',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         backgroundColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
