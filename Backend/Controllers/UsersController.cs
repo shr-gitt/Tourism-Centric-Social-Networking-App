@@ -10,15 +10,13 @@ namespace Backend.Controllers;
 public class UsersController:ControllerBase
 {
     private readonly UserServices _userServices;
-    private readonly CreateUser _createService;
     private readonly DeleteUser _deleteService;
     private readonly EditUser _editService;
     private readonly SaveUser _saveService;
 
-    public UsersController(UserServices userServices, CreateUser createUser, DeleteUser deleteUser, EditUser editUser, SaveUser saveUser)
+    public UsersController(UserServices userServices, DeleteUser deleteUser, EditUser editUser, SaveUser saveUser)
     {
         _userServices = userServices;
-        _createService = createUser;
         _deleteService = deleteUser;
         _editService = editUser;
         _saveService = saveUser;
@@ -53,7 +51,7 @@ public class UsersController:ControllerBase
     }
         
         // user: api/users
-    [HttpPost("create")]
+    /*[HttpPost("create")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create([FromForm] CreateuserRequest request)
     {
@@ -69,11 +67,9 @@ public class UsersController:ControllerBase
         {
             CreatedAt = DateTime.Now,
         };
-
-        await _createService.CreateAsync(user);
-
+        
         return CreatedAtAction(nameof(GetById), new { id = user.UserId }, user);
-    }
+    }*/
         
     // PUT: api/users/{id}
     [HttpPost("update/{userid}")]

@@ -67,9 +67,9 @@ class UserService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final userId = data['UserId'];
+      log('data $data');
+      final userId = data['userId'];
       log('User login successfully.');
-      log('User ID: $userId');
       return userId;
     } else {
       log('Failed to login user: ${response.body}-${response.statusCode}');

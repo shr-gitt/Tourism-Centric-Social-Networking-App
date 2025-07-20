@@ -66,11 +66,13 @@ namespace Backend.Controllers
         public async Task<IActionResult> Create([FromForm] CreatePostRequest request)
         {
             var imagePaths = new List<string>();
-
-            foreach (var file in request.Images)
+            if (request.Images != null)
             {
-                var imagePath = new UploadImage().Upload(file);
-                imagePaths.Add(imagePath);
+                foreach (var file in request.Images)
+                {
+                    var imagePath = new UploadImage().Upload(file);
+                    imagePaths.Add(imagePath);
+                }
             }
 
             var post = new Post
@@ -85,7 +87,7 @@ namespace Backend.Controllers
 
             await _createService.CreateAsync(post);
 
-            return CreatedAtAction(nameof(GetById), new { id = post.PostId }, post);
+            return CreatedAtAction(nameof(GetById), new { postid = post.PostId }, post);
         }
         
         // PUT: api/posts/{id}
