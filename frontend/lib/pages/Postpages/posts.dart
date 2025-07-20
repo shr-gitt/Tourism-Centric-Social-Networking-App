@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:developer';
-import 'package:frontend/pages/Service/api_service.dart';
+import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Postpages/displaymultiplepost.dart';
 import 'package:frontend/pages/search.dart';
@@ -36,12 +36,10 @@ class _PostsPageState extends State<PostsPage> {
                 IconButton(
                   icon: Icon(Icons.search),
                   onPressed: () {
-                    Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Search(),
-                  ),
-                );
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => Search()),
+                    );
                   },
                 ),
               ],
@@ -80,7 +78,10 @@ class _PostsPageState extends State<PostsPage> {
               return ListView.builder(
                 itemCount: filteredPosts.length,
                 itemBuilder: (context, index) {
-                  return Displaymultiplepost(post: filteredPosts[index]);
+                  return Displaymultiplepost(
+                    post: filteredPosts[index],
+                    state: widget.state,
+                  );
                 },
               );
             },

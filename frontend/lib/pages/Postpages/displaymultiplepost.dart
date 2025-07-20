@@ -2,16 +2,18 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
-import 'package:frontend/pages/Service/api_service_user.dart';
+import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Postpages/fullpost.dart';
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
-import 'package:frontend/pages/Service/api_service_feedbacks.dart';
+import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 
 class Displaymultiplepost extends StatefulWidget {
   //final String? id;
   final Map<String, dynamic> post;
-  const Displaymultiplepost({super.key, required this.post});
+    final bool state;
+
+  const Displaymultiplepost({super.key, required this.post, required this.state});
 
   @override
   State<Displaymultiplepost> createState() => _DisplaymultiplepostState();
@@ -34,6 +36,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
     final userId = widget.post['userId'];
     final userData = await userapi.fetchUserData(userId); // cleaner
     if (userData != null) {
+      if (!mounted) return;
       setState(() {
         user = userData;
       });
@@ -46,10 +49,11 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
     log('Full post object: $post');
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => FullPostPage(postId: post['postId'],scrollToComment: false,),
+            builder: (context) =>
+                FullPostPage(postId: post['postId'], scrollToComment: false,state: widget.state,),
           ),
         );
       },
@@ -80,11 +84,14 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              FullPostPage(postId: post['postId'],scrollToComment: false,),
+                          builder: (context) => FullPostPage(
+                            postId: post['postId'],
+                            scrollToComment: false,
+                            state:widget.state,
+                          ),
                         ),
                       );
                     },

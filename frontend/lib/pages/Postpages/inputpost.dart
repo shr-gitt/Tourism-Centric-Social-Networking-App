@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/apiconnect.dart';
+import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/mainscreen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -104,7 +105,10 @@ class _InputpostState extends State<Inputpost> {
           ),
           TextButton(
             child: const Text('Submit', style: TextStyle(color: Colors.black)),
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
+            ),
           ),
         ],
       ),
@@ -115,7 +119,7 @@ class _InputpostState extends State<Inputpost> {
       if (context.mounted) {
         Apiconnect(
           id: widget.id,
-          userId:uid,
+          userId: uid,
           isEditing: widget.isEditing,
           titleController: widget.titleController,
           locationController: widget.locationController,

@@ -219,12 +219,13 @@ class _FeedbacksState extends State<Feedbacks> {
                       if (widget.onCommentPressed != null) {
                         widget.onCommentPressed!();
                       } else {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => FullPostPage(
                               postId: post['postId'],
                               scrollToComment: true,
+                              state: false,
                             ),
                           ),
                         );

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/api_service.dart';
-import 'package:frontend/pages/Service/api_service_user.dart';
+import 'package:frontend/pages/Service/posts_apiservice.dart';
+import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbackscomments.dart';
+import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
 import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
@@ -10,18 +11,19 @@ import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
 class FullPostPage extends StatefulWidget {
   final String? postId;
   final bool scrollToComment;
+  final bool state;
 
   const FullPostPage({
     super.key,
     required this.postId,
     required this.scrollToComment,
+    required this.state,
   });
   @override
   State<FullPostPage> createState() => _FullPostPageState();
 }
 
 class _FullPostPageState extends State<FullPostPage> {
-  //final ScrollController _scrollController = ScrollController();
   final GlobalKey _commentKey = GlobalKey();
   final ApiService api = ApiService();
 
@@ -48,6 +50,7 @@ class _FullPostPageState extends State<FullPostPage> {
             curve: Curves.easeInOut,
           );
         }
+        if (!mounted) return;
         FocusScope.of(context).requestFocus(_commentFocusNode);
       }
     });
@@ -74,7 +77,6 @@ class _FullPostPageState extends State<FullPostPage> {
 
   void focusCommentInput() {
     FocusScope.of(context).requestFocus(_commentFocusNode);
-    // Optionally scroll to comment key here, too
     if (_commentKey.currentContext != null) {
       Scrollable.ensureVisible(
         _commentKey.currentContext!,
@@ -101,7 +103,19 @@ class _FullPostPageState extends State<FullPostPage> {
 
         final post = snapshot.data!;
         return Scaffold(
-          appBar: AppBar(title: Text(post['title'] ?? 'Post Details')),
+          appBar: AppBar(
+            title: Text(post['title'] ?? 'Post Details'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      MainScreen(currentIndex: widget.state ? 4 : 0),
+                ),
+              ),
+            ),
+          ),
           body: ListView(
             padding: const EdgeInsets.all(5),
             children: [
