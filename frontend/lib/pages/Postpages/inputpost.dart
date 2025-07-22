@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
@@ -31,6 +33,7 @@ class _InputpostState extends State<Inputpost> {
   final ImagePicker _picker = ImagePicker();
   List<XFile> pickedImage = [];
   late List<String> existingImages;
+  bool isSubmitting = false; // To prevent multiple submits
 
   @override
   void initState() {
@@ -101,31 +104,79 @@ class _InputpostState extends State<Inputpost> {
         actions: [
           TextButton(
             child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(
+              context,
+            ).pop(false), // Dismiss dialog and return false
           ),
           TextButton(
             child: const Text('Submit', style: TextStyle(color: Colors.black)),
-            onPressed: () => Navigator.pushReplacement(
+            onPressed: () => Navigator.of(
               context,
-              MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
-            ),
+            ).pop(true), // Dismiss dialog and return true
           ),
         ],
       ),
     );
+
     String? uid = await AuthStorage.getUserId();
 
+    // If confirmed (i.e., user pressed 'Submit')
     if (confirm == true) {
-      if (context.mounted) {
+      if (mounted && !isSubmitting) {
+        setState(() {
+          isSubmitting = true; // Prevent further submissions
+        });
+
+        log('in inputpost, title:${widget.titleController.text}');
+
+        // Show a loading indicator while posting
+        showDialog(
+          context: context,
+          barrierDismissible:
+              false, // Prevent closing the dialog by tapping outside
+          builder: (context) =>
+              const Center(child: CircularProgressIndicator()),
+        );
+
+        // Call the submitPost function, and handle navigation after submission
+        // After successful post submission, replace the current route and remove previous ones
         Apiconnect(
-          id: widget.id,
-          userId: uid,
-          isEditing: widget.isEditing,
-          titleController: widget.titleController,
-          locationController: widget.locationController,
-          contentController: widget.contentController,
-          pickedImage: pickedImage,
-        ).submitPost(context);
+              id: widget.id,
+              userId: uid,
+              isEditing: widget.isEditing,
+              titleController: widget.titleController,
+              locationController: widget.locationController,
+              contentController: widget.contentController,
+              pickedImage: pickedImage,
+            )
+            .submitPost(context)
+            .then((_) {
+              // Ensure that navigation occurs after the current frame is rendered
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                Navigator.pop(context); // Close the loading indicator
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (_) => MainScreen(currentIndex: 0),
+                  ),
+                  (route) =>
+                      false, // Remove all routes, effectively clearing the stack
+                );
+              });
+            })
+            .catchError((e) {
+              Navigator.pop(
+                context,
+              ); // Close the loading indicator in case of an error
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error: $e')));
+            })
+            .whenComplete(() {
+              setState(() {
+                isSubmitting =
+                    false; // Reset the submission state after completion
+              });
+            });
       }
     }
   }
@@ -207,7 +258,11 @@ class _InputpostState extends State<Inputpost> {
               Center(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                  onPressed: () => _confirm(context),
+                  onPressed: isSubmitting
+                      ? null
+                      : () => _confirm(
+                          context,
+                        ), // Disable button during submission
                   child: const Text('Submit'),
                 ),
               ),
