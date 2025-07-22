@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/mainscreen.dart';
-import 'dart:io'; // Required for HttpOverrides
+import 'dart:io'; 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized(); 
+
   // Apply the custom HttpOverrides to bypass SSL certificate verification
   HttpOverrides.global = MyHttpOverrides();
 
@@ -17,7 +19,8 @@ class MyHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     var client = super.createHttpClient(context);
     // Allow all SSL certificates
-    client.badCertificateCallback = (X509Certificate cert, String host, int port) => true; 
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
     return client;
   }
 }
@@ -60,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (userId != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => MainScreen(currentIndex:0)),
+        MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
       );
     } else {
       Navigator.pushReplacement(
