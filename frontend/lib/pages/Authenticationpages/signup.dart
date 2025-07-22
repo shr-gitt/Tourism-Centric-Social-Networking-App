@@ -71,7 +71,20 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GFAppBar(title: const Text("Sign Up"), centerTitle: true),
+      appBar: GFAppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  Status(title: 'Tourism-Centric Social Networking App'),
+            ),
+          ),
+        ),
+        title: const Text("Sign Up"),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Card(

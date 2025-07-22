@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
@@ -62,6 +63,16 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GFAppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  Status(title: 'Tourism-Centric Social Networking App'),
+            ),
+          ),
+        ),
         title: const Text('Login'),
         centerTitle: true,
         backgroundColor: Colors.grey,

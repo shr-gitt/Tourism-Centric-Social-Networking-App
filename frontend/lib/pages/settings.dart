@@ -32,15 +32,13 @@ class _SettingsState extends State<Settings> {
     log('Settings page reached');
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 4)),
-            ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 4)),
           ),
-        ],
+        ),
         title: const Text('Settings'),
       ),
       body: Center(
