@@ -3,9 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/mainscreen.dart';
+import 'dart:io'; // Required for HttpOverrides
 
 void main() {
+  // Apply the custom HttpOverrides to bypass SSL certificate verification
+  HttpOverrides.global = MyHttpOverrides();
+
   runApp(const MyApp());
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    var client = super.createHttpClient(context);
+    // Allow all SSL certificates
+    client.badCertificateCallback = (X509Certificate cert, String host, int port) => true; 
+    return client;
+  }
 }
 
 class MyApp extends StatelessWidget {

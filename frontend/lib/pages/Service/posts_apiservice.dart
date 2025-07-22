@@ -1,17 +1,18 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'dart:developer';
+import 'package:frontend/pages/Service/constants.dart';
+import 'package:http/http.dart' as http;
 
 class ApiService {
   // Use your computer's local network IP address instead of 'localhost'
-  //static const String baseUrl = 'http://192.168.1.246:5259/api';
-  static const String baseUrl = 'http://localhost:5259/api';
+  //static const String posturl = 'http://192.168.1.246:5259/api';
+  static const String posturl = Constants.posturl;
   String? id;
 
   Future<bool> createPost(Map<String, dynamic> postData) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/posts'),
+        Uri.parse('posturl'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(postData),
       );
@@ -26,7 +27,7 @@ class ApiService {
   }
 
   Future<List<dynamic>> fetchPosts() async {
-    final response = await http.get(Uri.parse('$baseUrl/posts'));
+    final response = await http.get(Uri.parse(posturl));
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -35,7 +36,7 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> fetchPostById(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/posts/$id'));
+    final response = await http.get(Uri.parse('$posturl/$id'));
     if (response.statusCode >= 200 && response.statusCode<300) {
       return jsonDecode(response.body);
     } else {
@@ -46,7 +47,7 @@ class ApiService {
 
   Future<bool> deletePost(String id) async {
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/posts/$id'));
+      final response = await http.delete(Uri.parse('$posturl/$id'));
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       } else {

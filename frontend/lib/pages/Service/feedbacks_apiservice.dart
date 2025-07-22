@@ -2,10 +2,11 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'package:frontend/pages/Service/constants.dart';
 import 'package:http/http.dart' as http;
 
 class FeedbackService {
-  static const String baseUrl = 'http://localhost:5259/api/feedbacks';
+  static const String feedbackurl = Constants.feedbackurl;
 
   Map<String, String> get _headers => {'Content-Type': 'application/json'};
 
@@ -27,7 +28,7 @@ class FeedbackService {
 
     try {
       final response = await http.post(
-        Uri.parse(baseUrl),
+        Uri.parse(feedbackurl),
         headers: _headers,
         body: jsonEncode(body),
       );
@@ -51,7 +52,7 @@ class FeedbackService {
 
   /// Fetch all feedbacks from the backend
   Future<List<dynamic>> fetchAllFeedbacks() async {
-    final response = await http.get(Uri.parse(baseUrl), headers: _headers);
+    final response = await http.get(Uri.parse(feedbackurl), headers: _headers);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
@@ -62,7 +63,7 @@ class FeedbackService {
   /// Fetch a specific feedback by its id
   Future<Map<String, dynamic>> fetchFeedbackById(String feedbackid) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/$feedbackid'),
+      Uri.parse('$feedbackurl/$feedbackid'),
       headers: _headers,
     );
     if (response.statusCode == 200) {
@@ -75,7 +76,7 @@ class FeedbackService {
   /// Fetch all feedbacks for a specific postId
   Future<List<dynamic>> fetchFeedbacksByPostId(String postId) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/post/$postId'),
+      Uri.parse('$feedbackurl/post/$postId'),
       headers: _headers,
     );
     if (response.statusCode == 200) {
@@ -97,7 +98,7 @@ class FeedbackService {
       return false;
     }
 
-    final url = Uri.parse('$baseUrl/$feedbackId');
+    final url = Uri.parse('$feedbackurl/$feedbackId');
 
     final body = <String, dynamic>{};
     if (like != null) body['like'] = like;
@@ -124,7 +125,7 @@ class FeedbackService {
   /// Delete feedback by feedbackId
   Future<bool> deleteFeedbackById(String feedbackId) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/$feedbackId'),
+      Uri.parse('$feedbackurl/$feedbackId'),
       headers: _headers,
     );
 

@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:frontend/pages/Service/constants.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
-  static const String baseUrl = 'http://localhost:5259/api/users';
-  static const String url = 'http://localhost:5259/api/auth';
+  static const String userurl= Constants.userurl;
+  static const String authurl= Constants.authurl;
 
   // Add JWT if needed from secure storage
   Future<Map<String, String>> _getHeaders() async {
@@ -18,7 +19,7 @@ class UserService {
   Future<Map<String, dynamic>> fetchUserById(String userId) async {
     final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('$baseUrl/$userId'),
+      Uri.parse('$userurl/$userId'),
       headers: headers,
     );
 
@@ -43,7 +44,7 @@ class UserService {
   Future<bool> registerUser(Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('$url/register'),
+      Uri.parse('$authurl/register'),
       headers: headers,
       body: jsonEncode(data),
     );
@@ -60,7 +61,7 @@ class UserService {
   Future loginUser(Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('$url/login'),
+      Uri.parse('$authurl/login'),
       headers: headers,
       body: jsonEncode(data),
     );
@@ -83,7 +84,7 @@ class UserService {
   ) async {
     final headers = await _getHeaders();
     final response = await http.put(
-      Uri.parse('$baseUrl/$userId'),
+      Uri.parse('$userurl/$userId'),
       headers: headers,
       body: jsonEncode(updatedData),
     );
@@ -100,7 +101,7 @@ class UserService {
   Future<bool> deleteUser(String userId) async {
     final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('$baseUrl/$userId'),
+      Uri.parse('$userurl/$userId'),
       headers: headers,
     );
 
