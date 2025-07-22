@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:getwidget/getwidget.dart';
 
@@ -51,7 +52,13 @@ class _SignupPageState extends State<SignupPage> {
         context,
         toastPosition: GFToastPosition.BOTTOM,
       );
-      Navigator.pop(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Status(title: 'Tourism Centric Social Networking App'),
+        ),
+      );
     } else {
       GFToast.showToast(
         'Sign up failed. Please try again.',
