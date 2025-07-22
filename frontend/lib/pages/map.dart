@@ -1,50 +1,88 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
 class Map extends StatefulWidget {
   const Map({super.key});
 
   @override
-  State<Map> createState() => MapState();
+  State<Map> createState() => _MapState();
 }
 
-class MapState extends State<Map> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
+class _MapState extends State<Map> {
+  late MapController controller;
+  bool isMapReady = false;
 
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
-  );
+  @override
+  void initState() {
+    super.initState();
+    controller = MapController.withPosition(
+      initPosition: GeoPoint(
+        latitude: 27.7172,
+        longitude: 85.3240,
+      ), // Kathmandu
+    );
+  }
 
-  static const CameraPosition _kLake = CameraPosition(
-    bearing: 192.8334901395799,
-    target: LatLng(37.43296265331129, -122.08832357078792),
-    tilt: 59.440717697143555,
-    zoom: 19.151926040649414,
-  );
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
+      appBar: AppBar(title: const Text("Map")),
+      body: OSMFlutter(
+        controller: controller,
+        osmOption: OSMOption(
+          userTrackingOption: const UserTrackingOption(
+            enableTracking: false,
+            unFollowUser: false,
+          ),
+          zoomOption: const ZoomOption(
+            initZoom: 12,
+            minZoomLevel: 3,
+            maxZoomLevel: 19,
+            stepZoom: 1.0,
+          ),
+          roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
+        ),
+        mapIsLoading: const Center(
+          child: CircularProgressIndicator(),
+        ), 
+        onMapIsReady: (ready) {
+          if (ready) {
+            setState(() {
+              isMapReady = true;
+            });
+          }
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _goToTheLake,
-        label: const Text('To the lake!'),
-        icon: const Icon(Icons.directions_boat),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "zoomIn",
+            onPressed: () {
+              if (isMapReady) {
+                controller.zoomIn();
+              }
+            },
+            child: const Icon(Icons.zoom_in),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: "zoomOut",
+            onPressed: () {
+              if (isMapReady) {
+                controller.zoomOut();
+              }
+            },
+            child: const Icon(Icons.zoom_out),
+          ),
+        ],
       ),
     );
-  }
-
-  Future<void> _goToTheLake() async {
-    final GoogleMapController controller = await _controller.future;
-    await controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }
 }

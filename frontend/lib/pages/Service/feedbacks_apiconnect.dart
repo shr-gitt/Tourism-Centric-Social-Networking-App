@@ -35,7 +35,7 @@ class ApiconnectFeedbacks {
       log("Failed to submit feedback.");
     }
 
-    return success; // <---- Return success here
+    return success; 
   }
 
   Future<bool> addLike() async {
