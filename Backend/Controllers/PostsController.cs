@@ -84,6 +84,11 @@ namespace Backend.Controllers
                 Created = DateTime.Now,
                 Image = imagePaths
             };
+            
+            if (string.IsNullOrEmpty(post.Location))
+            {
+                post.Location = "Nepal";
+            }
 
             await _createService.CreateAsync(post);
 
