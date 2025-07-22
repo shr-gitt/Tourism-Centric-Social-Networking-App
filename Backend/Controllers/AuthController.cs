@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Models;
 using Backend.Services;
+using Backend.Services.userPostService;
 
 namespace Backend.Controllers;
 
@@ -26,6 +27,7 @@ public class AuthController : ControllerBase
         public string Email { get; set; }
         [Required, MinLength(6)]
         public string Password { get; set; }
+        public IFormFile Image { get; set; }
     }
     
     public class LoginRequest
@@ -36,17 +38,25 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Register([FromForm] RegisterRequest request)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        string imagePath=null;
+        if (request.Image != null)
+        {
+            imagePath=new UploadImage().Upload(request.Image);
+        }
+        
         var user = new User
         {
             Email = request.Email,
             Password = request.Password,
             UserName = request.UserName,
             Name = request.Name,
+            Image=imagePath,
             CreatedAt = DateTime.UtcNow
         };
 

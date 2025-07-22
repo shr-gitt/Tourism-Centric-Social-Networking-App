@@ -49,7 +49,7 @@ class _ProfileState extends State<Profile> {
                 CircleAvatar(
                   radius: 40,
                   backgroundImage: user?['image'] != null
-                      ? NetworkImage(user!['image'])
+                      ? NetworkImage('https://localhost:5259${user!['image']}')
                       : null,
                   child: user?['image'] == null
                       ? const Icon(Icons.person, size: 40)

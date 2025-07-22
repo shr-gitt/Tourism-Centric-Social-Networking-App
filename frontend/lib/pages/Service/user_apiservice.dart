@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:frontend/pages/Service/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class UserService {
-  static const String userurl= Constants.userurl;
-  static const String authurl= Constants.authurl;
+  static const String userurl = Constants.userurl;
+  static const String authurl = Constants.authurl;
 
   // Add JWT if needed from secure storage
   Future<Map<String, String>> _getHeaders() async {
@@ -14,6 +16,45 @@ class UserService {
       'Content-Type': 'application/json',
       // 'Authorization': 'Bearer $token', // uncomment if using token
     };
+  }
+
+  Future<bool> registerUser(Map<String, dynamic> data, File? image) async {
+    Dio dio = Dio();
+
+    FormData formData = FormData.fromMap({
+      'UserName': data['UserName'],
+      'Name': data['Name'],
+      'Email': data['Email'],
+      'Password': data['Password'],
+    });
+
+    if (image != null) {
+      formData.files.add(MapEntry(
+        'image', // Field name expected by the server
+        await MultipartFile.fromFile(image.path, filename: 'profile.jpg'),
+      ));
+    }
+
+    try {
+      final response = await dio.post(
+        '$authurl/register',
+        data: formData,
+        options: Options(
+          headers: await _getHeaders(),
+        ),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        log('User registered successfully.');
+        return true;
+      } else {
+        log('Failed to register user: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      log("Error registering user: $e");
+      return false;
+    }
   }
 
   Future<Map<String, dynamic>> fetchUserById(String userId) async {
@@ -38,23 +79,6 @@ class UserService {
     } catch (e) {
       log('Error fetching user: $e');
       return null;
-    }
-  }
-
-  Future<bool> registerUser(Map<String, dynamic> data) async {
-    final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$authurl/register'),
-      headers: headers,
-      body: jsonEncode(data),
-    );
-
-    if (response.statusCode == 204 || response.statusCode == 200) {
-      log('User registered successfully.');
-      return true;
-    } else {
-      log('Failed to register user: ${response.body}-${response.statusCode}');
-      return false;
     }
   }
 

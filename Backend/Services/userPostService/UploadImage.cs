@@ -5,7 +5,7 @@ public class UploadImage
     public string Upload(IFormFile file)
     {
         List<string> validExtensions = new List<string>() { ".jpg", ".jpeg", ".png", ".gif" };
-        string extension = Path.GetExtension(file.FileName);
+        string extension = Path.GetExtension(file.FileName).ToLower();
         if (!validExtensions.Contains(extension))
         {
             return $"Extension is not valid({string.Join(',', validExtensions)})";
@@ -13,6 +13,8 @@ public class UploadImage
 
         string fileName = Guid.NewGuid().ToString() + extension;
         string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+        //string path = Path.Combine("wwwroot", "Images");
+
         if (!Directory.Exists(path))
         {
             Directory.CreateDirectory(path);
@@ -24,6 +26,6 @@ public class UploadImage
             file.CopyTo(fileStream);
         }
 
-        return "/wwwroot/Images/" + fileName; 
+        return "/Images/" + fileName; 
     }
 }

@@ -1,9 +1,10 @@
 import 'dart:developer';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
-import 'package:getwidget/getwidget.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -18,6 +19,24 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Add Image Picker related variables
+  final ImagePicker _picker = ImagePicker();
+  File? _image;
+
+  // Pick an image
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  // Submit the form
   void _submitForm() async {
     final username = _usernameController.text.trim();
     final fullname = _fullnameController.text.trim();
@@ -36,15 +55,23 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
+    // Prepare the data for submission
     final Map<String, dynamic> data = {
       "UserName": username,
       "Name": fullname,
       "Email": email,
       "Password": password,
     };
+
+    // Add the image to the data (if available)
+    //if (_image != null) {
+      //data['image'] = _image; // This will be handled in the API call
+    //}
+
     log('Email:$email and Password:$password');
 
-    final success = await UserService().registerUser(data);
+    final success = await UserService().registerUser(data,_image);
+
     if (!mounted) return;
     if (success) {
       GFToast.showToast(
@@ -96,6 +123,7 @@ class _SignupPageState extends State<SignupPage> {
                 const Text("Create Account", style: TextStyle(fontSize: 22)),
                 const SizedBox(height: 20),
 
+                // Username Field
                 GFTextField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
@@ -105,6 +133,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Full Name Field
                 GFTextField(
                   controller: _fullnameController,
                   decoration: const InputDecoration(
@@ -114,6 +143,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Email Field
                 GFTextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -124,6 +154,7 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Password Field
                 GFTextField(
                   controller: _passwordController,
                   obscureText: true,
@@ -134,6 +165,26 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 24),
 
+                // Image Picker Button
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: const Text("Pick Profile Image"),
+                ),
+                const SizedBox(height: 10),
+
+                // Display the picked image
+                _image != null
+                    ? Image.file(
+                        _image!,
+                        height: 150,
+                        width: 150,
+                        fit: BoxFit.cover,
+                      )
+                    : const SizedBox.shrink(),
+
+                const SizedBox(height: 24),
+
+                // Sign Up Button
                 GFButton(
                   onPressed: _submitForm,
                   text: "Sign Up",
