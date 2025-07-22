@@ -3,26 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Authenticationpages/signup.dart';
-import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/mainscreen.dart';
-
-/*class Status extends StatelessWidget {
-  const Status({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Tourism-Centric Social Networking App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow),
-      ),
-      home: const Status(
-        title: 'Tourism-Centric Social Networking App Home Page',
-      ),
-    );
-  }
-}*/
 
 class Status extends StatefulWidget {
   const Status({super.key, required this.title});
