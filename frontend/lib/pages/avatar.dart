@@ -3,7 +3,6 @@ import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Postpages/deletepost.dart';
 import 'package:frontend/pages/Postpages/editpost.dart';
-import 'package:path/path.dart';
 
 class Avatar extends StatefulWidget {
   final Map<String, dynamic> data;

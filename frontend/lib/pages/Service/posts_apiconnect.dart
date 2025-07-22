@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Service/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart';
@@ -25,21 +26,21 @@ class Apiconnect {
   });
 
   Future<void> submitPost(BuildContext context) async {
+    String posturl=Constants.posturl;
     try {
       final uri = isEditing
-          ? Uri.parse('http://localhost:5259/api/posts/update/${id!}')
-          : Uri.parse('http://localhost:5259/api/posts/create');
+          ? Uri.parse('$posturl/update/${id!}')
+          : Uri.parse('$posturl/create');
 
       final method = 'POST';
 
       final request = http.MultipartRequest(method, uri);
 
-      // Add text fields
       request.fields['UserId'] = userId ?? '';
       request.fields['title'] = titleController.text;
       request.fields['location'] = locationController.text;
       request.fields['content'] = contentController.text;
-
+      log('post title:${request.fields['title']}');
       if (pickedImage != null && pickedImage!.isNotEmpty) {
         for (final image in pickedImage!) {
           final fileName = basename(image.path);
@@ -65,7 +66,7 @@ class Apiconnect {
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        log('Response body: ${response.body}'); 
+        log('Response body: ${response.body}');
         throw Exception(
           '${isEditing ? 'Update' : 'Creation'} failed: ${response.body}',
         );
