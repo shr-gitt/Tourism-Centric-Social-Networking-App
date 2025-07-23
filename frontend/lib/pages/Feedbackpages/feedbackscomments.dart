@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/feedbacks_apiconnect.dart';
 import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
-import 'package:getwidget/components/card/gf_card.dart';
 import 'package:getwidget/getwidget.dart';
 
 class Comments extends StatefulWidget {
@@ -97,28 +96,42 @@ class _CommentsState extends State<Comments> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          minLines: 1,
-          maxLines: 10,
-          focusNode: widget.focusNode,
-          controller: _commentController,
-          decoration: InputDecoration(
-            hintText: "Add a comment...",
-            border: const OutlineInputBorder(),
-            suffixIcon: ElevatedButton(
-              onPressed: () {
-                final commentText = _commentController.text.trim();
-                if (commentText.isNotEmpty) {
-                  sendComment(commentText);
-                  _commentController.clear();
 
-                  setState(() {
-                    commentsFuture = api.fetchAllFeedbacks();
-                  });
-                }
-              },
-              child: const Text("Submit"),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: GFTextField(
+            minLines: 1,
+            maxLines: 10,
+            focusNode: widget.focusNode,
+            controller: _commentController,
+            decoration: InputDecoration(
+              hintText: "Add a comment...",
+              border: const OutlineInputBorder(),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    final commentText = _commentController.text.trim();
+                    if (commentText.isNotEmpty) {
+                      sendComment(commentText);
+                      _commentController.clear();
+
+                      setState(() {
+                        commentsFuture = api.fetchAllFeedbacks();
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size(48, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                  child: Icon(Icons.send),
+                ),
+              ),
             ),
           ),
         ),

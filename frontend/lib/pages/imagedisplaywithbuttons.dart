@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ImageDisplayWithButtons extends StatefulWidget {

@@ -3,4 +3,4 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
-Backend/wwwroot/Images/
+wwwroot/Images/

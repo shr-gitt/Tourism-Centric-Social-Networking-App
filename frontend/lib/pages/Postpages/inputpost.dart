@@ -129,7 +129,7 @@ class _InputpostState extends State<Inputpost> {
 
         log('in inputpost, title:${widget.titleController.text}');
 
-        // Show a loading indicator while posting
+        if (!context.mounted) return;
         showDialog(
           context: context,
           barrierDismissible:
@@ -164,6 +164,7 @@ class _InputpostState extends State<Inputpost> {
               });
             })
             .catchError((e) {
+              if (!context.mounted) return;
               Navigator.pop(
                 context,
               ); // Close the loading indicator in case of an error
