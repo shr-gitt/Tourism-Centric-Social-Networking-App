@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/feedbacks_apiconnect.dart';
 import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
@@ -96,7 +97,6 @@ class _CommentsState extends State<Comments> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
@@ -111,15 +111,23 @@ class _CommentsState extends State<Comments> {
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: ElevatedButton(
-                  onPressed: () {
-                    final commentText = _commentController.text.trim();
-                    if (commentText.isNotEmpty) {
-                      sendComment(commentText);
-                      _commentController.clear();
+                  onPressed: () async {
+                    String? uid = await AuthStorage.getUserId();
+                    if (uid != null) {
+                      final commentText = _commentController.text.trim();
+                      if (commentText.isNotEmpty) {
+                        sendComment(commentText);
+                        _commentController.clear();
 
-                      setState(() {
-                        commentsFuture = api.fetchAllFeedbacks();
-                      });
+                        setState(() {
+                          commentsFuture = api.fetchAllFeedbacks();
+                        });
+                      }
+                    } else {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Login to interact")),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -135,7 +143,7 @@ class _CommentsState extends State<Comments> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        //const SizedBox(height: 10),
         FutureBuilder<List<dynamic>>(
           future: commentsFuture,
           builder: (context, snapshot) {

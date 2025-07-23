@@ -1,23 +1,30 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Authenticationpages/signup.dart';
 import 'package:frontend/pages/mainscreen.dart';
 
-class Status extends StatefulWidget {
-  const Status({super.key, required this.title});
-  final String title;
+class Guest extends StatefulWidget {
+  const Guest({super.key});
 
   @override
-  State<Status> createState() => _StatusState();
+  State<Guest> createState() => _GuestState();
 }
 
-class _StatusState extends State<Status> {
+class _GuestState extends State<Guest> {
   @override
   Widget build(BuildContext context) {
-    log('In status page');
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.grey, title: Text(widget.title)),
+      appBar: AppBar(
+        backgroundColor: Colors.grey,
+        title: Text('Tourism-Centric Social Networking App'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -37,19 +44,6 @@ class _StatusState extends State<Status> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
-            ),
-            ElevatedButton(
-              child: Text('Use as Guest User'),
-              onPressed: () async {
-                log('Guest');
-                if (!context.mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MainScreen(currentIndex: 0),
-                  ),
                 );
               },
             ),

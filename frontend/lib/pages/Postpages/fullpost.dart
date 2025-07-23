@@ -117,7 +117,7 @@ class _FullPostPageState extends State<FullPostPage> {
             ),
           ),
           body: ListView(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(1),
             children: [
               GFCard(
                 boxFit: BoxFit.cover,
@@ -158,17 +158,17 @@ class _FullPostPageState extends State<FullPostPage> {
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 2),
 
               Feedbacks(post: post, onCommentPressed: focusCommentInput),
-              const SizedBox(height: 10),
+              const SizedBox(height: 1),
 
               Column(
                 key: _commentKey,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Comments",
+                    "   Comments",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Comments(post: post, focusNode: _commentFocusNode),

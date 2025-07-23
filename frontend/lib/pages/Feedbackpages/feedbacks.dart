@@ -145,7 +145,7 @@ class _FeedbacksState extends State<Feedbacks> {
 
           int likeCount = post['feedback']?['likeCount'] ?? 0;
           int dislikeCount = post['feedback']?['dislikeCount'] ?? 0;*/
-          
+
           int commentCount = post['feedback']?['commentCount'] ?? 0;
           return GFButtonBar(
             children: [
@@ -157,50 +157,59 @@ class _FeedbacksState extends State<Feedbacks> {
                       String? uid = await AuthStorage.getUserId();
                       log('post:$post');
                       log('postid:$postId');
-                      if (_isLiked) {
-                        setState(() {
-                          _isLiked = false;
-                          likeCount--;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        edit('remove', uid, postId);
-                      } else if (!_isLiked && _isDisLiked) {
-                        setState(() {
-                          _isLiked = true;
-                          _isDisLiked = false;
-                          likeCount++;
-                          dislikeCount--;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        edit('like', uid, postId);
-                      } else {
-                        setState(() {
-                          _isLiked = true;
-                          likeCount++;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        try {
-                          final success = await ApiconnectFeedbacks(
-                            UserId: uid,
-                            PostId: postId,
-                          ).addLike();
-                          if (success) {
-                            log('Like added');
-                            final updatedFeedbacks = await api
-                                .fetchAllFeedbacks();
-                            setState(() {
-                              feedbacksFuture = Future.value(updatedFeedbacks);
-                            });
+                      if (uid != null) {
+                        if (_isLiked) {
+                          setState(() {
+                            _isLiked = false;
+                            likeCount--;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          edit('remove', uid, postId);
+                        } else if (!_isLiked && _isDisLiked) {
+                          setState(() {
+                            _isLiked = true;
+                            _isDisLiked = false;
+                            likeCount++;
+                            dislikeCount--;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          edit('like', uid, postId);
+                        } else {
+                          setState(() {
+                            _isLiked = true;
+                            likeCount++;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          try {
+                            final success = await ApiconnectFeedbacks(
+                              UserId: uid,
+                              PostId: postId,
+                            ).addLike();
+                            if (success) {
+                              log('Like added');
+                              final updatedFeedbacks = await api
+                                  .fetchAllFeedbacks();
+                              setState(() {
+                                feedbacksFuture = Future.value(
+                                  updatedFeedbacks,
+                                );
+                              });
+                            }
+                          } catch (e) {
+                            log('Could not add like');
                           }
-                        } catch (e) {
-                          log('Could not add like');
                         }
+                      } else {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Login to interact")),
+                        );
                       }
                     },
                     text: "$likeCount",
@@ -217,53 +226,62 @@ class _FeedbacksState extends State<Feedbacks> {
                   GFButton(
                     onPressed: () async {
                       String? uid = await AuthStorage.getUserId();
-                      if (_isDisLiked) {
-                        setState(() {
-                          _isDisLiked = false;
-                          dislikeCount--;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        edit('remove', uid, postId);
-                      } else if (!_isDisLiked && _isLiked) {
-                        setState(() {
-                          _isDisLiked = true;
-                          _isLiked = false;
-                          dislikeCount++;
-                          likeCount--;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        edit('dislike', uid, postId);
-                      } else {
-                        setState(() {
-                          _isDisLiked = true;
-                          dislikeCount++;
-                          log(
-                            'like count is $likeCount and dislike is $dislikeCount',
-                          );
-                        });
-                        try {
-                          String? uid = await AuthStorage.getUserId();
-                          log('post:$post');
-                          log('postid:$postId');
-                          final success = await ApiconnectFeedbacks(
-                            UserId: uid,
-                            PostId: postId,
-                          ).adddisLike();
-                          if (success) {
-                            log('Dislike added');
-                            final updatedFeedbacks = await api
-                                .fetchAllFeedbacks();
-                            setState(() {
-                              feedbacksFuture = Future.value(updatedFeedbacks);
-                            });
+                      if (uid != null) {
+                        if (_isDisLiked) {
+                          setState(() {
+                            _isDisLiked = false;
+                            dislikeCount--;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          edit('remove', uid, postId);
+                        } else if (!_isDisLiked && _isLiked) {
+                          setState(() {
+                            _isDisLiked = true;
+                            _isLiked = false;
+                            dislikeCount++;
+                            likeCount--;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          edit('dislike', uid, postId);
+                        } else {
+                          setState(() {
+                            _isDisLiked = true;
+                            dislikeCount++;
+                            log(
+                              'like count is $likeCount and dislike is $dislikeCount',
+                            );
+                          });
+                          try {
+                            String? uid = await AuthStorage.getUserId();
+                            log('post:$post');
+                            log('postid:$postId');
+                            final success = await ApiconnectFeedbacks(
+                              UserId: uid,
+                              PostId: postId,
+                            ).adddisLike();
+                            if (success) {
+                              log('Dislike added');
+                              final updatedFeedbacks = await api
+                                  .fetchAllFeedbacks();
+                              setState(() {
+                                feedbacksFuture = Future.value(
+                                  updatedFeedbacks,
+                                );
+                              });
+                            }
+                          } catch (e) {
+                            log('Could not add dislike');
                           }
-                        } catch (e) {
-                          log('Could not add dislike');
                         }
+                      } else {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Login to interact")),
+                        );
                       }
                     },
                     text: "$dislikeCount",

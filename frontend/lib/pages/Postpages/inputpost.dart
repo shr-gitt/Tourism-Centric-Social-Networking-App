@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/mainscreen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -14,6 +15,7 @@ class Inputpost extends StatefulWidget {
   final TextEditingController locationController;
   final TextEditingController contentController;
   final List<String>? existingImageUrls;
+  final String? uid;
 
   const Inputpost({
     super.key,
@@ -23,6 +25,7 @@ class Inputpost extends StatefulWidget {
     required this.contentController,
     this.existingImageUrls,
     required this.isEditing,
+    this.uid,
   });
 
   @override
@@ -34,11 +37,27 @@ class _InputpostState extends State<Inputpost> {
   List<XFile> pickedImage = [];
   late List<String> existingImages;
   bool isSubmitting = false; // To prevent multiple submits
+  String? uid;
 
   @override
   void initState() {
     super.initState();
     existingImages = widget.existingImageUrls ?? [];
+    _initializeUid();
+  }
+
+  Future<void> _initializeUid() async {
+    uid = await AuthStorage.getUserId();
+    setState(() {});
+    Future.delayed(Duration(seconds: 1), () {
+      if (uid == null) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Guest()),
+        );
+      }
+    });
   }
 
   Future<void> _pickImages() async {
@@ -96,6 +115,7 @@ class _InputpostState extends State<Inputpost> {
   }
 
   void _confirm(BuildContext context) async {
+    if (!context.mounted) return;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -118,8 +138,6 @@ class _InputpostState extends State<Inputpost> {
       ),
     );
 
-    String? uid = await AuthStorage.getUserId();
-
     // If confirmed (i.e., user pressed 'Submit')
     if (confirm == true) {
       if (mounted && !isSubmitting) {
@@ -138,8 +156,6 @@ class _InputpostState extends State<Inputpost> {
               const Center(child: CircularProgressIndicator()),
         );
 
-        // Call the submitPost function, and handle navigation after submission
-        // After successful post submission, replace the current route and remove previous ones
         Apiconnect(
               id: widget.id,
               userId: uid,
@@ -184,93 +200,100 @@ class _InputpostState extends State<Inputpost> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Post' : 'Create Post'),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(border: Border.all(width: 2)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Title'),
-              TextField(controller: widget.titleController),
-              const SizedBox(height: 10),
-              const Text('Location'),
-              TextField(controller: widget.locationController),
-              const SizedBox(height: 10),
-              const Text('Content'),
-              TextField(controller: widget.contentController, maxLines: null),
-              const SizedBox(height: 20),
-              const Text('Images'),
-              ElevatedButton(
-                onPressed: pickedImage.length >= 5 ? null : _pickImages,
-                child: Text("Pick Image (${pickedImage.length}/5)"),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 150,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: pickedImage.length,
-                  itemBuilder: (context, index) {
-                    return Stack(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(right: 8),
-                          child: Image.file(
-                            File(pickedImage[index].path),
-                            width: 150,
-                            height: 150,
-                            fit: BoxFit.cover,
+    if (widget.uid != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.isEditing ? 'Edit Post' : 'Create Post'),
+        ),
+        body: SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(border: Border.all(width: 2)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Title'),
+                TextField(controller: widget.titleController),
+                const SizedBox(height: 10),
+                const Text('Location'),
+                TextField(controller: widget.locationController),
+                const SizedBox(height: 10),
+                const Text('Content'),
+                TextField(controller: widget.contentController, maxLines: null),
+                const SizedBox(height: 20),
+                const Text('Images'),
+                ElevatedButton(
+                  onPressed: pickedImage.length >= 5 ? null : _pickImages,
+                  child: Text("Pick Image (${pickedImage.length}/5)"),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 150,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: pickedImage.length,
+                    itemBuilder: (context, index) {
+                      return Stack(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(right: 8),
+                            child: Image.file(
+                              File(pickedImage[index].path),
+                              width: 150,
+                              height: 150,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        ),
-                        Positioned(
-                          top: 4,
-                          right: 12,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                pickedImage.removeAt(index);
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
+                          Positioned(
+                            top: 4,
+                            right: 12,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  pickedImage.removeAt(index);
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                  onPressed: isSubmitting
-                      ? null
-                      : () => _confirm(
-                          context,
-                        ), // Disable button during submission
-                  child: const Text('Submit'),
+                const SizedBox(height: 10),
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                    ),
+                    onPressed: isSubmitting
+                        ? null
+                        : () => _confirm(
+                            context,
+                          ), // Disable button during submission
+                    child: const Text('Submit'),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      // If user is null or loading, show loading indicator
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
   }
 }
