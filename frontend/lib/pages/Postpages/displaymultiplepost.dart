@@ -7,6 +7,7 @@ import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Postpages/fullpost.dart';
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
 import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
+import 'package:intl/intl.dart';
 
 class Displaymultiplepost extends StatefulWidget {
   //final String? id;
@@ -67,7 +68,6 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
 
       child: GFCard(
         boxFit: BoxFit.cover,
-        image: Image.asset('assets/images/_MG_6890.jpeg'),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -84,6 +84,19 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(post['location'] ?? 'No Location'),
+                  Builder(
+                    builder: (context) {
+                      final rawDate = post['created'];
+                      final parsedDate = DateTime.tryParse(rawDate);
+                      final formattedDate = parsedDate != null
+                          ? DateFormat('yyyy-MM-dd').format(parsedDate)
+                          : 'Invalid date';
+                      return Text(
+                        formattedDate,
+                        style: TextStyle(fontSize: 12),
+                      );
+                    },
+                  ),
                   Text(
                     post['content'] ?? 'No Content',
                     maxLines: 5,

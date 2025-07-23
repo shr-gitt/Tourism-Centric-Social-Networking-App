@@ -55,6 +55,16 @@ class _PostsPageState extends State<PostsPage> {
           }
 
           final posts = snapshot.data!;
+
+          // Sort newest first by date (assuming ISO8601 format)
+          posts.sort((a, b) {
+            final aDate =
+                DateTime.tryParse(a['created'] ?? '') ?? DateTime(2000);
+            final bDate =
+                DateTime.tryParse(b['created'] ?? '') ?? DateTime(2000);
+            return bDate.compareTo(aDate); // descending: newest first
+          });
+
           return FutureBuilder<String?>(
             future: AuthStorage.getUserId(),
             builder: (context, userIdSnapshot) {

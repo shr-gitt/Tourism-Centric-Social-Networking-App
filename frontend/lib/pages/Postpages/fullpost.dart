@@ -5,6 +5,8 @@ import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbackscomments.dart';
 import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:intl/intl.dart';
+
 import 'package:frontend/pages/imagedisplaywithbuttons.dart';
 import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
 
@@ -121,7 +123,6 @@ class _FullPostPageState extends State<FullPostPage> {
             children: [
               GFCard(
                 boxFit: BoxFit.cover,
-                image: Image.asset('assets/images/_MG_6890.jpeg'),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -133,6 +134,19 @@ class _FullPostPageState extends State<FullPostPage> {
                     Text(
                       post['location'] ?? 'No Location',
                       style: TextStyle(fontSize: 12),
+                    ),
+                    Builder(
+                      builder: (context) {
+                        final rawDate = post['created'];
+                        final parsedDate = DateTime.tryParse(rawDate);
+                        final formattedDate = parsedDate != null
+                            ? DateFormat('yyyy-MM-dd').format(parsedDate)
+                            : 'Invalid date';
+                        return Text(
+                          formattedDate,
+                          style: TextStyle(fontSize: 12),
+                        );
+                      },
                     ),
                     const SizedBox(height: 10),
 
