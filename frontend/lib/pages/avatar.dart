@@ -7,8 +7,9 @@ import 'package:frontend/pages/Postpages/editpost.dart';
 class Avatar extends StatefulWidget {
   final Map<String, dynamic> data;
   final bool isPost;
+  final bool selfPost;
 
-  const Avatar({super.key, required this.data, required this.isPost});
+  const Avatar({super.key, required this.data, required this.isPost, required this.selfPost});
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -39,6 +40,7 @@ class _AvatarState extends State<Avatar> {
   Widget build(BuildContext context) {
     final isPost = widget.isPost;
     final data = widget.data;
+    final selfPost=widget.selfPost;
 
     return Row(
       children: [
@@ -73,7 +75,7 @@ class _AvatarState extends State<Avatar> {
             ],
           ),
         ),
-        if (isPost)
+        if (isPost && selfPost)
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (String value) {

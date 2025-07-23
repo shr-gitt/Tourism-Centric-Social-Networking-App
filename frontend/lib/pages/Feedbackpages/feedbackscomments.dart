@@ -37,7 +37,9 @@ class _CommentsState extends State<Comments> {
   Future<void> sendComment(String comment) async {
     log("User comment: $comment");
     final postId = widget.post['postId'];
-    final success = await ApiconnectFeedbacks(PostId: postId).addComment(comment);
+    final success = await ApiconnectFeedbacks(
+      PostId: postId,
+    ).addComment(comment);
     if (!mounted) return;
     if (success) {
       _commentController.clear();
@@ -152,7 +154,13 @@ class _CommentsState extends State<Comments> {
                     children: [
                       Row(
                         children: [
-                          Expanded(child: Avatar(data: comment, isPost: false)),
+                          Expanded(
+                            child: Avatar(
+                              data: comment,
+                              isPost: false,
+                              selfPost: false,
+                            ),
+                          ),
                           PopupMenuButton<String>(
                             onSelected: (String value) async {
                               log('value=$value');
@@ -166,7 +174,10 @@ class _CommentsState extends State<Comments> {
                             },
                             itemBuilder: (BuildContext context) => const [
                               PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              PopupMenuItem(value: 'delete', child: Text('Delete')),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
                             ],
                           ),
                         ],
@@ -198,10 +209,13 @@ class _CommentsState extends State<Comments> {
                                     ),
                                     ElevatedButton(
                                       onPressed: () async {
-                                        final updatedComment =
-                                            editController.text.trim();
+                                        final updatedComment = editController
+                                            .text
+                                            .trim();
                                         if (updatedComment.isNotEmpty) {
-                                          log('Saving edited comment: $updatedComment');
+                                          log(
+                                            'Saving edited comment: $updatedComment',
+                                          );
                                           await ApiconnectFeedbacks(
                                             PostId: postId,
                                             feedbackId: commentId,

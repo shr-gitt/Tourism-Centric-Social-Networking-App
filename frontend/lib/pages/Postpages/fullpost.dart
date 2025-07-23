@@ -125,7 +125,7 @@ class _FullPostPageState extends State<FullPostPage> {
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Avatar(data: post, isPost: true),
+                    Avatar(data: post, isPost: true, selfPost: widget.state),
                     Text(post['title'] ?? 'No Title'),
                     Text(post['location'] ?? 'No Location'),
                     Text(

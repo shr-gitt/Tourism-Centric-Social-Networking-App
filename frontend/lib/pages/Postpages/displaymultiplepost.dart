@@ -64,7 +64,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Avatar(data: post, isPost: true),
+            Avatar(data: post, isPost: true, selfPost:widget.state),
             ListTile(
               title: Text(
                 post['title'] ?? 'No Title',
