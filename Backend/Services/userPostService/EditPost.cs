@@ -9,7 +9,7 @@ public class EditPost
 {
     private readonly IMongoCollection<Post> _postsCollection;
     
-    public EditPost(PostsContext postsContext)
+    public EditPost(PostsContext postsContext,FeedbacksContext feedbacksContext)
     {
         _postsCollection = postsContext.Posts;
     }

@@ -8,7 +8,7 @@ import 'package:getwidget/getwidget.dart';
 
 class Feedbacks extends StatefulWidget {
   final Map<String, dynamic> post;
-  final VoidCallback? onCommentPressed; // <-- add this
+  final VoidCallback? onCommentPressed;
 
   const Feedbacks({super.key, required this.post, this.onCommentPressed});
 
@@ -104,6 +104,10 @@ class _FeedbacksState extends State<Feedbacks> {
         log('Could not edit to dislike');
       }
     }
+    final updatedFeedbacks = await api.fetchAllFeedbacks();
+    setState(() {
+      feedbacksFuture = Future.value(updatedFeedbacks);
+    });
   }
 
   @override
@@ -120,6 +124,24 @@ class _FeedbacksState extends State<Feedbacks> {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (snapshot.hasData) {
+          var feedbacks = snapshot.data!;
+
+          // Find the feedback for the current post
+          var postFeedback = feedbacks
+              .where((f) => f['postId'] == postId)
+              .toList();
+
+          int likeCount = postFeedback.fold(
+            0,
+            (sum, f) => sum + (f['like'] == true ? 1 : 0),
+          );
+          int dislikeCount = postFeedback.fold(
+            0,
+            (sum, f) => sum + (f['like'] == false ? 1 : 0),
+          );
+          int commentCount = postFeedback.isNotEmpty
+              ? postFeedback[0]['commentCount'] ?? 0
+              : 0;
           return GFButtonBar(
             children: [
               Row(
@@ -133,17 +155,30 @@ class _FeedbacksState extends State<Feedbacks> {
                       if (_isLiked) {
                         setState(() {
                           _isLiked = false;
+                          likeCount--;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         edit('remove', uid, postId);
                       } else if (!_isLiked && _isDisLiked) {
                         setState(() {
                           _isLiked = true;
                           _isDisLiked = false;
+                          likeCount++;
+                          dislikeCount--;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         edit('like', uid, postId);
                       } else {
                         setState(() {
                           _isLiked = true;
+                          likeCount++;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         try {
                           final success = await ApiconnectFeedbacks(
@@ -152,13 +187,18 @@ class _FeedbacksState extends State<Feedbacks> {
                           ).addLike();
                           if (success) {
                             log('Like added');
+                            final updatedFeedbacks = await api
+                                .fetchAllFeedbacks();
+                            setState(() {
+                              feedbacksFuture = Future.value(updatedFeedbacks);
+                            });
                           }
                         } catch (e) {
                           log('Could not add like');
                         }
                       }
                     },
-                    text: "",
+                    text: "$likeCount",
                     icon: Icon(
                       _isLiked
                           ? Icons.thumb_up_alt
@@ -175,17 +215,30 @@ class _FeedbacksState extends State<Feedbacks> {
                       if (_isDisLiked) {
                         setState(() {
                           _isDisLiked = false;
+                          dislikeCount--;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         edit('remove', uid, postId);
                       } else if (!_isDisLiked && _isLiked) {
                         setState(() {
                           _isDisLiked = true;
                           _isLiked = false;
+                          dislikeCount++;
+                          likeCount--;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         edit('dislike', uid, postId);
                       } else {
                         setState(() {
                           _isDisLiked = true;
+                          dislikeCount++;
+                          log(
+                            'like count is $likeCount and dislike is $dislikeCount',
+                          );
                         });
                         try {
                           String? uid = await AuthStorage.getUserId();
@@ -197,13 +250,18 @@ class _FeedbacksState extends State<Feedbacks> {
                           ).adddisLike();
                           if (success) {
                             log('Dislike added');
+                            final updatedFeedbacks = await api
+                                .fetchAllFeedbacks();
+                            setState(() {
+                              feedbacksFuture = Future.value(updatedFeedbacks);
+                            });
                           }
                         } catch (e) {
                           log('Could not add dislike');
                         }
                       }
                     },
-                    text: "",
+                    text: "$dislikeCount",
                     icon: Icon(
                       _isDisLiked
                           ? Icons.thumb_down_alt
@@ -231,7 +289,7 @@ class _FeedbacksState extends State<Feedbacks> {
                         );
                       }
                     },
-                    text: "",
+                    text: "$commentCount",
                     icon: Icon(Icons.comment_outlined),
                     type: GFButtonType.transparent,
                   ),

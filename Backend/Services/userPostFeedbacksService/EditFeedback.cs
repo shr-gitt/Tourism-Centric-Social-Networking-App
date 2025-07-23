@@ -1,16 +1,24 @@
 using Backend.Data;
 using MongoDB.Driver;
 using Backend.Models;
+using Backend.Services.userPostService;
 
 namespace Backend.Services.userPostFeedbacksService;
 
 public class EditFeedback
 {
     private readonly IMongoCollection<Feedback> _feedbackCollection;
+    private readonly IMongoCollection<Post> _postsCollection;
+    private readonly UpdateFeedback _updateFeedbackService;
 
-    public EditFeedback(FeedbacksContext feedbacksContext)
+    public EditFeedback(
+        FeedbacksContext feedbacksContext,
+        PostsContext postsContext,
+        UpdateFeedback updateFeedbackService) 
     {
         _feedbackCollection = feedbacksContext.Feedbacks;
+        _postsCollection = postsContext.Posts;
+        _updateFeedbackService = updateFeedbackService;
     }
 
     public async Task<bool> Edit(Feedback feedback)
@@ -37,6 +45,8 @@ public class EditFeedback
         var result = await _feedbackCollection.UpdateOneAsync(
             f => f.FeedbackId == feedback.FeedbackId,
             updateDefinition);
+        
+        await _updateFeedbackService.UpdateAsync(feedback.PostId);
 
         return result.IsAcknowledged && result.ModifiedCount > 0;
     }

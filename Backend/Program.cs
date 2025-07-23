@@ -66,6 +66,7 @@ builder.Services.AddScoped<SaveUser>();
 builder.Services.AddScoped<PostServices>();
 builder.Services.AddScoped<CreatePost>();
 builder.Services.AddScoped<EditPost>();
+builder.Services.AddScoped<UpdateFeedback>();
 builder.Services.AddScoped<DeletePost>();
 builder.Services.AddScoped<SavePost>();
 

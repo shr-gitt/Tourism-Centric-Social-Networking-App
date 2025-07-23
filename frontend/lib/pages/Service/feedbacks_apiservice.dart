@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 class FeedbackService {
   static const String feedbackurl = Constants.feedbackurl;
+  static const String posturl = Constants.posturl;
 
   Map<String, String> get _headers => {'Content-Type': 'application/json'};
 

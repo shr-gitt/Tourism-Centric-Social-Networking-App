@@ -9,8 +9,14 @@ import 'package:getwidget/getwidget.dart';
 class Comments extends StatefulWidget {
   final Map<String, dynamic> post;
   final FocusNode? focusNode;
+  final VoidCallback? onCommentPressed;
 
-  const Comments({super.key, required this.post, this.focusNode});
+  const Comments({
+    super.key,
+    required this.post,
+    this.focusNode,
+    this.onCommentPressed,
+  });
 
   @override
   State<Comments> createState() => _CommentsState();
@@ -46,6 +52,10 @@ class _CommentsState extends State<Comments> {
       setState(() {
         commentsFuture = api.fetchFeedbacksByPostId(postId);
       });
+    }
+
+    if (widget.onCommentPressed != null) {
+      widget.onCommentPressed!();
     }
   }
 

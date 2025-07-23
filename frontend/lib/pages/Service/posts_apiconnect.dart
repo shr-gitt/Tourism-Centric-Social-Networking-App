@@ -29,7 +29,7 @@ class Apiconnect {
     String posturl=Constants.posturl;
     try {
       final uri = isEditing
-          ? Uri.parse('$posturl/update/${id!}')
+          ? Uri.parse('$posturl/edit/${id!}')
           : Uri.parse('$posturl/create');
 
       final method = 'POST';

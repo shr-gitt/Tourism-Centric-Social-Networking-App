@@ -9,7 +9,12 @@ class Avatar extends StatefulWidget {
   final bool isPost;
   final bool selfPost;
 
-  const Avatar({super.key, required this.data, required this.isPost, required this.selfPost});
+  const Avatar({
+    super.key,
+    required this.data,
+    required this.isPost,
+    required this.selfPost,
+  });
 
   @override
   State<Avatar> createState() => _AvatarState();
@@ -40,7 +45,7 @@ class _AvatarState extends State<Avatar> {
   Widget build(BuildContext context) {
     final isPost = widget.isPost;
     final data = widget.data;
-    final selfPost=widget.selfPost;
+    final selfPost = widget.selfPost;
 
     return Row(
       children: [

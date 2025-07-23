@@ -96,8 +96,8 @@ namespace Backend.Controllers
         }
         
         // PUT: api/posts/{id}
-        [HttpPost("update/{postid}")]
-        public async Task<IActionResult> Update(string postid, [FromForm] CreatePostRequest request)
+        [HttpPost("edit/{postid}")]
+        public async Task<IActionResult> Edit(string postid, [FromForm] CreatePostRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -160,6 +160,5 @@ namespace Backend.Controllers
             await _saveService.SaveInputAsync(input);
             return Ok();
         }
-
     }
 }

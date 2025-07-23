@@ -154,7 +154,7 @@ class _FullPostPageState extends State<FullPostPage> {
 
               Feedbacks(
                 post: post,
-                onCommentPressed: focusCommentInput, // pass the callback here
+                onCommentPressed: focusCommentInput, 
               ),
               const SizedBox(height: 10),
 

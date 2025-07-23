@@ -11,9 +11,13 @@ import 'package:frontend/pages/Service/feedbacks_apiservice.dart';
 class Displaymultiplepost extends StatefulWidget {
   //final String? id;
   final Map<String, dynamic> post;
-    final bool state;
+  final bool state;
 
-  const Displaymultiplepost({super.key, required this.post, required this.state});
+  const Displaymultiplepost({
+    super.key,
+    required this.post,
+    required this.state,
+  });
 
   @override
   State<Displaymultiplepost> createState() => _DisplaymultiplepostState();
@@ -52,8 +56,11 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                FullPostPage(postId: post['postId'], scrollToComment: false,state: widget.state,),
+            builder: (context) => FullPostPage(
+              postId: post['postId'],
+              scrollToComment: false,
+              state: widget.state,
+            ),
           ),
         );
       },
@@ -64,7 +71,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Avatar(data: post, isPost: true, selfPost:widget.state),
+            Avatar(data: post, isPost: true, selfPost: widget.state),
             ListTile(
               title: Text(
                 post['title'] ?? 'No Title',
@@ -90,7 +97,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                           builder: (context) => FullPostPage(
                             postId: post['postId'],
                             scrollToComment: false,
-                            state:widget.state,
+                            state: widget.state,
                           ),
                         ),
                       );
