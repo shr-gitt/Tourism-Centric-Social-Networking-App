@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ImageDisplayWithButtons extends StatefulWidget {
@@ -61,7 +62,7 @@ class _ImageDisplayWithButtonsState extends State<ImageDisplayWithButtons> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      widget.imageUrls[index],
+                      'https://localhost:5259${widget.imageUrls[index]}',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(child: Icon(Icons.broken_image)),

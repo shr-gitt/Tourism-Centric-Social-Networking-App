@@ -139,9 +139,14 @@ class _FeedbacksState extends State<Feedbacks> {
             0,
             (sum, f) => sum + (f['like'] == false ? 1 : 0),
           );
-          int commentCount = postFeedback.isNotEmpty
+          /*int commentCount = postFeedback.isNotEmpty
               ? postFeedback[0]['commentCount'] ?? 0
               : 0;
+
+          int likeCount = post['feedback']?['likeCount'] ?? 0;
+          int dislikeCount = post['feedback']?['dislikeCount'] ?? 0;*/
+          
+          int commentCount = post['feedback']?['commentCount'] ?? 0;
           return GFButtonBar(
             children: [
               Row(

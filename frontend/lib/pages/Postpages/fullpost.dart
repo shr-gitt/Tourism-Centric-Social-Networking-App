@@ -126,8 +126,16 @@ class _FullPostPageState extends State<FullPostPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Avatar(data: post, isPost: true, selfPost: widget.state),
-                    Text(post['title'] ?? 'No Title'),
-                    Text(post['location'] ?? 'No Location'),
+                    Text(
+                      post['title'] ?? 'No Title',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      post['location'] ?? 'No Location',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(height: 10),
+
                     Text(
                       post['content'] ?? 'No Content',
                       style: const TextStyle(fontSize: 16),
@@ -152,10 +160,7 @@ class _FullPostPageState extends State<FullPostPage> {
 
               const SizedBox(height: 10),
 
-              Feedbacks(
-                post: post,
-                onCommentPressed: focusCommentInput, 
-              ),
+              Feedbacks(post: post, onCommentPressed: focusCommentInput),
               const SizedBox(height: 10),
 
               Column(
