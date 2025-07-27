@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using Backend.DTO;
 using Backend.Models;
 using Backend.Services;
 using Backend.Services.userPostService;
@@ -30,13 +31,6 @@ public class AuthController : ControllerBase
         public IFormFile Image { get; set; }
     }
     
-    public class LoginRequest
-    {
-        [Required, EmailAddress]
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-
     [HttpPost("register")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Register([FromForm] RegisterRequest request)

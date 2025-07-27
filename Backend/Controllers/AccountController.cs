@@ -57,14 +57,28 @@ public class AccountController:ControllerBase
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        // Parse LifespanMinutes from configuration
+        if (!int.TryParse(_configuration["Jwt:LifespanMinutes"], out var lifespanMinutes))
+        {
+            lifespanMinutes = 30; // fallback default in case config is missing or invalid
+        }
+        
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddMinutes(lifespanMinutes),
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private void AddErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
     }
     
     [HttpPost]
@@ -73,7 +87,7 @@ public class AccountController:ControllerBase
     public async Task<IActionResult> Login(LoginRequest model)
     {
         if(!ModelState.IsValid)
-            return BadRequest();
+            return BadRequest(ModelState);
         
         var user = await _userManager.FindByEmailAsync(model.Email);
         if(user == null)
@@ -96,5 +110,25 @@ public class AccountController:ControllerBase
                 Message = $"User {user.UserName} successfully logged in."
             }
         );
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    public async Task<IActionResult> Register(RegisterRequest model)
+    {
+        if(!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var user = new ApplicationUser {UserName = model.UserName, Email = model.Email};
+        
+        var result = await _userManager.CreateAsync(user, model.Password);
+        if (result.Succeeded)
+        {
+            await _signInManager.SignInAsync(user, false);
+            _logger.LogInformation("User created a new account with password.");
+            return Ok(new {Message = "User created successfully"});
+        }
+        AddErrors(result);
+        return BadRequest(ModelState);
     }
 }

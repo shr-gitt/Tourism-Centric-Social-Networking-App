@@ -7,6 +7,7 @@ using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
 using Backend.Services.userService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -113,11 +114,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "yourdomain.com",
-            ValidAudience = "yourdomain.com",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_super_secret_key"))
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
         };
     });
+
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.Password.RequiredLength = 6;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = true;
+    }).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
+        builder.Configuration["MongoDbSettings:ConnectionString"],
+        builder.Configuration["MongoDbSettings:DatabaseName"])
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthorization();
 
@@ -175,12 +188,12 @@ app.UseSwaggerUI(c =>
 
 // app.UseHttpsRedirection(); // Uncomment if HTTPS enforcement is desired
 
-app.UseStaticFiles();
-
 app.UseRouting();
 
 // Apply the CORS policy globally
 app.UseCors("AllowAll");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
