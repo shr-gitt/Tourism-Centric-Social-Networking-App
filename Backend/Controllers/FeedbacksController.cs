@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
 using Backend.Models;
 using Backend.Services.userPostFeedbacksService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class FeedbacksController : ControllerBase
     {
         private readonly FeedbacksService _feedbacksService;
@@ -55,6 +55,7 @@ namespace Backend.Controllers
         }
         
         [HttpPost]
+        [Authorize(Roles = "LoggedIn")]
         public async Task<ActionResult> AddFeedback([FromBody] Feedback feedback)
         {
             if (string.IsNullOrWhiteSpace(feedback.PostId))

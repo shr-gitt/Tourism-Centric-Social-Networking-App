@@ -5,10 +5,8 @@ using Backend.Models;
 using Backend.Services;
 using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
-using Backend.Services.userService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -30,14 +28,6 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
-builder.Services.AddScoped<IMongoCollection<User>>(sp =>
-{
-    var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-    var client = sp.GetRequiredService<IMongoClient>();
-    var database = client.GetDatabase(settings.DatabaseName);
-    return database.GetCollection<User>(settings.UsersCollectionName);
-});
-
 builder.Services.AddScoped<IMongoCollection<Post>>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
@@ -55,16 +45,8 @@ builder.Services.AddScoped<IMongoCollection<Feedback>>(sp =>
 });
 
 // Register data contexts
-builder.Services.AddScoped<UsersContext>();
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<FeedbacksContext>();
-
-// Register User related services
-builder.Services.AddScoped<AuthServices>();
-builder.Services.AddScoped<UserServices>();
-builder.Services.AddScoped<EditUser>();
-builder.Services.AddScoped<DeleteUser>();
-builder.Services.AddScoped<SaveUser>();
 
 // Register Post related services
 builder.Services.AddScoped<PostServices>();

@@ -100,6 +100,7 @@ public class AccountController:ControllerBase
         if(await _userManager.IsLockedOutAsync(user))
             return Forbid("You are not allowed to log in.");
 
+        await _userManager.AddToRoleAsync(user, "LoggedIn");
         var token = await GenerateJwtToken(user);
         
         _logger.LogInformation("User logged in.");
@@ -110,6 +111,30 @@ public class AccountController:ControllerBase
                 Message = $"User {user.UserName} successfully logged in."
             }
         );
+    }
+    
+    [HttpPost]
+    [AllowAnonymous]
+    public IActionResult UseAsGuest()
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Role, "Guest"),
+            new Claim("uid", Guid.NewGuid().ToString())  // some guest UID or anonymous
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(30),
+            signingCredentials: creds);
+
+        var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return Ok(new { Token = jwtToken, Message = "Logged in as Guest" });
     }
 
     [HttpPost]

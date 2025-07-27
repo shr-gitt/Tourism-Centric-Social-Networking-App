@@ -1,6 +1,7 @@
 using Backend.Models;
 using Backend.Services;
 using Backend.Services.userPostService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
@@ -63,6 +64,7 @@ namespace Backend.Controllers
         // POST: api/posts
         [HttpPost("create")]
         [Consumes("multipart/form-data")]
+        [Authorize (Roles = "LoggedIn")]
         public async Task<IActionResult> Create([FromForm] CreatePostRequest request)
         {
             var imagePaths = new List<string>();
