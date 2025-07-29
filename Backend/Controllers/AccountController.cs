@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.DTO;
 using Backend.Models;
+using Backend.Services.userPostService;
 //using Backend.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -18,27 +19,39 @@ public class AccountController:ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IEmailSender _emailSender;
+    //private readonly IEmailSender _emailSender;
     //private readonly ISmsSender _smsSender;
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
+    private readonly RoleManager<ApplicationRole> _roleManager;
 
     public AccountController(UserManager<ApplicationUser> userManager, 
         SignInManager<ApplicationUser> signInManager,
-        IEmailSender emailSender, 
+        //IEmailSender emailSender, 
         //ISmsSender smsSender, 
         ILoggerFactory loggerFactory,
-        IConfiguration configuration
+        IConfiguration configuration,
+        RoleManager<ApplicationRole> roleManager
         )
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _emailSender = emailSender;
+        //_emailSender = emailSender;
         //_smsSender = smsSender;
         _logger = loggerFactory.CreateLogger<AccountController>();
         _configuration=configuration;
+        _roleManager = roleManager;
     }
     
+    private async Task EnsureRolesExist()
+    {
+        if (!await _roleManager.RoleExistsAsync(ApplicationRole.RoleNames.LoggedIn))
+        {
+            var role = new ApplicationRole { Name = ApplicationRole.RoleNames.LoggedIn };
+            await _roleManager.CreateAsync(role);
+        }
+    }
+
     private async Task<string> GenerateJwtToken(ApplicationUser user)
     {
         var userRoles = await _userManager.GetRolesAsync(user);
@@ -99,8 +112,14 @@ public class AccountController:ControllerBase
         
         if(await _userManager.IsLockedOutAsync(user))
             return Forbid("You are not allowed to log in.");
+        await EnsureRolesExist(); // Ensure the LoggedIn role exists
 
-        await _userManager.AddToRoleAsync(user, "LoggedIn");
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(ApplicationRole.RoleNames.LoggedIn))
+        {
+            await _userManager.AddToRoleAsync(user, ApplicationRole.RoleNames.LoggedIn);
+        }
+
         var token = await GenerateJwtToken(user);
         
         _logger.LogInformation("User logged in.");
@@ -139,12 +158,19 @@ public class AccountController:ControllerBase
 
     [HttpPost]
     [AllowAnonymous]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> Register(RegisterRequest model)
     {
         if(!ModelState.IsValid)
             return BadRequest(ModelState);
+        
+        string imagePath=null;
+        if (model.Image != null)
+        {
+            imagePath=new UploadImage().Upload(model.Image);
+        }
 
-        var user = new ApplicationUser {UserName = model.UserName, Email = model.Email};
+        var user = new ApplicationUser {UserName = model.UserName,Name= model.Name,PhoneNumber = model.Phone, Email = model.Email, Image = imagePath??""};
         
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
