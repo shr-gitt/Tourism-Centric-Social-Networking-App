@@ -16,8 +16,10 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final _usernameController = TextEditingController();
   final _fullnameController = TextEditingController();
+  final _phonenumberController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmpasswordController = TextEditingController();
 
   // Add Image Picker related variables
   final ImagePicker _picker = ImagePicker();
@@ -40,13 +42,17 @@ class _SignupPageState extends State<SignupPage> {
   void _submitForm() async {
     final username = _usernameController.text.trim();
     final fullname = _fullnameController.text.trim();
+    final phonenumber = _phonenumberController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
+    final confirmpassword = _confirmpasswordController.text;
 
     if (username.isEmpty ||
         fullname.isEmpty ||
+        phonenumber.isEmpty ||
         email.isEmpty ||
-        password.isEmpty) {
+        password.isEmpty ||
+        confirmpassword.isEmpty) {
       GFToast.showToast(
         'Please fill in all fields',
         context,
@@ -59,18 +65,15 @@ class _SignupPageState extends State<SignupPage> {
     final Map<String, dynamic> data = {
       "UserName": username,
       "Name": fullname,
+      "PhoneNumber": phonenumber,
       "Email": email,
       "Password": password,
+      "ConfirmPassword": confirmpassword,
     };
 
-    // Add the image to the data (if available)
-    //if (_image != null) {
-      //data['image'] = _image; // This will be handled in the API call
-    //}
+    log('Email:$email');
 
-    log('Email:$email and Password:$password');
-
-    final success = await UserService().registerUser(data,_image);
+    final success = await UserService().registerUser(data, _image);
 
     if (!mounted) return;
     if (success) {
@@ -143,6 +146,16 @@ class _SignupPageState extends State<SignupPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Phone Number Field
+                GFTextField(
+                  controller: _phonenumberController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 // Email Field
                 GFTextField(
                   controller: _emailController,
@@ -160,6 +173,17 @@ class _SignupPageState extends State<SignupPage> {
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Confirm Password Field
+                GFTextField(
+                  controller: _confirmpasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Comfirm Password',
                     border: OutlineInputBorder(),
                   ),
                 ),

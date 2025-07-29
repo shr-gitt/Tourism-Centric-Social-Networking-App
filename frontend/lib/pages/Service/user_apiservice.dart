@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
@@ -11,10 +12,10 @@ class UserService {
 
   // Add JWT if needed from secure storage
   Future<Map<String, String>> _getHeaders() async {
-    // String? token = await AuthStorage.getToken(); // if using JWT
+    String? token = await AuthStorage.getToken(); // if using JWT
     return {
       'Content-Type': 'application/json',
-      // 'Authorization': 'Bearer $token', // uncomment if using token
+      'Authorization': 'Bearer $token', // uncomment if using token
     };
   }
 
@@ -24,24 +25,26 @@ class UserService {
     FormData formData = FormData.fromMap({
       'UserName': data['UserName'],
       'Name': data['Name'],
+      'Phone': data['PhoneNumber'],
       'Email': data['Email'],
       'Password': data['Password'],
+      'ConfirmPassword': data['ConfirmPassword'],
     });
 
     if (image != null) {
-      formData.files.add(MapEntry(
-        'image', // Field name expected by the server
-        await MultipartFile.fromFile(image.path, filename: 'profile.jpg'),
-      ));
+      formData.files.add(
+        MapEntry(
+          'Image', // Field name expected by the server
+          await MultipartFile.fromFile(image.path, filename: 'profile.jpg'),
+        ),
+      );
     }
 
     try {
       final response = await dio.post(
-        '$authurl/register',
+        '$authurl/Register',
         data: formData,
-        options: Options(
-          headers: await _getHeaders(),
-        ),
+        //options: Options(headers: await _getHeaders()),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -85,7 +88,7 @@ class UserService {
   Future loginUser(Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('$authurl/login'),
+      Uri.parse('$authurl/Login'),
       headers: headers,
       body: jsonEncode(data),
     );
@@ -93,8 +96,11 @@ class UserService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('data $data');
-      final userId = data['userId'];
+      //final userId = data['userId'];
+      final token = data['token'];
       log('User login successfully.');
+      await AuthStorage.saveToken(token);
+      final userId = await AuthStorage.getUserId();
       return userId;
     } else {
       log('Failed to login user: ${response.body}-${response.statusCode}');

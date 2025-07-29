@@ -107,7 +107,9 @@ class _CommentsState extends State<Comments> {
             controller: _commentController,
             decoration: InputDecoration(
               hintText: "Add a comment...",
-              border: const OutlineInputBorder(),
+              border: const OutlineInputBorder(
+                borderSide: BorderSide(width: 1),
+              ),
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: ElevatedButton(
@@ -193,6 +195,8 @@ class _CommentsState extends State<Comments> {
                             ),
                           ),
                           PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert),
+
                             onSelected: (String value) async {
                               log('value=$value');
                               if (value == 'edit') {
