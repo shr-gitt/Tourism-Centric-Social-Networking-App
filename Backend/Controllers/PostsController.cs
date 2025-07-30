@@ -64,7 +64,7 @@ namespace Backend.Controllers
         // POST: api/posts
         [HttpPost("create")]
         [Consumes("multipart/form-data")]
-        [Authorize (Roles = "LoggedIn")]
+        //[Authorize (Roles = "LoggedIn")]
         public async Task<IActionResult> Create([FromForm] CreatePostRequest request)
         {
             var imagePaths = new List<string>();

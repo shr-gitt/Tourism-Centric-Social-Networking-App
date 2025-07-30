@@ -6,11 +6,8 @@ namespace Backend.Models
 {
     public class Post
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string? PostId { get; set; }
 
-        [BsonRepresentation(BsonType.ObjectId)]
         public required string UserId { get; set; }
 
         public required string Title { get; set; }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +48,10 @@ builder.Services.AddScoped<IMongoCollection<Feedback>>(sp =>
 // Register data contexts
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<FeedbacksContext>();
+builder.Services.AddScoped<AccountContext>();
+
+//Register Account related services
+builder.Services.AddScoped<AccountServices>();
 
 // Register Post related services
 builder.Services.AddScoped<PostServices>();
@@ -109,7 +114,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireDigit = true;
-    }).AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
+    }).AddMongoDbStores<ApplicationUser, ApplicationRole, ObjectId>(
         builder.Configuration["MongoDbSettings:ConnectionString"],
         builder.Configuration["MongoDbSettings:DatabaseName"])
     .AddDefaultTokenProviders();
@@ -119,7 +124,7 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Seed database on startup (optional, implement SeedData.InitializeAsync as needed)
-await using (var scope = app.Services.CreateAsyncScope())
+/*await using (var scope = app.Services.CreateAsyncScope())
 {
     var services = scope.ServiceProvider;
     try
@@ -131,7 +136,7 @@ await using (var scope = app.Services.CreateAsyncScope())
     {
         Console.WriteLine($"Error seeding data: {ex.Message}");
     }
-}
+}*/
 
 // Global error handler for production environment
 if (!app.Environment.IsDevelopment())

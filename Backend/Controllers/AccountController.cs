@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.DTO;
 using Backend.Models;
+using Backend.Services;
 using Backend.Services.userPostService;
-//using Backend.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 
 namespace Backend.Controllers;
 
@@ -17,6 +17,7 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class AccountController:ControllerBase
 {
+    private readonly AccountServices _accountServices;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     //private readonly IEmailSender _emailSender;
@@ -25,7 +26,9 @@ public class AccountController:ControllerBase
     private readonly IConfiguration _configuration;
     private readonly RoleManager<ApplicationRole> _roleManager;
 
-    public AccountController(UserManager<ApplicationUser> userManager, 
+    public AccountController(
+        AccountServices accountServices,
+        UserManager<ApplicationUser> userManager, 
         SignInManager<ApplicationUser> signInManager,
         //IEmailSender emailSender, 
         //ISmsSender smsSender, 
@@ -34,6 +37,7 @@ public class AccountController:ControllerBase
         RoleManager<ApplicationRole> roleManager
         )
     {
+        _accountServices = accountServices;
         _userManager = userManager;
         _signInManager = signInManager;
         //_emailSender = emailSender;
@@ -43,56 +47,36 @@ public class AccountController:ControllerBase
         _roleManager = roleManager;
     }
     
-    private async Task EnsureRolesExist()
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
-        if (!await _roleManager.RoleExistsAsync(ApplicationRole.RoleNames.LoggedIn))
-        {
-            var role = new ApplicationRole { Name = ApplicationRole.RoleNames.LoggedIn };
-            await _roleManager.CreateAsync(role);
-        }
+        var users= await _accountServices.GetAsync();
+        return Ok(users);
+    }
+    
+    // GET: api/users/{id}
+    [HttpGet("{userid}")]
+    public async Task<IActionResult> GetById(string userid)
+    {
+        if (string.IsNullOrWhiteSpace(userid))
+            return BadRequest("Id cannot be null or empty.");
+
+        var user = await _accountServices.GetByIdAsync(userid);
+        if (user == null)
+            return NotFound();
+
+        return Ok(user);
+    }
+    
+    [HttpGet("{username}")]
+    public async Task<ApplicationUser> GetByUsernameAsync(string username)
+    {
+        var user = await _userManager.FindByNameAsync(username);
+        /*if (user == null)
+            return NotFound();*/
+        return user;
     }
 
-    private async Task<string> GenerateJwtToken(ApplicationUser user)
-    {
-        var userRoles = await _userManager.GetRolesAsync(user);
-        var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("uid", user.Id.ToString())
-        };
-
-        foreach (var role in userRoles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
-
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        // Parse LifespanMinutes from configuration
-        if (!int.TryParse(_configuration["Jwt:LifespanMinutes"], out var lifespanMinutes))
-        {
-            lifespanMinutes = 30; // fallback default in case config is missing or invalid
-        }
-        
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(lifespanMinutes),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    private void AddErrors(IdentityResult result)
-    {
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError(string.Empty, error.Description);
-        }
-    }
     
     [HttpPost]
     [AllowAnonymous]
@@ -138,9 +122,9 @@ public class AccountController:ControllerBase
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Role, "Guest"),
-            new Claim("uid", Guid.NewGuid().ToString())  // some guest UID or anonymous
-        };
+            new Claim(ClaimTypes.NameIdentifier, ObjectId.GenerateNewId().ToString()),
+            new Claim(ClaimTypes.Role, "Guest")                      
+        }; 
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -181,5 +165,56 @@ public class AccountController:ControllerBase
         }
         AddErrors(result);
         return BadRequest(ModelState);
+    }
+    
+    private async Task EnsureRolesExist()
+    {
+        if (!await _roleManager.RoleExistsAsync(ApplicationRole.RoleNames.LoggedIn))
+        {
+            var role = new ApplicationRole { Name = ApplicationRole.RoleNames.LoggedIn };
+            await _roleManager.CreateAsync(role);
+        }
+    }
+
+    private async Task<string> GenerateJwtToken(ApplicationUser user)
+    {
+        var userRoles = await _userManager.GetRolesAsync(user);
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        };
+
+        foreach (var role in userRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        // Parse LifespanMinutes from configuration
+        if (!int.TryParse(_configuration["Jwt:LifespanMinutes"], out var lifespanMinutes))
+        {
+            lifespanMinutes = 30; // fallback default in case config is missing or invalid
+        }
+        
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(lifespanMinutes),
+            signingCredentials: creds);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private void AddErrors(IdentityResult result)
+    {
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
     }
 }

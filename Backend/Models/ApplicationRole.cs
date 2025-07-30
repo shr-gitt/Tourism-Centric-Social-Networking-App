@@ -1,10 +1,11 @@
 using AspNetCore.Identity.MongoDbCore.Models;
+using MongoDB.Bson;
 using MongoDbGenericRepository.Attributes;
 
 namespace Backend.Models
 {
     [CollectionName("TouristUsersRole")]
-    public class ApplicationRole : MongoIdentityRole<Guid>
+    public class ApplicationRole : MongoIdentityRole<ObjectId>
     {
         public static class RoleNames
         {
@@ -13,6 +14,5 @@ namespace Backend.Models
             public const string Guest = "Guest";
             public const string LoggedIn = "LoggedIn";
         }
-
     }
 }
