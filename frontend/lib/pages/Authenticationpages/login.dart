@@ -38,6 +38,11 @@ class _LoginPageState extends State<LoginPage> {
     log('Email:$email and Password:$password');
 
     final userId = await UserService().loginUser(data);
+    /*{
+      response => {
+
+      }
+    };*/
     log('Login userId: $userId');
 
     if (userId != null) {

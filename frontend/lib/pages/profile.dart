@@ -36,7 +36,7 @@ class _ProfileState extends State<Profile> {
 
   Future<void> _loadUserId() async {
     String? userId = await AuthStorage.getUserId();
-    log('userId is $userId');
+    log('in profile page, userId is $userId');
 
     if (userId != null) {
       final fetchedUser = await userapi.fetchUserData(userId);

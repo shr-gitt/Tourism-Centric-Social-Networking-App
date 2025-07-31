@@ -51,7 +51,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
-    log('Full post object: $post');
+    log('Full post object: ${post['postId']}');
     return GestureDetector(
       onTap: () {
         Navigator.pushReplacement(
