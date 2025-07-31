@@ -48,7 +48,7 @@ class _InputpostState extends State<Inputpost> {
   }
 
   Future<void> _initializeUid() async {
-    uid = await AuthStorage.getUserId();
+    uid = await AuthStorage.getUserName();
     setState(() {});
     Future.delayed(Duration(seconds: 1), () {
       if (uid == null && mounted) {

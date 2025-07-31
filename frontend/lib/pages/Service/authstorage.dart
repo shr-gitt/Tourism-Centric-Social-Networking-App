@@ -22,14 +22,15 @@ class AuthStorage {
     return payloadMap;
   }
 
-  static Future<void> saveUserId(String userId) async {
+  static Future<void> saveUserName(String userId) async {
     final prefs = await SharedPreferences.getInstance();
     log('Stored user id is $userId');
     await prefs.setString(_userIdKey, userId);
   }
 
-  static Future<String?> getUserId() async {
+  static Future<String?> getUserName() async {
     final prefs = await SharedPreferences.getInstance();
+    log('In get user id, userid is ${prefs.getString(_userIdKey)}');
     return prefs.getString(_userIdKey);
   }
 
@@ -37,11 +38,15 @@ class AuthStorage {
     final prefs = await SharedPreferences.getInstance();
     log('Stored JWT is $token');
     await prefs.setString(_tokenKey, token);
+    
     final decoded = decodeJwt(token);
     log('decoded jwt is: $decoded');
-    final userId = decoded['userId'];
-    if (userId != null) {
-      await saveUserId(userId);
+    
+    final username = decoded['sub'];
+    log('after decoding, userId is : $username');
+    
+    if (username != null) {
+      await saveUserName(username);
     } else {
       log('User ID not found in JWT payload');
     }

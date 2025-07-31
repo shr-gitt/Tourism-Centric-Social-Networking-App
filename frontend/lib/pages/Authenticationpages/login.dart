@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     log('Login userId: $userId');
 
     if (userId != null) {
-      await AuthStorage.saveUserId(userId);
+      await AuthStorage.saveUserName(userId);
       log('Saving userId: $userId');
 
       if (!mounted) return;

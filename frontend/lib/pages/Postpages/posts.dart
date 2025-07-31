@@ -66,7 +66,7 @@ class _PostsPageState extends State<PostsPage> {
           });
 
           return FutureBuilder<String?>(
-            future: AuthStorage.getUserId(),
+            future: AuthStorage.getUserName(),
             builder: (context, userIdSnapshot) {
               if (userIdSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());

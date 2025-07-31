@@ -29,7 +29,7 @@ class _FeedbacksState extends State<Feedbacks> {
     super.initState();
     final postId = widget.post['postid'] ?? widget.post['postId'];
 
-    AuthStorage.getUserId().then((userId) {
+    AuthStorage.getUserName().then((userId) {
       feedbacksFuture = api.fetchAllFeedbacks().then((feedbacks) {
         final postFeedbacks = feedbacks.where((f) {
           return (f['postId'] == postId || f['PostId'] == postId) &&
@@ -154,7 +154,7 @@ class _FeedbacksState extends State<Feedbacks> {
                 children: <Widget>[
                   GFButton(
                     onPressed: () async {
-                      String? uid = await AuthStorage.getUserId();
+                      String? uid = await AuthStorage.getUserName();
                       log('post:$post');
                       log('postid:$postId');
                       if (uid != null) {
@@ -225,7 +225,7 @@ class _FeedbacksState extends State<Feedbacks> {
                   ),
                   GFButton(
                     onPressed: () async {
-                      String? uid = await AuthStorage.getUserId();
+                      String? uid = await AuthStorage.getUserName();
                       if (uid != null) {
                         if (_isDisLiked) {
                           setState(() {
@@ -256,7 +256,7 @@ class _FeedbacksState extends State<Feedbacks> {
                             );
                           });
                           try {
-                            String? uid = await AuthStorage.getUserId();
+                            String? uid = await AuthStorage.getUserName();
                             log('post:$post');
                             log('postid:$postId');
                             final success = await ApiconnectFeedbacks(

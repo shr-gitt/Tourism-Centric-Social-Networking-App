@@ -21,7 +21,7 @@ class ApiconnectFeedbacks {
 
   Future<bool> submitFeedback() async {
     final service = FeedbackService();
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     final success = await service.submitFeedback(
       UserId: uid,
       PostId: PostId,
@@ -39,7 +39,7 @@ class ApiconnectFeedbacks {
   }
 
   Future<bool> addLike() async {
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     return await ApiconnectFeedbacks(
       UserId: uid,
       PostId: PostId,
@@ -48,7 +48,7 @@ class ApiconnectFeedbacks {
   }
 
   Future<bool> adddisLike() async {
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     return await ApiconnectFeedbacks(
       UserId: uid,
       PostId: PostId,
@@ -57,7 +57,7 @@ class ApiconnectFeedbacks {
   }
 
   Future<bool> addComment(String comment) async {
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     log('comment in apiconnect is: $comment and post id is $PostId');
     return await ApiconnectFeedbacks(
       UserId: uid,
@@ -67,7 +67,7 @@ class ApiconnectFeedbacks {
   }
 
   Future<bool> editReaction(bool like) async {
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     if (feedbackId == null) {
       log("No feedback ID provided for editing.");
       return false;
@@ -93,7 +93,7 @@ class ApiconnectFeedbacks {
   }
 
   Future<bool> editComment(String comment) async {
-    String? uid = await AuthStorage.getUserId();
+    String? uid = await AuthStorage.getUserName();
     if (feedbackId == null) {
       log("No feedback ID provided for editing.");
       return false;

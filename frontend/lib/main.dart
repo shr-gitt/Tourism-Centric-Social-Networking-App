@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkLoginStatus() async {
-    final userId = await AuthStorage.getUserId();
+    final userId = await AuthStorage.getUserName();
     if (!mounted) return;
 
     log('User ID: $userId');

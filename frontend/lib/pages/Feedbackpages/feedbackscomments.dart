@@ -114,7 +114,7 @@ class _CommentsState extends State<Comments> {
                 padding: const EdgeInsets.only(right: 10.0),
                 child: ElevatedButton(
                   onPressed: () async {
-                    String? uid = await AuthStorage.getUserId();
+                    String? uid = await AuthStorage.getUserName();
                     if (uid != null) {
                       final commentText = _commentController.text.trim();
                       if (commentText.isNotEmpty) {

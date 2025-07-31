@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 
 class UserService {
   static const String userurl = Constants.userurl;
-  static const String authurl = Constants.authurl;
 
   // Add JWT if needed from secure storage
   Future<Map<String, String>> _getHeaders() async {
@@ -42,7 +41,7 @@ class UserService {
 
     try {
       final response = await dio.post(
-        '$authurl/Register',
+        '$userurl/Register',
         data: formData,
         //options: Options(headers: await _getHeaders()),
       );
@@ -60,27 +59,33 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>> fetchUserById(String userId) async {
+  Future<Map<String, dynamic>> fetchUserByUserName(String username) async {
     final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('$userurl/$userId'),
+      Uri.parse('$userurl/GetByUserName/$username'),
       headers: headers,
     );
 
+    log('Url is : $userurl/GetByUserName/$username');
     if (response.statusCode == 200) {
+      log('User has been fetched from fetchUserByUserName');
       return jsonDecode(response.body);
     } else {
+      log('User has not been fetched from fetchUserByUserName');
       throw Exception('Failed to load user: ${response.body}');
     }
   }
 
-  Future<Map<String, dynamic>?> fetchUserData(String userId) async {
+  Future<Map<String, dynamic>?> fetchUserData(String username) async {
     try {
-      final userData = await fetchUserById(userId);
+      log(
+        'Currently in fetchUserData trying to fetchUserByUserName. here, username is $username',
+      );
+      final userData = await fetchUserByUserName(username);
       log('Fetched user: $userData');
       return userData;
     } catch (e) {
-      log('Error fetching user: $e');
+      log('Error fetching user through fetchUserData: $e');
       return null;
     }
   }
@@ -88,20 +93,23 @@ class UserService {
   Future loginUser(Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('$authurl/Login'),
+      Uri.parse('$userurl/Login'),
       headers: headers,
       body: jsonEncode(data),
     );
+    log('Trying to log in user');
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('data $data');
-      //final userId = data['userId'];
+
       final token = data['token'];
       log('User login successfully.');
+      log('token is $token');
       await AuthStorage.saveToken(token);
-      final userId = await AuthStorage.getUserId();
-      return userId;
+
+      final username = await AuthStorage.getUserName();
+      return username;
     } else {
       log('Failed to login user: ${response.body}-${response.statusCode}');
       return null;
@@ -109,12 +117,12 @@ class UserService {
   }
 
   Future<bool> updateUser(
-    String userId,
+    String username,
     Map<String, dynamic> updatedData,
   ) async {
     final headers = await _getHeaders();
     final response = await http.put(
-      Uri.parse('$userurl/$userId'),
+      Uri.parse('$userurl/$username'),
       headers: headers,
       body: jsonEncode(updatedData),
     );
@@ -128,10 +136,10 @@ class UserService {
     }
   }
 
-  Future<bool> deleteUser(String userId) async {
+  Future<bool> deleteUser(String username) async {
     final headers = await _getHeaders();
     final response = await http.delete(
-      Uri.parse('$userurl/$userId'),
+      Uri.parse('$userurl/$username'),
       headers: headers,
     );
 

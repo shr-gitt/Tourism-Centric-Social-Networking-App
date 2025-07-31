@@ -11,7 +11,7 @@ class UserConnect {
   /// Fetch the logged-in user's data
   Future<Map<String, dynamic>?> fetchCurrentUser() async {
     try {
-      String? uid = userId ?? await AuthStorage.getUserId();
+      String? uid = userId ?? await AuthStorage.getUserName();
       if (uid == null) {
         log("User ID is null");
         return null;
@@ -28,7 +28,7 @@ class UserConnect {
 
   Future<bool> updateCurrentUser(Map<String, dynamic> data) async {
     try {
-      String? uid = userId ?? await AuthStorage.getUserId();
+      String? uid = userId ?? await AuthStorage.getUserName();
       if (uid == null) {
         log("User ID is null");
         return false;
@@ -45,7 +45,7 @@ class UserConnect {
 
   Future<bool> deleteCurrentUser() async {
     try {
-      String? uid = userId ?? await AuthStorage.getUserId();
+      String? uid = userId ?? await AuthStorage.getUserName();
       if (uid == null) {
         log("User ID is null");
         return false;
