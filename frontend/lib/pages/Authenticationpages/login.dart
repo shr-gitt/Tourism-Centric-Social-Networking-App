@@ -18,6 +18,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool isRememberMe = false;
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
@@ -34,8 +35,14 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final data = {"Email": email, "Password": password};
-    log('Email:$email and Password:$password');
+    final data = {
+      "Email": email,
+      "Password": password,
+      "rememberMe": isRememberMe,
+    };
+    log(
+      'Email:$email and Password:$password and remember me is : $isRememberMe',
+    );
 
     final userId = await UserService().loginUser(data);
     /*{
@@ -105,14 +112,40 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 30),
-            GFButton(
-              onPressed: _handleLogin,
-              text: "Login",
-              fullWidthButton: true,
-              size: GFSize.LARGE,
-              type: GFButtonType.solid,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GFButton(
+                  onPressed: _handleLogin,
+                  text: "Login",
+                  textColor: Colors.black,
+                  fullWidthButton: true,
+                  size: GFSize.LARGE,
+                  type: GFButtonType.solid,
+                  color: const Color(0xFFF5E17A),
+                ),
+
+                Row(
+                  children: [
+                    GFCheckbox(
+                      size: 22,
+                      activeBgColor: const Color.fromARGB(255, 171, 175, 173),
+                      type: GFCheckboxType.square,
+                      onChanged: (value) {
+                        setState(() {
+                          isRememberMe = value;
+                        });
+                      },
+                      value: isRememberMe,
+                      inactiveIcon: null,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('Remember Me'),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
