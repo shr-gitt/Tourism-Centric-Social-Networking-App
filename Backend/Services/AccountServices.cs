@@ -1,7 +1,6 @@
 using MongoDB.Driver;
 using Backend.Models;
 using Backend.Data;
-using MongoDB.Bson;
 
 namespace Backend.Services;
 
@@ -17,15 +16,8 @@ public class AccountServices
     public async Task<List<ApplicationUser>> GetAsync()=>
         await _usersCollection.Find(_ => true).ToListAsync();
 
-    public async Task<ApplicationUser?> GetByIdAsync(string id)
+    public async Task<ApplicationUser?> GetByUserNameAsync(string username)
     {
-        if (!ObjectId.TryParse(id, out var objectId))
-        {
-            Console.WriteLine($"Invalid ObjectId format: {id}");
-            return null; 
-        }
-
-        return await _usersCollection.Find(p => p.Id == objectId).FirstOrDefaultAsync();
-        //await _usersCollection.Find(p => p.Id == ObjectId.Parse(id)).FirstOrDefaultAsync();
+        return await _usersCollection.Find(p => p.UserName == username).FirstOrDefaultAsync();
     }
 }

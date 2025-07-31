@@ -55,28 +55,18 @@ public class AccountController:ControllerBase
     }
     
     // GET: api/users/{id}
-    [HttpGet("{userid}")]
-    public async Task<IActionResult> GetById(string userid)
+    [HttpGet("{username}")]
+    public async Task<IActionResult> GetByUserName(string username)
     {
-        if (string.IsNullOrWhiteSpace(userid))
+        if (string.IsNullOrWhiteSpace(username))
             return BadRequest("Id cannot be null or empty.");
 
-        var user = await _accountServices.GetByIdAsync(userid);
+        var user = await _accountServices.GetByUserNameAsync(username);
         if (user == null)
             return NotFound();
 
         return Ok(user);
     }
-    
-    [HttpGet("{username}")]
-    public async Task<ApplicationUser> GetByUsernameAsync(string username)
-    {
-        var user = await _userManager.FindByNameAsync(username);
-        /*if (user == null)
-            return NotFound();*/
-        return user;
-    }
-
     
     [HttpPost]
     [AllowAnonymous]
@@ -154,7 +144,14 @@ public class AccountController:ControllerBase
             imagePath=new UploadImage().Upload(model.Image);
         }
 
-        var user = new ApplicationUser {UserName = model.UserName,Name= model.Name,PhoneNumber = model.Phone, Email = model.Email, Image = imagePath??""};
+        var user = new ApplicationUser
+        {
+            UserName = model.UserName.ToLowerInvariant(),
+            Name= model.Name,
+            PhoneNumber = model.Phone, 
+            Email = model.Email.ToLowerInvariant(), 
+            Image = imagePath??""
+        };
         
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
@@ -183,7 +180,6 @@ public class AccountController:ControllerBase
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? ""),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            //new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
 
         foreach (var role in userRoles)
