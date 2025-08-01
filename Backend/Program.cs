@@ -3,6 +3,7 @@ using Backend;
 using Backend.Data;
 using Backend.Models;
 using Backend.Services;
+using Backend.Services.userAccount;
 using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,6 +53,9 @@ builder.Services.AddScoped<AccountContext>();
 
 //Register Account related services
 builder.Services.AddScoped<AccountServices>();
+//builder.Services.AddScoped<IEmailSender>();
+//builder.Services.AddScoped<ISmsSender>();
+//builder.Services.AddScoped<MessageServices>();
 
 // Register Post related services
 builder.Services.AddScoped<PostServices>();
