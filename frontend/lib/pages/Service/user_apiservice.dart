@@ -8,14 +8,36 @@ import 'package:dio/dio.dart';
 
 class UserService {
   static const String userurl = Constants.userurl;
+  static const String manageurl = Constants.manageurl;
 
   // Add JWT if needed from secure storage
   Future<Map<String, String>> _getHeaders() async {
-    String? token = await AuthStorage.getToken(); // if using JWT
+    String? token = await AuthStorage.getToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // uncomment if using token
+      'Authorization': 'Bearer $token',
     };
+  }
+
+  Future<Map<String, dynamic>?> getUserSettings() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$manageurl/Index'),
+        headers: await _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        log('User settings fetched');
+        return jsonDecode(response.body);
+      } else {
+        log('Failed to fetch settings: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      log('Exception in getUserSettings: $e');
+      return null;
+    }
   }
 
   Future<bool> registerUser(Map<String, dynamic> data, File? image) async {
@@ -116,7 +138,45 @@ class UserService {
     }
   }
 
-  Future<bool> updateUser(
+  Future logoutUser() async {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$userurl/Logout'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      log('logout service data is $data');
+
+      return true;
+    } else {
+      log('Failed to logout user: ${response.body} - ${response.statusCode}');
+      return false;
+    }
+  }
+
+  Future guestUser() async {
+    final header = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$userurl/UseAsGuest'),
+      headers: header,
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      log('Guest User service data is $data');
+
+      return true;
+    } else {
+      log(
+        'Failed to login as guest user: ${response.body} - ${response.statusCode}',
+      );
+      return false;
+    }
+  }
+
+  /*Future<bool> updateUser(
     String username,
     Map<String, dynamic> updatedData,
   ) async {
@@ -150,5 +210,5 @@ class UserService {
       log('Failed to delete user: ${response.body}');
       return false;
     }
-  }
+  }*/
 }

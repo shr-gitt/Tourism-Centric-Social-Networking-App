@@ -26,7 +26,7 @@ class UserConnect {
     }
   }
 
-  Future<bool> updateCurrentUser(Map<String, dynamic> data) async {
+  /*Future<bool> updateCurrentUser(Map<String, dynamic> data) async {
     try {
       String? uid = userId ?? await AuthStorage.getUserName();
       if (uid == null) {
@@ -58,5 +58,5 @@ class UserConnect {
       log("Failed to delete user: $e");
       return false;
     }
-  }
+  }*/
 }
