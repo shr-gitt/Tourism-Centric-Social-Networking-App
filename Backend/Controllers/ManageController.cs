@@ -1,6 +1,8 @@
+using MongoDB.Bson;
 using Backend.Models;
 using Backend.DTO.Manage;
 using Backend.Services.userAccount;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +13,7 @@ namespace Backend.Controllers
     /// Manages user account settings like passwords, 2FA, and phone numbers.
     /// </summary>
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]/[action]")]
     //[ApiExplorerSettings(GroupName = "Manage")]
     public class ManageController : ControllerBase
@@ -42,7 +44,7 @@ namespace Backend.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null)
             {
                 _logger.LogInformation("User not found in Index of ManageController.");
@@ -71,7 +73,7 @@ namespace Backend.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -93,7 +95,7 @@ namespace Backend.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
@@ -110,7 +112,7 @@ namespace Backend.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
@@ -125,7 +127,7 @@ namespace Backend.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var result = await _userManager.ChangePhoneNumberAsync(user, model.PhoneNumber, model.Code);
@@ -140,7 +142,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> RemovePhone()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var result = await _userManager.SetPhoneNumberAsync(user, null);
@@ -155,7 +157,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> EnableTwoFactor()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
@@ -168,7 +170,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> DisableTwoFactor()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             await _userManager.SetTwoFactorEnabledAsync(user, false);
@@ -181,7 +183,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetAuthenticatorKey()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             await _userManager.ResetAuthenticatorKeyAsync(user);
@@ -193,7 +195,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerateRecoveryCodes()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var codes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 5);
@@ -205,7 +207,7 @@ namespace Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveExternalLogin(RemoveLoginRequest model)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var result = await _userManager.RemoveLoginAsync(user, model.LoginProvider, model.ProviderKey);
@@ -218,10 +220,13 @@ namespace Backend.Controllers
 
         /// <summary>Links an external login provider (e.g., Google, Facebook).</summary>
         [HttpPost]
-        public IActionResult LinkExternalLogin(string provider)
+        public async Task<IActionResult> LinkExternalLogin(string provider)
         {
+            var user = await GetCurrentUserAsync();
+            if (user == null) return Unauthorized();
+    
             var redirectUrl = Url.Action(nameof(LinkExternalLoginCallback), "Manage");
-            var props = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+            var props = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, user.Id.ToString());
             return Challenge(props, provider);
         }
 
@@ -229,7 +234,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> LinkExternalLoginCallback()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
             var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
@@ -240,6 +245,34 @@ namespace Backend.Controllers
                 return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
 
             return Ok(new { Message = "External login linked." });
+        }
+        
+        private async Task<ApplicationUser?> GetCurrentUserAsync()
+        {
+            // Get all NameIdentifier claims
+            var nameIdentifierClaims = User.FindAll(ClaimTypes.NameIdentifier).ToList();
+    
+            _logger.LogInformation("Found {Count} NameIdentifier claims", nameIdentifierClaims.Count);
+    
+            // Try each NameIdentifier claim to find the one that's a valid ObjectId
+            foreach (var claim in nameIdentifierClaims)
+            {
+                _logger.LogInformation("Trying NameIdentifier claim: {Value}", claim.Value);
+        
+                if (ObjectId.TryParse(claim.Value, out var objectId))
+                {
+                    _logger.LogInformation("Successfully parsed ObjectId: {ObjectId}", objectId);
+                    var user = await _userManager.FindByIdAsync(objectId.ToString());
+                    if (user != null)
+                    {
+                        _logger.LogInformation("User found: {UserName}", user.UserName);
+                        return user;
+                    }
+                }
+            }
+    
+            _logger.LogWarning("No valid ObjectId found in NameIdentifier claims");
+            return null;
         }
     }
 }
