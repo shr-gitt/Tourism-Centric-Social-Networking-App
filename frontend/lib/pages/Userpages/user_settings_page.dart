@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Service/usersettings_apiservice.dart';
 import 'package:getwidget/getwidget.dart';
@@ -26,6 +29,9 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
 
   Future<void> _loadSettings() async {
     setState(() => isLoading = true);
+    final token = await AuthStorage.getToken();
+    log('Token used for settings request: $token');
+
     final result = await _userService.getUserSettings();
     setState(() {
       settings = result;

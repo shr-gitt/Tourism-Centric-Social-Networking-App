@@ -43,7 +43,11 @@ namespace Backend.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            if (user == null)
+            {
+                _logger.LogInformation("User not found in Index of ManageController.");
+                return Unauthorized();
+            }
 
             var response = new
             {
