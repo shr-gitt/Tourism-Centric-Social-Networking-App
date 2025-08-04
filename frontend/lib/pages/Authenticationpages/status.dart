@@ -23,7 +23,7 @@ class _StatusState extends State<Status> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              child: Text('Sign In'),
+              child: Text('Sign Up'),
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -51,6 +51,13 @@ class _StatusState extends State<Status> {
                     builder: (context) => MainScreen(currentIndex: 0),
                   ),
                 );
+              },
+            ),
+            ElevatedButton.icon(
+              icon: Icon(Icons.g_mobiledata),
+              label: Text('Continue with Google'),
+              onPressed: () {
+                // Call your external login API, or open the OAuth URL
               },
             ),
           ],

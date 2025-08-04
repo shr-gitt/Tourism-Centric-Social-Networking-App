@@ -1,10 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Service/usersettings_apiservice.dart';
-import 'package:getwidget/getwidget.dart';
 
 class UserSettingsPage extends StatefulWidget {
   const UserSettingsPage({super.key});
@@ -47,7 +45,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
     final result = await action();
     if (result) {
       _showSnackBar(successMsg);
-      //await _loadSettings();
+      await _loadSettings(); // Refresh settings
     } else {
       _showSnackBar('Action failed');
     }
@@ -59,91 +57,101 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Center(child: CircularProgressIndicator());
-    if (error != null) return Center(child: Text(error!));
+    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (error != null) return Scaffold(body: Center(child: Text(error!)));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Settings')),
+      appBar: AppBar(
+        title: const Text('User Settings'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.grey,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            GFListTile(
-              titleText: 'Username',
-              subTitleText: settings!['userName'] ?? '',
-              icon: const Icon(Icons.person),
-            ),
-            GFListTile(
-              titleText: 'Email',
-              subTitleText: settings!['email'] ?? '',
-              icon: const Icon(Icons.email),
-            ),
-            GFListTile(
-              titleText: 'Phone Number',
-              subTitleText: settings!['phoneNumber'] ?? 'Not added',
-              icon: const Icon(Icons.phone),
-            ),
-            const SizedBox(height: 16),
-            GFButton(
-              text: 'Remove Phone Number',
-              onPressed: () =>
-                  _handleAction(_settings.removePhone, 'Phone removed'),
+            _infoTile('Username', settings?['userName'] ?? ''),
+            _infoTile('Email', settings?['email'] ?? ''),
+            _infoTile('Phone Number', settings?['phoneNumber'] ?? 'Not added'),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
               icon: const Icon(Icons.delete),
-              color: GFColors.DANGER,
+              label: const Text('Remove Phone Number'),
+              onPressed: () => _handleAction(_settings.removePhone, 'Phone number removed.'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
             const SizedBox(height: 10),
-            GFButton(
-              text: 'Enable 2FA',
-              onPressed: () =>
-                  _handleAction(_settings.enableTwoFactor, '2FA enabled'),
+            ElevatedButton.icon(
               icon: const Icon(Icons.security),
-              color: GFColors.SUCCESS,
+              label: const Text('Enable 2FA'),
+              onPressed: () => _handleAction(_settings.enableTwoFactor, '2FA enabled.'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             ),
-            GFButton(
-              text: 'Disable 2FA',
-              onPressed: () =>
-                  _handleAction(_settings.disableTwoFactor, '2FA disabled'),
+            const SizedBox(height: 10),
+            ElevatedButton.icon(
               icon: const Icon(Icons.no_encryption),
-              color: GFColors.WARNING,
+              label: const Text('Disable 2FA'),
+              onPressed: () => _handleAction(_settings.disableTwoFactor, '2FA disabled.'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
             ),
             const SizedBox(height: 10),
-            GFButton(
-              text: 'Reset Authenticator Key',
-              onPressed: () =>
-                  _handleAction(_settings.resetAuthenticatorKey, 'Key reset'),
+            ElevatedButton.icon(
               icon: const Icon(Icons.vpn_key),
+              label: const Text('Reset Authenticator Key'),
+              onPressed: () => _handleAction(_settings.resetAuthenticatorKey, 'Authenticator key reset.'),
             ),
             const SizedBox(height: 10),
-            GFButton(
-              text: 'Generate Recovery Codes',
+            ElevatedButton.icon(
+              icon: const Icon(Icons.lock_reset),
+              label: const Text('Generate Recovery Codes'),
               onPressed: () async {
                 final codes = await _settings.generateRecoveryCodes();
                 if (codes != null && codes.isNotEmpty) {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Recovery Codes'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: codes.map((code) => Text(code)).toList(),
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text('OK'),
-                          onPressed: () => Navigator.of(ctx).pop(),
-                        ),
-                      ],
-                    ),
-                  );
+                  _showRecoveryDialog(codes);
                 } else {
-                  _showSnackBar('Failed to generate codes');
+                  _showSnackBar('Failed to generate recovery codes.');
                 }
               },
-              icon: const Icon(Icons.lock_reset),
-              color: GFColors.PRIMARY,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoTile(String title, String value) {
+    return Column(
+      children: [
+        ListTile(
+          leading: const Icon(Icons.info),
+          title: Text(title),
+          subtitle: Text(value),
+        ),
+        const Divider(),
+      ],
+    );
+  }
+
+  void _showRecoveryDialog(List<String> codes) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Recovery Codes'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: codes.map((code) => Text(code)).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+        ],
       ),
     );
   }
