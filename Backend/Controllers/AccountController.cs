@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Models;
 using Backend.DTO.Account;
+using Backend.Services;
 using Backend.Services.userAccount;
 using Backend.Services.userPostService;
 
@@ -20,6 +21,7 @@ namespace Backend.Controllers;
 [Route("api/[controller]/[action]")]
 public class AccountController : ControllerBase
 {
+    private readonly AccountServices _accountServices;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSender _emailSender;
@@ -30,6 +32,7 @@ public class AccountController : ControllerBase
     private readonly UploadImage _uploadImage;
 
     public AccountController(
+        AccountServices accountServices,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IEmailSender emailSender,
@@ -39,6 +42,7 @@ public class AccountController : ControllerBase
         RoleManager<ApplicationRole> roleManager,
         UploadImage uploadImage)
     {
+        _accountServices = accountServices;
         _userManager = userManager;
         _signInManager = signInManager;
         _emailSender = emailSender;
@@ -47,6 +51,27 @@ public class AccountController : ControllerBase
         _configuration = configuration;
         _roleManager = roleManager;
         _uploadImage = uploadImage;
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var users= await _accountServices.GetAsync();
+        return Ok(users);
+    }
+    
+    // GET: api/users/{id}
+    [HttpGet("{username}")]
+    public async Task<IActionResult> GetByUserName(string username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+            return BadRequest("Id cannot be null or empty.");
+
+        var user = await _accountServices.GetByUserNameAsync(username);
+        if (user == null)
+            return NotFound();
+
+        return Ok(user);
     }
 
     /// <summary>
@@ -398,9 +423,9 @@ public class AccountController : ControllerBase
 
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Name, user.UserName),
+            //new Claim(ClaimTypes.Name, user.UserName),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
 

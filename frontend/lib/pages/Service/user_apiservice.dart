@@ -122,9 +122,10 @@ class UserService {
     log('Trying to log in user');
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      log('data $data');
+      final decoded = jsonDecode(response.body);
+      log('decoded data is $decoded');
 
+      final data = decoded['data'];
       final token = data['token'];
       log('User login successfully.');
       log('token is $token');

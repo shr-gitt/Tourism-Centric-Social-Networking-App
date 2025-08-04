@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
+import 'package:frontend/pages/Userpages/user_settings_page.dart';
 import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/settings.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
@@ -98,6 +99,18 @@ class _ProfileState extends State<Profile> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => Settings()),
+                      );
+                    },
+                    icon: Icon(Icons.settings),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      log('Settings button pressed');
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UserSettingsPage(),
+                        ),
                       );
                     },
                     icon: Icon(Icons.settings),

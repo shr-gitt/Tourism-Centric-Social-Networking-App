@@ -53,9 +53,9 @@ builder.Services.AddScoped<AccountContext>();
 
 //Register Account related services
 builder.Services.AddScoped<AccountServices>();
-//builder.Services.AddScoped<IEmailSender>();
-//builder.Services.AddScoped<ISmsSender>();
-//builder.Services.AddScoped<MessageServices>();
+builder.Services.AddScoped<IEmailSender, AuthMessageSender>();
+builder.Services.AddScoped<ISmsSender, AuthMessageSender>();
+builder.Services.AddScoped<UploadImage>();
 
 // Register Post related services
 builder.Services.AddScoped<PostServices>();

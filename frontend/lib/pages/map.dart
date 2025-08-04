@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'package:frontend/pages/Userpages/user_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 
@@ -32,7 +34,21 @@ class _MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Map")),
+      appBar: AppBar(
+        title: const Text("Map"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              log('Settings button pressed');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => UserSettingsPage()),
+              );
+            },
+            icon: Icon(Icons.settings),
+          ),
+        ],
+      ),
       body: OSMFlutter(
         controller: controller,
         osmOption: OSMOption(
@@ -48,9 +64,7 @@ class _MapState extends State<Map> {
           ),
           roadConfiguration: const RoadOption(roadColor: Colors.yellowAccent),
         ),
-        mapIsLoading: const Center(
-          child: CircularProgressIndicator(),
-        ), 
+        mapIsLoading: const Center(child: CircularProgressIndicator()),
         onMapIsReady: (ready) {
           if (ready) {
             setState(() {

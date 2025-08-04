@@ -38,13 +38,15 @@ class AuthStorage {
     final prefs = await SharedPreferences.getInstance();
     log('Stored JWT is $token');
     await prefs.setString(_tokenKey, token);
-    
+
     final decoded = decodeJwt(token);
     log('decoded jwt is: $decoded');
-    
+
     final username = decoded['sub'];
+
+    //final username =decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name:'];
     log('after decoding, userId is : $username');
-    
+
     if (username != null) {
       await saveUserName(username);
     } else {

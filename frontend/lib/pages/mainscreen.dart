@@ -5,7 +5,7 @@ import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/map.dart';
 import 'package:frontend/pages/Postpages/createpost.dart';
 import 'package:frontend/pages/notification.dart';
-import 'package:frontend/pages/profile.dart';
+import 'package:frontend/pages/Userpages/profile.dart';
 
 // ignore: must_be_immutable
 class MainScreen extends StatefulWidget {
