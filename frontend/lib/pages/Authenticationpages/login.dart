@@ -7,6 +7,8 @@ import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Authenticationpages/signup.dart';
+import 'package:frontend/pages/Authenticationpages/forgot_password.dart';
+import 'package:frontend/pages/Authenticationpages/guest_access.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -145,6 +147,35 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
+
+            // Forgot Password Button
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                );
+              },
+              child: const Text("Forgot Password?"),
+            ),
+
+            // Guest Access Button
+            GFButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GuestAccessPage()),
+                );
+              },
+              text: "Continue as Guest",
+              textColor: Colors.black,
+              fullWidthButton: true,
+              size: GFSize.LARGE,
+              type: GFButtonType.outline,
+              color: Colors.grey,
+            ),
+
+            const SizedBox(height: 10),
 
             TextButton(
               onPressed: () {
