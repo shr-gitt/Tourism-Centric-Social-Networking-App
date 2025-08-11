@@ -305,21 +305,34 @@ public class AccountController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
 
+        _logger.LogInformation("ForgotPassword email request: {Email}",  model.Email);
         var user = await _userManager.FindByEmailAsync(model.Email.ToLowerInvariant());
-        if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+        _logger.LogInformation("ForgotPassword user email: {Email}", user.Email);
+        if (user == null)// || !(await _userManager.IsEmailConfirmedAsync(user)))
         {
             // Always return success to avoid email enumeration
             return Ok(new ApiResponse<string> { Success = true, Message = "If this email exists, a reset link has been sent." });
         }
 
+        //var code = GenerateSixDigitCode();
         var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
         // Provide the reset link so frontend app can handle it
-        var frontendResetUrl = $"{_configuration["FrontendBaseUrl"]}/reset-password?code={Uri.EscapeDataString(code)}&email={Uri.EscapeDataString(user.Email)}";
-
-        await _emailSender.SendEmailAsync(user.Email, "Reset Password",
-            $"Please reset your password by clicking here: <a href='{frontendResetUrl}'>Reset Password</a>");
-
+        try
+        {
+            await _emailSender.SendEmailAsync(
+                user.Name,
+                user.Email, 
+                "Reset Password",
+                $"Your password reset code is:<br><strong>{code}</strong><br>" +
+                "Copy this code into the app to reset your password.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send reset password email to {Email}", user.Email);
+            return StatusCode(500, new ApiResponse<object> { Success = false, Message = "Failed to send email." });
+        }
+        
         return Ok(new ApiResponse<string> { Success = true, Message = "Reset email sent." });
     }
 
@@ -488,4 +501,10 @@ public class AccountController : ControllerBase
         public T Data { get; set; }
     }
     #endregion
+    private string GenerateSixDigitCode() 
+    {
+        var random = new Random();
+        return random.Next(100000, 999999).ToString(); // always 6 digits
+    }
+
 }
