@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
+import 'package:frontend/pages/Service/usersettings_apiservice.dart';
 import 'package:frontend/pages/Userpages/change_password.dart';
 import 'package:frontend/pages/Userpages/user_settings_page.dart';
 import 'package:frontend/pages/decorhelper.dart';
+import 'package:frontend/pages/help_center.dart';
 import 'package:frontend/pages/mainscreen.dart';
 
 class Settings extends StatefulWidget {
@@ -16,6 +18,13 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  final UserService _userService = UserService();
+  final UsersettingsApiservice _settings = UsersettingsApiservice();
+
+  Map<String, dynamic>? settings;
+  bool isLoading = false;
+  String? error;
+
   Future<void> _logoutUser() async {
     try {
       await UserService().logoutUser();
@@ -33,6 +42,44 @@ class _SettingsState extends State<Settings> {
         context,
       ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
     }
+  }
+
+  Future<void> _loadSettings() async {
+    setState(() => isLoading = true);
+    final token = await AuthStorage.getToken();
+    log('Token used for settings request: $token');
+
+    final result = await _userService.getUserSettings();
+    setState(() {
+      settings = result;
+      isLoading = false;
+      error = result == null ? 'Failed to load settings' : null;
+    });
+  }
+
+  Future<void> _handleAction(
+    Future<bool> Function() action,
+    String successMsg,
+  ) async {
+    final result = await action();
+    if (result) {
+      _showSnackBar(successMsg);
+      await _loadSettings(); // Refresh settings
+    } else {
+      _showSnackBar('Action failed');
+    }
+  }
+
+  void _showSnackBar(String msg, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red.shade400 : Colors.green.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -83,6 +130,45 @@ class _SettingsState extends State<Settings> {
                       MaterialPageRoute(
                         builder: (_) => const ChangePasswordPage(),
                       ),
+                    ),
+                    iconColor: Colors.blue.shade600,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  DecorHelper().buildSettingCard(
+                    title: 'Two-Factor Authentication',
+                    subtitle: settings?['twoFactorEnabled'] == true
+                        ? 'Enabled - Your account is protected'
+                        : 'Disabled - Enhance your security',
+                    icon: Icons.security_outlined,
+                    onTap: () {
+                      if (settings?['twoFactorEnabled'] == true) {
+                        _handleAction(
+                          _settings.disableTwoFactor,
+                          '2FA disabled.',
+                        );
+                      } else {
+                        _handleAction(
+                          _settings.enableTwoFactor,
+                          '2FA enabled.',
+                        );
+                      }
+                    },
+                    iconColor: settings?['twoFactorEnabled'] == true
+                        ? Colors.green.shade600
+                        : Colors.orange.shade600,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  DecorHelper().buildSettingCard(
+                    title: 'Help Center',
+                    subtitle: 'Frequently asked questions',
+                    icon: Icons.lock_outline,
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HelpCenterPage()),
                     ),
                     iconColor: Colors.blue.shade600,
                   ),
