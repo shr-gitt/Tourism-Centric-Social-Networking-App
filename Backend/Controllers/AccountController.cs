@@ -188,10 +188,11 @@ public class AccountController : ControllerBase
     /// Logout the user by clearing cookies/session.
     /// </summary>
     [HttpPost]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [ProducesResponseType(typeof(ApiResponse<string>), 200)]
     public async Task<IActionResult> Logout()
     {
+        _logger.LogInformation("Trying to logged out User.");
         await _signInManager.SignOutAsync();
         _logger.LogInformation("User {UserId} logged out.", User.FindFirstValue(ClaimTypes.NameIdentifier));
         return Ok(new ApiResponse<string> { Success = true, Message = "User logged out." });
@@ -506,5 +507,4 @@ public class AccountController : ControllerBase
         var random = new Random();
         return random.Next(100000, 999999).ToString(); // always 6 digits
     }
-
 }

@@ -146,6 +146,7 @@ class UserService {
       headers: headers,
     );
 
+    log('Sending logout request with headers: $headers');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('logout service data is $data');

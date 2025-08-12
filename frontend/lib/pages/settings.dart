@@ -1,7 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Authenticationpages/status.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/Service/user_apiservice.dart';
+import 'package:frontend/pages/Userpages/user_settings_page.dart';
 import 'package:frontend/pages/mainscreen.dart';
 
 class Settings extends StatefulWidget {
@@ -13,18 +15,22 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   Future<void> _logoutUser() async {
-    await AuthStorage.logout();
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            const Status(title: 'Tourism Centric Social Networking App'),
-      ),
-    );
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
+    try {
+      await UserService().logoutUser();
+      await AuthStorage.logout();
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+    }
   }
 
   @override
@@ -43,11 +49,31 @@ class _SettingsState extends State<Settings> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Work in Progress....'),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: _logoutUser, child: const Text('Logout')),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    log('User Details pressed');
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserSettingsPage(),
+                      ),
+                    );
+                  },
+                  child: const Text('Account Details'),
+                ),
+                const SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed: _logoutUser,
+                  child: const Text('Logout'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
