@@ -1,4 +1,4 @@
-import 'dart:developer';
+/*import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Authenticationpages/signup.dart';
@@ -66,3 +66,4 @@ class _StatusState extends State<Status> {
     );
   }
 }
+*/

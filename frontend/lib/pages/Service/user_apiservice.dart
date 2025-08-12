@@ -177,6 +177,61 @@ class UserService {
     }
   }
 
+  Future<bool> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$userurl/ForgotPassword'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        log('Forgot password response: ${result['message']}');
+        return result['success'] ?? true;
+      } else {
+        log('Forgot password failed: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in forgotPassword: $e');
+      return false;
+    }
+  }
+
+  /// Reset Password - Reset password using code
+  Future<bool> resetPassword(
+    String email,
+    String code,
+    String newPassword,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$userurl/ResetPassword'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'Email': email,
+          'Code': code,
+          'Password': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        log('Reset password successful: ${result['message']}');
+        return result['success'] ?? true;
+      } else {
+        log('Reset password failed: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in resetPassword: $e');
+      return false;
+    }
+  }
+
   /*Future<bool> updateUser(
     String username,
     Map<String, dynamic> updatedData,

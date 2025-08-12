@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Authenticationpages/status.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/mainscreen.dart';
 import 'dart:io'; 
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Tourism-Centric Social Networking App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 255, 235, 59)),
       ),
       home: const SplashScreen(), // Renamed for clarity
     );
@@ -70,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen> {
         context,
         MaterialPageRoute(
           builder: (_) =>
-              const Status(title: 'Tourism Centric Social Networking App'),
+              const LoginPage(),
         ),
       );
     }

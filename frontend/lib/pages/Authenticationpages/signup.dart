@@ -1,9 +1,10 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
+import 'package:frontend/pages/decorhelper.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:frontend/pages/Authenticationpages/status.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 
 class SignupPage extends StatefulWidget {
@@ -20,6 +21,8 @@ class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmpasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isconfirmPasswordVisible = false;
 
   // Add Image Picker related variables
   final ImagePicker _picker = ImagePicker();
@@ -84,10 +87,7 @@ class _SignupPageState extends State<SignupPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) =>
-              Status(title: 'Tourism Centric Social Networking App'),
-        ),
+        MaterialPageRoute(builder: (context) => LoginPage()),
       );
     } else {
       GFToast.showToast(
@@ -106,118 +106,172 @@ class _SignupPageState extends State<SignupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) =>
-                  Status(title: 'Tourism-Centric Social Networking App'),
-            ),
+            MaterialPageRoute(builder: (_) => LoginPage()),
           ),
         ),
-        title: const Text("Sign Up"),
-        centerTitle: true,
+        backgroundColor: Color.fromARGB(255, 233, 224, 143),
+        //title: const Text("Sign Up"),
+        //centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Card(
-          elevation: 3,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                const Text("Create Account", style: TextStyle(fontSize: 22)),
-                const SizedBox(height: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 45),
+            Card(
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
 
-                // Username Field
-                GFTextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(),
-                  ),
+                    const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF2D3748),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'New User? Create Account',
+                      style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
+                      textAlign: TextAlign.center,
+                    ),
+                    //const Text("Create Account", style: TextStyle(fontSize: 22)),
+                    const SizedBox(height: 20),
+
+                    // Username Field
+                    DecorHelper().buildModernTextField(
+                      controller: _usernameController,
+                      label: 'Username',
+                      icon: Icons.person_2_outlined,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Full Name Field
+                    DecorHelper().buildModernTextField(
+                      controller: _fullnameController,
+                      label: 'Full Name',
+                      icon: Icons.person,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Phone Number Field
+                    DecorHelper().buildModernTextField(
+                      controller: _phonenumberController,
+                      label: 'Phone Number',
+                      icon: Icons.phone,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Email Field
+                    DecorHelper().buildModernTextField(
+                      controller: _emailController,
+                      label: 'Email',
+                      icon: Icons.email_outlined,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password Field
+                    DecorHelper().buildModernTextField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      icon: Icons.lock_outline,
+                      obscureText: !_isPasswordVisible,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: const Color(0xFF718096),
+                        ),
+                        onPressed: () => setState(
+                          () => _isPasswordVisible = !_isPasswordVisible,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Password is required';
+                        }
+                        if (value!.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Confirm Password Field
+                    DecorHelper().buildModernTextField(
+                      controller: _confirmpasswordController,
+                      label: 'Password',
+                      icon: Icons.lock_outline,
+                      obscureText: !_isconfirmPasswordVisible,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isconfirmPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: const Color(0xFF718096),
+                        ),
+                        onPressed: () => setState(
+                          () => _isconfirmPasswordVisible =
+                              !_isconfirmPasswordVisible,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Password is required';
+                        }
+                        if (value!.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Image Picker Button
+                    ElevatedButton(
+                      onPressed: _pickImage,
+                      child: const Text("Pick Profile Image"),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Display the picked image
+                    _image != null
+                        ? Image.file(
+                            _image!,
+                            height: 150,
+                            width: 150,
+                            fit: BoxFit.cover,
+                          )
+                        : const SizedBox.shrink(),
+
+                    const SizedBox(height: 24),
+
+                    // Sign Up Button
+                    DecorHelper().buildGradientButton(
+                      onPressed: _submitForm,
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-
-                // Full Name Field
-                GFTextField(
-                  controller: _fullnameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Phone Number Field
-                GFTextField(
-                  controller: _phonenumberController,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Email Field
-                GFTextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Password Field
-                GFTextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Confirm Password Field
-                GFTextField(
-                  controller: _confirmpasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Comfirm Password',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Image Picker Button
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  child: const Text("Pick Profile Image"),
-                ),
-                const SizedBox(height: 10),
-
-                // Display the picked image
-                _image != null
-                    ? Image.file(
-                        _image!,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
-                      )
-                    : const SizedBox.shrink(),
-
-                const SizedBox(height: 24),
-
-                // Sign Up Button
-                GFButton(
-                  onPressed: _submitForm,
-                  text: "Sign Up",
-                  color: Colors.blueGrey,
-                  blockButton: true,
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

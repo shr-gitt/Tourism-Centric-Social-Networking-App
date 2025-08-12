@@ -44,7 +44,6 @@ class AuthStorage {
 
     final username = decoded['sub'];
 
-    //final username =decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name:'];
     log('after decoding, userId is : $username');
 
     if (username != null) {
