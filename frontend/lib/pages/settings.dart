@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
+import 'package:frontend/pages/Userpages/change_password.dart';
 import 'package:frontend/pages/Userpages/user_settings_page.dart';
+import 'package:frontend/pages/decorhelper.dart';
 import 'package:frontend/pages/mainscreen.dart';
 
 class Settings extends StatefulWidget {
@@ -50,29 +52,49 @@ class _SettingsState extends State<Settings> {
       body: Center(
         child: Column(
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    log('User Details pressed');
-                    Navigator.pushReplacement(
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  const SizedBox(height: 20),
+                  DecorHelper().buildSettingCard(
+                    title: 'Account Details',
+                    subtitle: 'View your information',
+                    icon: Icons.person,
+                    onTap: () => Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserSettingsPage(),
+                        builder: (_) => const UserSettingsPage(),
                       ),
-                    );
-                  },
-                  child: const Text('Account Details'),
-                ),
-                const SizedBox(height: 20),
+                    ),
+                    iconColor: Colors.blue.shade600,
+                  ),
 
-                ElevatedButton(
-                  onPressed: _logoutUser,
-                  child: const Text('Logout'),
-                ),
-              ],
+                  const SizedBox(height: 20),
+
+                  DecorHelper().buildSettingCard(
+                    title: 'Change Password',
+                    subtitle: 'Update your account password',
+                    icon: Icons.lock_outline,
+                    onTap: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChangePasswordPage(),
+                      ),
+                    ),
+                    iconColor: Colors.blue.shade600,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  ElevatedButton(
+                    onPressed: _logoutUser,
+                    child: const Text('Logout'),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

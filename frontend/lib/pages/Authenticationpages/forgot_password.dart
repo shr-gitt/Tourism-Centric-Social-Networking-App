@@ -378,6 +378,38 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
 
                         const SizedBox(height: 32),
 
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Password requirements:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue.shade800,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '• At least 6 characters long\n • Use a combination of letters, numbers, and symbols',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade700,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
                         DecorHelper().buildGradientButton(
                           onPressed: _isLoading ? null : _resetPassword,
                           child: _isLoading
