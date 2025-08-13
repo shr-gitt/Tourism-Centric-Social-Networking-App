@@ -96,93 +96,134 @@ class _SettingsState extends State<Settings> {
         ),
         title: const Text('Settings'),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
 
-                children: [
-                  const SizedBox(height: 20),
-                  DecorHelper().buildSettingCard(
-                    title: 'Account Details',
-                    subtitle: 'View your information',
-                    icon: Icons.person,
-                    onTap: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const UserSettingsPage(),
+                  children: [
+                    const SizedBox(height: 20),
+                    DecorHelper().buildSettingCard(
+                      title: 'Account Details',
+                      subtitle: 'View your information',
+                      icon: Icons.person,
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const UserSettingsPage(),
+                        ),
+                      ),
+                      iconColor: Colors.blue.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildSettingCard(
+                      title: 'Verify Email',
+                      subtitle: 'Verify your email',
+                      icon: Icons.lock_outline,
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChangePasswordPage(),
+                        ),
+                      ),
+                      iconColor: Colors.blue.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildSettingCard(
+                      title: 'Change Password',
+                      subtitle: 'Update your account password',
+                      icon: Icons.lock_outline,
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ChangePasswordPage(),
+                        ),
+                      ),
+                      iconColor: Colors.blue.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildSettingCard(
+                      title: 'Two-Factor Authentication',
+                      subtitle: settings?['twoFactorEnabled'] == true
+                          ? 'Enabled - Your account is protected'
+                          : 'Disabled - Enhance your security',
+                      icon: Icons.security_outlined,
+                      onTap: () {
+                        if (settings?['twoFactorEnabled'] == true) {
+                          _handleAction(
+                            _settings.disableTwoFactor,
+                            '2FA disabled.',
+                          );
+                        } else {
+                          _handleAction(
+                            _settings.enableTwoFactor,
+                            '2FA enabled.',
+                          );
+                        }
+                      },
+                      iconColor: settings?['twoFactorEnabled'] == true
+                          ? Colors.green.shade600
+                          : Colors.orange.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildSettingCard(
+                      title: 'Help Center',
+                      subtitle: 'Frequently asked questions',
+                      icon: Icons.lock_outline,
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HelpCenterPage(),
+                        ),
+                      ),
+                      iconColor: Colors.blue.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildSettingCard(
+                      title: 'Delete Account',
+                      subtitle: 'Delete your account',
+                      icon: Icons.lock_outline,
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HelpCenterPage(),
+                        ),
+                      ),
+                      iconColor: Colors.blue.shade600,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildGradientButton(
+                      onPressed: _logoutUser,
+                      child: const Text(
+                        'Log Out',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    iconColor: Colors.blue.shade600,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  DecorHelper().buildSettingCard(
-                    title: 'Change Password',
-                    subtitle: 'Update your account password',
-                    icon: Icons.lock_outline,
-                    onTap: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const ChangePasswordPage(),
-                      ),
-                    ),
-                    iconColor: Colors.blue.shade600,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  DecorHelper().buildSettingCard(
-                    title: 'Two-Factor Authentication',
-                    subtitle: settings?['twoFactorEnabled'] == true
-                        ? 'Enabled - Your account is protected'
-                        : 'Disabled - Enhance your security',
-                    icon: Icons.security_outlined,
-                    onTap: () {
-                      if (settings?['twoFactorEnabled'] == true) {
-                        _handleAction(
-                          _settings.disableTwoFactor,
-                          '2FA disabled.',
-                        );
-                      } else {
-                        _handleAction(
-                          _settings.enableTwoFactor,
-                          '2FA enabled.',
-                        );
-                      }
-                    },
-                    iconColor: settings?['twoFactorEnabled'] == true
-                        ? Colors.green.shade600
-                        : Colors.orange.shade600,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  DecorHelper().buildSettingCard(
-                    title: 'Help Center',
-                    subtitle: 'Frequently asked questions',
-                    icon: Icons.lock_outline,
-                    onTap: () => Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HelpCenterPage()),
-                    ),
-                    iconColor: Colors.blue.shade600,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  ElevatedButton(
-                    onPressed: _logoutUser,
-                    child: const Text('Logout'),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

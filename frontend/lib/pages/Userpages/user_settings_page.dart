@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
-import 'package:frontend/pages/Service/usersettings_apiservice.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/Userpages/edit_info.dart';
+import 'package:frontend/pages/decorhelper.dart';
+import 'package:frontend/pages/settings.dart';
 
 class UserSettingsPage extends StatefulWidget {
   const UserSettingsPage({super.key});
@@ -12,146 +14,171 @@ class UserSettingsPage extends StatefulWidget {
 }
 
 class _UserSettingsPageState extends State<UserSettingsPage> {
-  final UserService _userService = UserService();
-  final UsersettingsApiservice _settings = UsersettingsApiservice();
-  Map<String, dynamic>? settings;
-
-  bool isLoading = true;
-  String? error;
+  final UserService userapi = UserService();
+  Map<String, dynamic>? user;
 
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    _loadUserId();
   }
 
-  Future<void> _loadSettings() async {
-    setState(() => isLoading = true);
-    final token = await AuthStorage.getToken();
-    log('Token used for settings request: $token');
+  Future<void> _loadUserId() async {
+    String? userId = await AuthStorage.getUserName();
+    log('in profile page, userId is $userId');
 
-    final result = await _userService.getUserSettings();
-    setState(() {
-      settings = result;
-      isLoading = false;
-      error = result == null ? 'Failed to load settings' : null;
-    });
-  }
-
-  Future<void> _handleAction(
-    Future<bool> Function() action,
-    String successMsg,
-  ) async {
-    final result = await action();
-    if (result) {
-      _showSnackBar(successMsg);
-      await _loadSettings(); // Refresh settings
+    if (userId != null) {
+      final fetchedUser = await userapi.fetchUserData(userId);
+      if (!mounted) return;
+      setState(() {
+        user = fetchedUser;
+      });
     } else {
-      _showSnackBar('Action failed');
+      setState(() {
+        user = null;
+      });
     }
   }
 
-  void _showSnackBar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
+  Map<String, dynamic>? settings;
+
+  bool isLoading = false;
+  String? error;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (error != null) return Scaffold(body: Center(child: Text(error!)));
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+              const SizedBox(height: 16),
+              Text(
+                error!,
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 24),
+              /*ElevatedButton(
+                onPressed: _loadSettings,
+                child: const Text('Retry'),
+              ),*/
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('User Settings'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: Colors.grey,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
         child: Column(
           children: [
-            _infoTile('Username', settings?['userName'] ?? ''),
-            _infoTile('Email', settings?['email'] ?? ''),
-            _infoTile('Phone Number', settings?['phoneNumber'] ?? 'Not added'),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.delete),
-              label: const Text('Remove Phone Number'),
-              onPressed: () => _handleAction(_settings.removePhone, 'Phone number removed.'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            // Header with back button
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, size: 24),
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Settings()),
+                    ),
+                    padding: EdgeInsets.zero,
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Account Information',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Balance the back button
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.security),
-              label: const Text('Enable 2FA'),
-              onPressed: () => _handleAction(_settings.enableTwoFactor, '2FA enabled.'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.no_encryption),
-              label: const Text('Disable 2FA'),
-              onPressed: () => _handleAction(_settings.disableTwoFactor, '2FA disabled.'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.vpn_key),
-              label: const Text('Reset Authenticator Key'),
-              onPressed: () => _handleAction(_settings.resetAuthenticatorKey, 'Authenticator key reset.'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.lock_reset),
-              label: const Text('Generate Recovery Codes'),
-              onPressed: () async {
-                final codes = await _settings.generateRecoveryCodes();
-                if (codes != null && codes.isNotEmpty) {
-                  _showRecoveryDialog(codes);
-                } else {
-                  _showSnackBar('Failed to generate recovery codes.');
-                }
-              },
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsGeometry.fromLTRB(110, 0, 0, 0),
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundImage: user?['image'] != null
+                            ? NetworkImage(
+                                'https://localhost:5259${user!['image']}',
+                              )
+                            : null,
+                        child: user?['image'] == null
+                            ? const Icon(Icons.person, size: 40)
+                            : null,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    DecorHelper().buildInfoCard(
+                      title: 'Username',
+                      value: user?['userName'] ?? '',
+                      icon: Icons.person_outline,
+                    ),
+
+                    DecorHelper().buildInfoCard(
+                      title: 'Name',
+                      value: user?['name'] ?? '',
+                      icon: Icons.person_outline,
+                    ),
+
+                    DecorHelper().buildInfoCard(
+                      title: 'Email Address',
+                      value: user?['email'] ?? '',
+                      icon: Icons.email_outlined,
+                    ),
+
+                    DecorHelper().buildInfoCard(
+                      title: 'Phone Number',
+                      value: user?['phoneNumber'] ?? '',
+                      icon: Icons.phone_outlined,
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    DecorHelper().buildGradientButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditInformationPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Edit Information',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _infoTile(String title, String value) {
-    return Column(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.info),
-          title: Text(title),
-          subtitle: Text(value),
-        ),
-        const Divider(),
-      ],
-    );
-  }
-
-  void _showRecoveryDialog(List<String> codes) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Recovery Codes'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: codes.map((code) => Text(code)).toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(ctx).pop(),
-          ),
-        ],
       ),
     );
   }

@@ -233,22 +233,48 @@ class UserService {
     }
   }
 
-  /*Future<bool> updateUser(
+  Future<bool> updateUser(
     String username,
     Map<String, dynamic> updatedData,
+    File? image,
   ) async {
-    final headers = await _getHeaders();
-    final response = await http.put(
-      Uri.parse('$userurl/$username'),
-      headers: headers,
-      body: jsonEncode(updatedData),
-    );
+    Dio dio = Dio();
 
-    if (response.statusCode == 204 || response.statusCode == 200) {
-      log('User updated successfully.');
-      return true;
-    } else {
-      log('Failed to update user: ${response.body}');
+    FormData formData = FormData.fromMap({
+      'UserName': updatedData['UserName'],
+      'Name': updatedData['Name'],
+      'Phone': updatedData['PhoneNumber'],
+      'Email': updatedData['Email'],
+      'Password': updatedData['Password'],
+      'ConfirmPassword': updatedData['ConfirmPassword'],
+    });
+
+    if (image != null) {
+      formData.files.add(
+        MapEntry(
+          'Image', // Field name expected by the server
+          await MultipartFile.fromFile(image.path, filename: 'profile.jpg'),
+        ),
+      );
+    }
+
+    try {
+      //final headers = await _getHeaders();
+      final response = await dio.put(
+        Uri.parse('$userurl/$username') as String,
+        //headers: headers,
+        data: jsonEncode(updatedData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        log('User information updated successfully.');
+        return true;
+      } else {
+        log('Failed to update user information: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      log("Error updating user information: $e");
       return false;
     }
   }
@@ -267,5 +293,5 @@ class UserService {
       log('Failed to delete user: ${response.body}');
       return false;
     }
-  }*/
+  }
 }
