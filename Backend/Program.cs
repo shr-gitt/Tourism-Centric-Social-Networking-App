@@ -148,6 +148,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         builder.Configuration["MongoDbSettings:DatabaseName"])
     .AddDefaultTokenProviders();
 
+builder.Services.Configure<IdentityOptions>(options => 
+{
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultPhoneProvider;
+});
+
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

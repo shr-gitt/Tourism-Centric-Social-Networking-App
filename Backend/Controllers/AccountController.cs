@@ -326,7 +326,7 @@ public class AccountController : ControllerBase
                 user.Email, 
                 "Reset Password",
                 $"Your password reset code is:<br><strong>{code}</strong><br>" +
-                "Copy this code into the app to reset your password.");
+                "This code is valid for 5 minutes. Copy this code into the app to reset your password.");
         }
         catch (Exception ex)
         {
