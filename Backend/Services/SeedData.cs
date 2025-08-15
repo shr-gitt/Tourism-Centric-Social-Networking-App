@@ -9,7 +9,6 @@ public static class SeedData
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
         var postService = serviceProvider.GetRequiredService<PostServices>();
-        var createService = serviceProvider.GetRequiredService<CreatePost>();
 
         var existingPosts = await postService.GetAsync();
         if (existingPosts.Any())
@@ -45,7 +44,7 @@ public static class SeedData
 
         foreach (var post in posts)
         {
-            await createService.CreateAsync(post);
+            await postService.CreateAsync(post);
         }
     }
 }

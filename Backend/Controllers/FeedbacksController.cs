@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Backend.Services;
 using Backend.Models;
-using Backend.Services.userPostFeedbacksService;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Backend.Controllers
@@ -11,18 +10,10 @@ namespace Backend.Controllers
     public class FeedbacksController : ControllerBase
     {
         private readonly FeedbacksService _feedbacksService;
-        private readonly CreateFeedback _createFeedback;
-        private readonly EditFeedback _editFeedback;
-        private readonly DeleteFeedback _deleteFeedback;
-        private readonly SaveFeedback _saveFeedback;
 
-        public FeedbacksController(FeedbacksService feedbacksService, CreateFeedback createFeedback, EditFeedback editFeedback, DeleteFeedback deleteFeedback, SaveFeedback saveFeedback)
+        public FeedbacksController(FeedbacksService feedbacksService)
         {
             _feedbacksService = feedbacksService;
-            _createFeedback=createFeedback;
-            _editFeedback=editFeedback;
-            _deleteFeedback=deleteFeedback;
-            _saveFeedback=saveFeedback;
         }
         
         [HttpGet]
@@ -64,7 +55,7 @@ namespace Backend.Controllers
             if (string.IsNullOrWhiteSpace(feedback.Comment) && feedback.Like == null)
                 return BadRequest("Either comment or like/dislike must be provided.");
 
-            var created = await _createFeedback.CreateAsync(feedback);
+            var created = await _feedbacksService.CreateAsync(feedback);
             if (!created)
                 return BadRequest("Post not found. Feedback cannot be added.");
 
@@ -93,7 +84,7 @@ namespace Backend.Controllers
             if (!string.IsNullOrEmpty(request.Comment))
                 feedback.Comment = request.Comment;
 
-            await _editFeedback.Edit(feedback);
+            await _feedbacksService.Edit(feedback);
 
             return NoContent();
         }
@@ -101,21 +92,11 @@ namespace Backend.Controllers
         [HttpDelete("{feedbackid}")]
         public async Task<IActionResult> DeleteFeedback(string feedbackid)
         {
-            var deleted = await _deleteFeedback.DeleteAsync(feedbackid);
+            var deleted = await _feedbacksService.DeleteAsync(feedbackid);
             if (!deleted)
                 return NotFound("Feedback not found.");
     
             return NoContent();
-        }
-        
-        [HttpPost("save")]
-        public async Task<IActionResult> SaveFeedback([FromBody] Feedback feedback)
-        {
-            if(!ModelState.IsValid)
-                return BadRequest(ModelState);
-            
-            await _saveFeedback.SaveAsync(feedback);
-            return CreatedAtAction(nameof(GetById), new { feedbackid = feedback.FeedbackId }, feedback);
         }
     }
 }

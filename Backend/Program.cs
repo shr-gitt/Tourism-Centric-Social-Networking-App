@@ -4,7 +4,6 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Services;
 using Backend.Services.userAccount;
-using Backend.Services.userPostFeedbacksService;
 using Backend.Services.userPostService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +15,7 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers support
+// Add controller support
 builder.Services.AddControllers();
 
 // Configure MongoDB settings from appsettings.json
@@ -54,23 +53,13 @@ builder.Services.AddScoped<AccountContext>();
 //Register Account related services
 builder.Services.AddScoped<AccountServices>();
 builder.Services.AddScoped<IEmailSender, AuthMessageSender>();
-builder.Services.AddScoped<ISmsSender, AuthMessageSender>();
 builder.Services.AddScoped<UploadImage>();
 
 // Register Post related services
 builder.Services.AddScoped<PostServices>();
-builder.Services.AddScoped<CreatePost>();
-builder.Services.AddScoped<EditPost>();
-builder.Services.AddScoped<UpdateFeedback>();
-builder.Services.AddScoped<DeletePost>();
-builder.Services.AddScoped<SavePost>();
 
 // Register Feedback related services
 builder.Services.AddScoped<FeedbacksService>();
-builder.Services.AddScoped<CreateFeedback>();
-builder.Services.AddScoped<EditFeedback>();
-builder.Services.AddScoped<DeleteFeedback>();
-builder.Services.AddScoped<SaveFeedback>();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();

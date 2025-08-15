@@ -25,7 +25,6 @@ public class AccountController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSender _emailSender;
-    private readonly ISmsSender _smsSender;
     private readonly ILogger<AccountController> _logger;
     private readonly IConfiguration _configuration;
     private readonly RoleManager<ApplicationRole> _roleManager;
@@ -36,7 +35,6 @@ public class AccountController : ControllerBase
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IEmailSender emailSender,
-        ISmsSender smsSender,
         ILogger<AccountController> logger,
         IConfiguration configuration,
         RoleManager<ApplicationRole> roleManager,
@@ -46,7 +44,6 @@ public class AccountController : ControllerBase
         _userManager = userManager;
         _signInManager = signInManager;
         _emailSender = emailSender;
-        _smsSender = smsSender;
         _logger = logger;
         _configuration = configuration;
         _roleManager = roleManager;

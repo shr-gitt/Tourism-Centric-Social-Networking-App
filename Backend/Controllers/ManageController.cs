@@ -21,20 +21,17 @@ namespace Backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
-        private readonly ISmsSender _smsSender;
         private readonly ILogger<ManageController> _logger;
 
         public ManageController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ISmsSender smsSender,
             ILogger<ManageController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
-            _smsSender = smsSender;
             _logger = logger;
         }
 
@@ -107,7 +104,7 @@ namespace Backend.Controllers
         }
 
         /// <summary>Sends a verification SMS to the provided phone number.</summary>
-        [HttpPost]
+        /*[HttpPost]
         public async Task<IActionResult> AddPhone(AddPhoneNumberRequest model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -119,7 +116,7 @@ namespace Backend.Controllers
             await _smsSender.SendSmsAsync(model.PhoneNumber, $"Your security code is {code}. It expires in 5 minutes.");
 
             return Ok(new { Message = "Verification code sent." });
-        }
+        }*/
 
         /// <summary>Verifies and sets the user's phone number.</summary>
         [HttpPost]

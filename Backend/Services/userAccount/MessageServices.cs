@@ -3,7 +3,7 @@ using MimeKit;
 
 namespace Backend.Services.userAccount
 {
-    public class AuthMessageSender : IEmailSender, ISmsSender
+    public class AuthMessageSender : IEmailSender
     {
         public async Task SendEmailAsync(string name, string email, string subject, string message)
         {
@@ -28,11 +28,6 @@ namespace Backend.Services.userAccount
             await client.SendAsync(messageBody);
             await client.DisconnectAsync(true);
             //return Task.CompletedTask;
-        }
-
-        public Task SendSmsAsync(string number, string message)
-        {
-            return Task.FromResult(0);
         }
     }
 }
