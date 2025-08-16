@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/map.dart';
@@ -21,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   late int currentIndex;
 
   List pages = [PostsPage(), Map(), Createpost(), Notify(), Profile()];
-  
+
   @override
   void initState() {
     super.initState();

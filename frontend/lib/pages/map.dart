@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/pages/map_searchbar.dart';
 import 'package:latlong2/latlong.dart';
 
 class Map extends StatefulWidget {
@@ -30,6 +31,13 @@ class _MapState extends State<Map> {
       appBar: AppBar(title: const Text('Custom Map Picker')),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: MapSearchBar(
+              mapController: _mapController,
+              onLocationSelected: _updateLocation,
+            ),
+          ),
           Expanded(
             child: FlutterMap(
               mapController: _mapController,
