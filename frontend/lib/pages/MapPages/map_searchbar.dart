@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:frontend/pages/MapPages/set_location.dart';
 import 'package:latlong2/latlong.dart';
 import '../Service/map_apiservice.dart';
 
@@ -31,6 +32,10 @@ class LocationSearchBar extends StatelessWidget {
             suffix: frompost
                 ? InkWell(
                     onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SetLocation()),
+                      );
                       log('Set on map tapped');
                     },
                     child: Padding(
