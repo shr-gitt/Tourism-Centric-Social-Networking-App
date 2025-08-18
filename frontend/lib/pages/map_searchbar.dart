@@ -1,65 +1,67 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 
-class MapSearchBar extends StatefulWidget {
-  final MapController mapController;
-  final Function(LatLng) onLocationSelected;
+class LocationSearchBar extends StatelessWidget {
+  final Function(LatLng position, String address) onLocationSelected;
 
-  const MapSearchBar({
-    super.key,
-    required this.mapController,
-    required this.onLocationSelected,
-  });
+  const LocationSearchBar({super.key, required this.onLocationSelected});
 
-  @override
-  State<MapSearchBar> createState() => _MapSearchBarState();
-}
-
-class _MapSearchBarState extends State<MapSearchBar> {
-  final TextEditingController _searchController = TextEditingController();
-
-  Future<void> _searchLocation(String query) async {
+  Future<List<Map<String, dynamic>>> fetchLocationSuggestions(
+    String query,
+  ) async {
     final url = Uri.parse(
-      'https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=1',
+      "https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&accept-language=en",
     );
     final response = await http.get(
       url,
-      headers: {'User-Agent': 'FlutterMapSearchApp/1.0'},
+      headers: {
+        'User-Agent': 'FlutterApp', 
+      },
     );
 
     if (response.statusCode == 200) {
       final List data = json.decode(response.body);
-      if (data.isNotEmpty) {
-        final lat = double.parse(data[0]['lat']);
-        final lon = double.parse(data[0]['lon']);
-        final picked = LatLng(lat, lon);
-
-        widget.mapController.move(picked, 15.0);
-        widget.onLocationSelected(picked);
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Location not found')));
-      }
+      return data.cast<Map<String, dynamic>>();
+    } else {
+      return [];
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: 'Search location',
-        suffixIcon: IconButton(
-          icon: const Icon(Icons.search),
-          onPressed: () => _searchLocation(_searchController.text),
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onSubmitted: _searchLocation,
+    return TypeAheadField<Map<String, dynamic>>(
+      suggestionsCallback: fetchLocationSuggestions,
+      itemBuilder: (context, suggestion) {
+        return ListTile(
+          leading: Icon(Icons.location_on),
+          title: Text(suggestion['display_name']),
+        );
+      },
+      onSelected: (suggestion) {
+        final lat = double.tryParse(suggestion['lat']);
+        final lon = double.tryParse(suggestion['lon']);
+        if (lat != null && lon != null) {
+          final position = LatLng(lat, lon);
+          final address = suggestion['display_name'];
+          onLocationSelected(position, address);
+        }
+      },
+      builder: (context, controller, focusNode) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            hintText: 'Search location',
+            filled: true,
+            fillColor: Colors.white,
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        );
+      },
     );
   }
 }

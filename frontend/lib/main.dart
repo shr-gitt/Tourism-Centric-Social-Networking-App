@@ -1,15 +1,17 @@
+import 'dart:io';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/mainscreen.dart';
-import 'dart:io'; 
+import 'package:maptiler_flutter/maptiler_flutter.dart';
 
-void main() async{
-  WidgetsFlutterBinding.ensureInitialized(); 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
   // Apply the custom HttpOverrides to bypass SSL certificate verification
   HttpOverrides.global = MyHttpOverrides();
+  MapTilerConfig.setApiKey('7cvVQJWrkuxmQg34BCzg');
 
   runApp(const MyApp());
 }
@@ -34,7 +36,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Tourism-Centric Social Networking App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 255, 235, 59)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 255, 235, 59),
+        ),
       ),
       home: const SplashScreen(), // Renamed for clarity
     );
@@ -68,10 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) =>
-              const LoginPage(),
-        ),
+        MaterialPageRoute(builder: (_) => const LoginPage()),
       );
     }
   }
