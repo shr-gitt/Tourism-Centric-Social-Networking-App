@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:frontend/pages/map_searchbar.dart';
+import 'package:frontend/pages/MapPages/map_searchbar.dart';
 
 class Map extends StatefulWidget {
   const Map({super.key});
@@ -33,10 +33,10 @@ class MapState extends State<Map> {
             ),
             children: [
               TileLayer(
-                urlTemplate:
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                subdomains: ['a', 'b', 'c'],
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                tileProvider: NetworkTileProvider(),
               ),
+
               MarkerLayer(
                 markers: [
                   Marker(
@@ -67,7 +67,31 @@ class MapState extends State<Map> {
                 });
                 log('Selected location: $address');
               },
+              frompost: false,
             ),
+          ),
+        ],
+      ),
+
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: "zoomIn",
+            onPressed: () => _mapController.move(
+              _mapController.camera.center,
+              _mapController.camera.zoom + 1,
+            ),
+            child: Icon(Icons.zoom_in),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: "zoomOut",
+            onPressed: () => _mapController.move(
+              _mapController.camera.center,
+              _mapController.camera.zoom - 1,
+            ),
+            child: Icon(Icons.zoom_out),
           ),
         ],
       ),

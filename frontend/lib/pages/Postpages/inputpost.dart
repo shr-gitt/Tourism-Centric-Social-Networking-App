@@ -1,13 +1,16 @@
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/decorhelper.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/mainscreen.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/pages/MapPages/map_searchbar.dart';
+import 'package:latlong2/latlong.dart';
 
 class Inputpost extends StatefulWidget {
   final String? id;
@@ -39,6 +42,9 @@ class _InputpostState extends State<Inputpost> {
   late List<String> existingImages;
   bool isSubmitting = false;
   String? uid;
+
+  final MapController _mapController = MapController();
+  LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
 
   @override
   void initState() {
@@ -187,30 +193,33 @@ class _InputpostState extends State<Inputpost> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
-                GFTextField(
+
+                DecorHelper().buildModernTextField(
                   controller: widget.titleController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Title',
+                  icon: Icons.subject,
                 ),
                 const SizedBox(height: 16),
 
                 Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
-                GFTextField(
-                  controller: widget.locationController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                LocationSearchBar(
+                  onLocationSelected: (LatLng position, String address) {
+                    setState(() {
+                      _selectedLocation = position;
+                      _mapController.move(position, 15.0);
+                    });
+                    log('Selected location: $address');
+                  },
+                  frompost: true,
                 ),
+
                 const SizedBox(height: 16),
 
                 Text('Content', style: TextStyle(fontWeight: FontWeight.bold)),
-                GFTextField(
+                DecorHelper().buildModernTextField(
                   controller: widget.contentController,
-                  maxLines: 5,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Content',
+                  icon: Icons.description_outlined,
                 ),
                 const SizedBox(height: 20),
 

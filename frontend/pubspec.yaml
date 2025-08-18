@@ -48,12 +48,8 @@ dependencies:
   flutter_typeahead: ^5.2.0
   geolocator: ^10.1.0
   latlong2: ^0.9.1
-  #flutter_map_location_picker: ^0.0.8
-  #flutter_map_location_marker: ^10.1.0
   location: ^8.0.1
   flutter_polyline_points: ^3.0.1
-  #flutter_map_search_pick_price_time_distance_route_sherifammar: ^0.0.7
-  #open_street_map_search_and_pick: ^0.1.1
   open_street_map_search_and_pick: ^0.1.1
   maptiler_flutter: ^0.1.0
 
