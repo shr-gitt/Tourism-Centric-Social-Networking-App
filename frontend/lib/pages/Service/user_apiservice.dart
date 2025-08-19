@@ -131,8 +131,9 @@ class UserService {
       log('token is $token');
       await AuthStorage.saveToken(token);
 
+      final twofa = data['Code'];
       final username = await AuthStorage.getUserName();
-      return username;
+      return (username, twofa);
     } else {
       log('Failed to login user: ${response.body}-${response.statusCode}');
       return null;
@@ -197,6 +198,29 @@ class UserService {
       }
     } catch (e) {
       log('Exception in forgotPassword: $e');
+      return false;
+    }
+  }
+
+  /// Reset password and 2FA code verification
+  Future<bool> verifyCode(String email, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$userurl/CodeVerification'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email, 'Code': code}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        return result['success'] ?? true;
+      } else {
+        log('Verify code failed: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in verify code: $e');
       return false;
     }
   }

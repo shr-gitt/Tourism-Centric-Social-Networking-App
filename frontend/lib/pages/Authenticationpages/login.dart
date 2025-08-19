@@ -41,19 +41,27 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         "rememberMe": _isRememberMe,
       };
 
-      final userId = await UserService().loginUser(data);
+      final (userId, twofa) = await UserService().loginUser(data);
 
       if (userId != null) {
         await AuthStorage.saveUserName(userId);
+        log('Two Factor Authentication is $twofa');
 
         if (!mounted) return;
 
-        _showSuccessSnackBar("Welcome back! Login successful");
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
-        );
+        if (twofa) {
+          _showSuccessSnackBar("Welcome back! Login successful");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 2)),
+          );
+        } else {
+          _showSuccessSnackBar("Welcome back! Login successful");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
+          );
+        }
       } else {
         _showErrorSnackBar("Invalid credentials. Please try again.");
       }

@@ -150,30 +150,17 @@ namespace Backend.Controllers
             return Ok(new { Message = "Phone number removed." });
         }
 
-        /// <summary>Enables two-factor authentication for the user.</summary>
+        /// <summary>Enables or Disables two-factor authentication for the user.</summary>
         [HttpPost]
-        public async Task<IActionResult> EnableTwoFactor()
+        public async Task<IActionResult> TwoFactor(bool ans)
         {
             var user = await GetCurrentUserAsync();
             if (user == null) return Unauthorized();
 
-            await _userManager.SetTwoFactorEnabledAsync(user, true);
+            await _userManager.SetTwoFactorEnabledAsync(user, ans);
             await _signInManager.SignInAsync(user, false);
-            _logger.LogInformation("User enabled 2FA.");
+            _logger.LogInformation("User changed to 2FA.{value}",ans);
             return Ok(new { Message = "Two-factor authentication enabled." });
-        }
-
-        /// <summary>Disables two-factor authentication for the user.</summary>
-        [HttpPost]
-        public async Task<IActionResult> DisableTwoFactor()
-        {
-            var user = await GetCurrentUserAsync();
-            if (user == null) return Unauthorized();
-
-            await _userManager.SetTwoFactorEnabledAsync(user, false);
-            await _signInManager.SignInAsync(user, false);
-            _logger.LogInformation("User disabled 2FA.");
-            return Ok(new { Message = "Two-factor authentication disabled." });
         }
 
         /// <summary>Resets the user's authenticator key (used for app-based 2FA).</summary>

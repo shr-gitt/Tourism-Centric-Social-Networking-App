@@ -22,6 +22,7 @@ namespace Backend.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly AccountServices _accountServices;
+    private readonly CustomUserManager _customUserManager;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSender _emailSender;
@@ -32,6 +33,7 @@ public class AccountController : ControllerBase
 
     public AccountController(
         AccountServices accountServices,
+        CustomUserManager customUserManager,
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IEmailSender emailSender,
@@ -41,6 +43,7 @@ public class AccountController : ControllerBase
         UploadImage uploadImage)
     {
         _accountServices = accountServices;
+        _customUserManager = customUserManager;
         _userManager = userManager;
         _signInManager = signInManager;
         _emailSender = emailSender;
@@ -106,6 +109,29 @@ public class AccountController : ControllerBase
 
         await SaveRefreshToken(user, refreshToken);
 
+        bool c = false;
+        
+        if (user.TwoFactorEnabled)
+        {
+            var code = await _customUserManager.GeneratePasswordResetTokenAsync(user);
+            await StoreResetCodeInClaim(user, code);
+            c = true;
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    user.Name,
+                    user.Email, 
+                    "Login Attempt",
+                    $"Your code for logging in is:<br><strong>{code}</strong><br>" +
+                    "This code is valid for 5 minutes. Copy this code into the app to login.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send reset password email to {Email}", user.Email);
+                return StatusCode(500, new ApiResponse<object> { Success = false, Message = "Failed to send email." });
+            }
+        }
+
         _logger.LogInformation("User {UserId} logged in.", user.Id);
 
         return Ok(new ApiResponse<LoginResponse>
@@ -114,6 +140,7 @@ public class AccountController : ControllerBase
             Message = $"User {user.UserName} logged in.",
             Data = new LoginResponse
             {
+                Code = c,
                 Token = token,
                 RefreshToken = refreshToken.Token,
                 RefreshTokenExpiry = refreshToken.ExpiresAt
@@ -313,7 +340,8 @@ public class AccountController : ControllerBase
         }
 
         //var code = GenerateSixDigitCode();
-        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var code = await _customUserManager.GeneratePasswordResetTokenAsync(user);
+        await StoreResetCodeInClaim(user,  code);
 
         // Provide the reset link so frontend app can handle it
         try
@@ -333,7 +361,66 @@ public class AccountController : ControllerBase
         
         return Ok(new ApiResponse<string> { Success = true, Message = "Reset email sent." });
     }
+    
+    /// <summary>
+    /// Reset password code verification.
+    /// </summary>
+    [HttpPost]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+    public async Task<IActionResult> CodeVerification(VerifyCodeRequest model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+            return BadRequest("User not found.");
 
+        // Retrieve the code claim
+        var codeClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "ResetCode");
+        if (codeClaim == null || codeClaim.Value.Split('|')[0] != model.Code)
+            return BadRequest("Invalid code.");
+
+        // Check expiration time
+        var expirationTime = DateTime.Parse(codeClaim.Value.Split('|')[1]);
+        if (expirationTime < DateTime.UtcNow)
+            return BadRequest("Code has expired.");
+
+        return Ok(new ApiResponse<string> { Success = true, Message = "Verify Code successful." });
+    } 
+  /* 
+    /// <summary>
+    /// Reset password using claim.
+    /// </summary>
+    [HttpPost]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+    public async Task<IActionResult> ResetPasswordWithClaim(ResetPasswordRequest model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+            return BadRequest("User not found.");
+
+        // Retrieve the code claim
+        var codeClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "ResetCode");
+        if (codeClaim == null || codeClaim.Value.Split('|')[0] != model.Code)
+            return BadRequest("Invalid code.");
+
+        // Check expiration time
+        var expirationTime = DateTime.Parse(codeClaim.Value.Split('|')[1]);
+        if (expirationTime < DateTime.UtcNow)
+            return BadRequest("Code has expired.");
+
+        // Proceed with password reset
+        var resetResult = await _userManager.ChangePasswordAsync(user, user.PasswordHash, model.Password);
+        _logger.LogInformation("ResetPasswordWithClaim result:{Result}", resetResult);
+        if (!resetResult.Succeeded)
+            return IdentityErrorResponse(resetResult);
+
+        return Ok("Password reset successful.");
+    }
+*/
+    
     /// <summary>
     /// Reset password using token.
     /// </summary>
@@ -404,6 +491,7 @@ public class AccountController : ControllerBase
 
     #region Helpers
 
+    
     private async Task EnsureRolesExist()
     {
         var roles = new[]
@@ -478,6 +566,22 @@ public class AccountController : ControllerBase
 
         await Task.CompletedTask;
     }
+    
+    [HttpPost]
+    public async Task StoreResetCodeInClaim(ApplicationUser user, string code)
+    {
+        var expiration = DateTime.UtcNow.AddMinutes(5);
+        var claims = await _userManager.GetClaimsAsync(user);
+    
+        // Remove old claims if they exist
+        var existingCodeClaim = claims.FirstOrDefault(c => c.Type == "ResetCode");
+        if (existingCodeClaim != null)
+            await _userManager.RemoveClaimAsync(user, existingCodeClaim);
+
+        // Add new claim with code and expiration time
+        var codeClaim = new Claim("ResetCode", $"{code}|{expiration:O}");
+        await _userManager.AddClaimAsync(user, codeClaim);
+    }
 
     private IActionResult IdentityErrorResponse(IdentityResult result)
     {
@@ -499,9 +603,4 @@ public class AccountController : ControllerBase
         public T Data { get; set; }
     }
     #endregion
-    private string GenerateSixDigitCode() 
-    {
-        var random = new Random();
-        return random.Next(100000, 999999).ToString(); // always 6 digits
-    }
 }

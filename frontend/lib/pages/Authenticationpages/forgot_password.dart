@@ -23,6 +23,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isCodeSent = false;
+  bool _isCodeVerified = false;
 
   @override
   void dispose() {
@@ -67,10 +68,48 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     }
   }
 
+  Future<void> _verifyCode() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final success = await UserService().verifyCode(
+        _emailController.text.trim(),
+        _codeController.text.trim(),
+      );
+
+      if (success) {
+        setState(() => _isCodeVerified = true);
+
+        _showSuccessSnackBar('Code verified! Please create a new password.');
+
+        /*if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );*/
+      } else {
+        _showErrorSnackBar(
+          'Failed to verify code. Please check your code and try again.',
+        );
+      }
+    } catch (e) {
+      _showErrorSnackBar('An error occurred. Please try again.');
+      log('Verify code error: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _resetPassword() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
+
+    log(
+      'In _resetpassword, ${_emailController.text.trim()}, ${_codeController.text.trim()}, ${_newPasswordController.text},',
+    );
 
     try {
       final success = await UserService().resetPassword(
@@ -90,9 +129,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
           MaterialPageRoute(builder: (_) => const LoginPage()),
         );
       } else {
-        _showErrorSnackBar(
-          'Failed to reset password. Please check your code and try again.',
-        );
+        _showErrorSnackBar('Failed to reset password.');
       }
     } catch (e) {
       _showErrorSnackBar('An error occurred. Please try again.');
@@ -175,7 +212,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                 Column(
                   children: [
                     Text(
-                      _isCodeSent ? 'Reset Your Password' : 'Forgot Password?',
+                      _isCodeSent
+                          ? (_isCodeVerified
+                                ? 'Reset Your Password'
+                                : 'Enter Code')
+                          : 'Forgot Password?',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -186,7 +227,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                     const SizedBox(height: 8),
                     Text(
                       _isCodeSent
-                          ? 'Enter the code sent to your email and create a new password'
+                          ? (_isCodeVerified
+                                ? 'Create a new password'
+                                : 'Enter the code sent to your email')
                           : 'Don\'t worry! Enter your email and we\'ll send you a reset code',
                       style: const TextStyle(
                         fontSize: 14,
@@ -283,168 +326,216 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                                 ),
                         ),
                       ] else ...[
-                        // Reset Password Step
-                        const Text(
-                          'Create New Password',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2D3748),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Code sent to ${_emailController.text}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF718096),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        DecorHelper().buildModernTextField(
-                          controller: _codeController,
-                          label: 'Reset Code',
-                          icon: Icons.security,
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return 'Reset code is required';
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        DecorHelper().buildModernTextField(
-                          controller: _newPasswordController,
-                          label: 'New Password',
-                          icon: Icons.lock_outline,
-                          obscureText: !_isPasswordVisible,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: const Color(0xFF718096),
+                        if (!_isCodeVerified) ...[
+                          const Text(
+                            'Create New Password',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2D3748),
                             ),
-                            onPressed: () => setState(
-                              () => _isPasswordVisible = !_isPasswordVisible,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Code sent to ${_emailController.text}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF718096),
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return 'Password is required';
-                            }
-                            if (value!.length < 6) {
-                              return 'Password must be at least 6 characters';
-                            }
-                            return null;
-                          },
-                        ),
 
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 32),
 
-                        DecorHelper().buildModernTextField(
-                          controller: _confirmPasswordController,
-                          label: 'Confirm New Password',
-                          icon: Icons.lock_outline,
-                          obscureText: !_isConfirmPasswordVisible,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isConfirmPasswordVisible
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: const Color(0xFF718096),
-                            ),
-                            onPressed: () => setState(
-                              () => _isConfirmPasswordVisible =
-                                  !_isConfirmPasswordVisible,
-                            ),
+                          DecorHelper().buildModernTextField(
+                            controller: _codeController,
+                            label: 'Reset Code',
+                            icon: Icons.security,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Reset code is required';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return 'Please confirm your password';
-                            }
-                            if (value != _newPasswordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
 
-                        const SizedBox(height: 32),
+                          const SizedBox(height: 32),
 
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Password requirements:',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue.shade800,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '• At least 6 characters long\n • Use a combination of letters, numbers, and symbols',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.blue.shade700,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        DecorHelper().buildGradientButton(
-                          onPressed: _isLoading ? null : _resetPassword,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                          DecorHelper().buildGradientButton(
+                            onPressed: _isLoading ? null : _verifyCode,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Verify Code',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                )
-                              : const Text(
-                                  'Reset Password',
+                          ),
+                        ]
+                        // Reset Password Step
+                        else ...[
+                          const Text(
+                            'Create New Password',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2D3748),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Code sent to ${_emailController.text}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF718096),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          DecorHelper().buildModernTextField(
+                            controller: _newPasswordController,
+                            label: 'New Password',
+                            icon: Icons.lock_outline,
+                            obscureText: !_isPasswordVisible,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color(0xFF718096),
+                              ),
+                              onPressed: () => setState(
+                                () => _isPasswordVisible = !_isPasswordVisible,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Password is required';
+                              }
+                              if (value!.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          DecorHelper().buildModernTextField(
+                            controller: _confirmPasswordController,
+                            label: 'Confirm New Password',
+                            icon: Icons.lock_outline,
+                            obscureText: !_isConfirmPasswordVisible,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color(0xFF718096),
+                              ),
+                              onPressed: () => setState(
+                                () => _isConfirmPasswordVisible =
+                                    !_isConfirmPasswordVisible,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Please confirm your password';
+                              }
+                              if (value != _newPasswordController.text) {
+                                return 'Passwords do not match';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Password requirements:',
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue.shade800,
                                   ),
                                 ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        TextButton(
-                          onPressed: () => setState(() => _isCodeSent = false),
-                          child: const Text(
-                            'Didn\'t receive the code? Try again',
-                            style: TextStyle(
-                              color: Color(0xFF667eea),
-                              fontWeight: FontWeight.w600,
+                                const SizedBox(height: 8),
+                                Text(
+                                  '• At least 6 characters long\n • Use a combination of letters, numbers, and symbols',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue.shade700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
+
+                          const SizedBox(height: 32),
+
+                          DecorHelper().buildGradientButton(
+                            onPressed: _isLoading ? null : _resetPassword,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Reset Password',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          TextButton(
+                            onPressed: () =>
+                                setState(() => _isCodeSent = false),
+                            child: const Text(
+                              'Didn\'t receive the code? Try again',
+                              style: TextStyle(
+                                color: Color(0xFF667eea),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ],
                   ),

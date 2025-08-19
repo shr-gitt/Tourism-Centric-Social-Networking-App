@@ -125,23 +125,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+builder.Services
+    .AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
         options.Password.RequiredLength = 6;
         options.Password.RequireNonAlphanumeric = true;
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
         options.Password.RequireDigit = true;
-    }).AddMongoDbStores<ApplicationUser, ApplicationRole, ObjectId>(
+
+        options.Tokens.PasswordResetTokenProvider = "TokenProvider";
+    })
+    .AddTokenProvider<TokenProvider<ApplicationUser>>("TokenProvider")
+    .AddUserManager<CustomUserManager>()
+    .AddMongoDbStores<ApplicationUser, ApplicationRole, ObjectId>(
         builder.Configuration["MongoDbSettings:ConnectionString"],
         builder.Configuration["MongoDbSettings:DatabaseName"])
     .AddDefaultTokenProviders();
-
-builder.Services.Configure<IdentityOptions>(options => 
-{
-    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultPhoneProvider;
-});
-
 
 builder.Services.AddAuthorization();
 
