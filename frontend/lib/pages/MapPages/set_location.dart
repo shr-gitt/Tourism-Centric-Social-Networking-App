@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -13,19 +12,9 @@ class SetLocation extends StatefulWidget {
 
 class _SetLocationState extends State<SetLocation> {
   final MapController _mapController = MapController();
-  LatLng _selectedLocation = LatLng(27.7172, 85.3240); // Kathmandu default
+  final LatLng _selectedLocation = LatLng(27.7172, 85.3240); // Kathmandu default
   LatLng _tempSelectedLocation = LatLng(27.7172, 85.3240);
-  bool _selectingOnMap = true;
-
-  void _onLocationSelected(LatLng position, String address) {
-    setState(() {
-      _selectedLocation = position;
-      _tempSelectedLocation = position;
-      _selectingOnMap = false;
-    });
-    _mapController.move(position, 15.0);
-    log('Selected location from search: $address');
-  }
+  final bool _selectingOnMap = true;
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +35,11 @@ class _SetLocationState extends State<SetLocation> {
                   ? _tempSelectedLocation
                   : _selectedLocation,
               initialZoom: 13,
-              interactiveFlags: _selectingOnMap
-                  ? InteractiveFlag.all
-                  : InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+              interactionOptions: _selectingOnMap
+                  ? const InteractionOptions(flags: InteractiveFlag.all)
+                  : const InteractionOptions(
+                      flags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
+                    ),
               onPositionChanged: (pos, hasGesture) {
                 if (_selectingOnMap && pos.center != null) {
                   setState(() {
@@ -61,53 +52,48 @@ class _SetLocationState extends State<SetLocation> {
               TileLayer(
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
               ),
-
-              // Show fixed marker only when NOT selecting on map
-              if (!_selectingOnMap)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _selectedLocation,
-                      width: 40,
-                      height: 40,
-                      child: const Icon(
-                        Icons.location_pin,
-                        size: 40,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
             ],
           ),
 
           // Fixed center marker while selecting on map
           if (_selectingOnMap)
             const Center(
-              child: Icon(
-                Icons.location_pin,
-                size: 50,
-                color: Colors.blueAccent,
-              ),
+              child: Icon(Icons.location_on_sharp, size: 40, color: Colors.red),
             ),
 
           // Confirm button bottom-right (only while selecting)
-          if (_selectingOnMap)
-            Positioned(
-              bottom: 40,
-              right: 16,
-              child: DecorHelper().buildGradientButton(
-                onPressed: () {
-                  setState(() {
-                    _selectedLocation = _tempSelectedLocation;
-                    _selectingOnMap = false;
-                  });
-                  _mapController.move(_selectedLocation, 15.0);
-                  log('Location confirmed on map: $_selectedLocation');
-                },
-                child: const Text('    Confirm Location    '),
-              ),
+          Positioned(
+            bottom: 50,
+            right: 140,
+            child: DecorHelper().buildGradientButton(
+              onPressed: () {
+                Navigator.pop(context, _tempSelectedLocation);
+              },
+              child: const Text('    Confirm Location    '),
             ),
+          ),
+        ],
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            heroTag: "zoomIn",
+            onPressed: () => _mapController.move(
+              _mapController.camera.center,
+              _mapController.camera.zoom + 1,
+            ),
+            child: Icon(Icons.zoom_in),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: "zoomOut",
+            onPressed: () => _mapController.move(
+              _mapController.camera.center,
+              _mapController.camera.zoom - 1,
+            ),
+            child: Icon(Icons.zoom_out),
+          ),
         ],
       ),
     );
