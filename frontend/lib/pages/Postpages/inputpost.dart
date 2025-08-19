@@ -8,7 +8,6 @@ import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/mainscreen.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:frontend/pages/MapPages/map_searchbar.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -42,9 +41,6 @@ class _InputpostState extends State<Inputpost> {
   late List<String> existingImages;
   bool isSubmitting = false;
   String? uid;
-
-  final MapController _mapController = MapController();
-  LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
 
   @override
   void initState() {
@@ -204,10 +200,6 @@ class _InputpostState extends State<Inputpost> {
                 Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
                 LocationSearchBar(
                   onLocationSelected: (LatLng position, String address) {
-                    setState(() {
-                      _selectedLocation = position;
-                      _mapController.move(position, 15.0);
-                    });
                     log('Selected location: $address');
                   },
                   frompost: true,
