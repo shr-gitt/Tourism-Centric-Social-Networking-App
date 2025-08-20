@@ -116,7 +116,7 @@ namespace Backend.Controllers
             await _smsSender.SendSmsAsync(model.PhoneNumber, $"Your security code is {code}. It expires in 5 minutes.");
 
             return Ok(new { Message = "Verification code sent." });
-        }*/
+        }
 
         /// <summary>Verifies and sets the user's phone number.</summary>
         [HttpPost]
@@ -148,7 +148,7 @@ namespace Backend.Controllers
 
             await _signInManager.SignInAsync(user, false);
             return Ok(new { Message = "Phone number removed." });
-        }
+        }*/
 
         /// <summary>Enables or Disables two-factor authentication for the user.</summary>
         [HttpPost]
@@ -162,7 +162,7 @@ namespace Backend.Controllers
             _logger.LogInformation("User changed to 2FA.{value}",ans);
             return Ok(new { Message = "Two-factor authentication enabled." });
         }
-
+/*
         /// <summary>Resets the user's authenticator key (used for app-based 2FA).</summary>
         [HttpPost]
         public async Task<IActionResult> ResetAuthenticatorKey()
@@ -230,7 +230,7 @@ namespace Backend.Controllers
 
             return Ok(new { Message = "External login linked." });
         }
-        
+        */
         private async Task<ApplicationUser?> GetCurrentUserAsync()
         {
             // Get all NameIdentifier claims

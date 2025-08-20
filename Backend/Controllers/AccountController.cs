@@ -114,7 +114,6 @@ public class AccountController : ControllerBase
         if (user.TwoFactorEnabled)
         {
             var code = await _customUserManager.GeneratePasswordResetTokenAsync(user);
-            await StoreResetCodeInClaim(user, code);
             c = true;
             try
             {
@@ -221,7 +220,7 @@ public class AccountController : ControllerBase
         _logger.LogInformation("User {UserId} logged out.", User.FindFirstValue(ClaimTypes.NameIdentifier));
         return Ok(new ApiResponse<string> { Success = true, Message = "User logged out." });
     }
-
+/*
     /// <summary>
     /// Initiate external login challenge.
     /// </summary>
@@ -317,7 +316,7 @@ public class AccountController : ControllerBase
 
         return Ok(new ApiResponse<string> { Success = true, Message = "External account created and logged in." });
     }
-
+*/
     /// <summary>
     /// Request password reset link via email.
     /// </summary>
@@ -341,7 +340,6 @@ public class AccountController : ControllerBase
 
         //var code = GenerateSixDigitCode();
         var code = await _customUserManager.GeneratePasswordResetTokenAsync(user);
-        await StoreResetCodeInClaim(user,  code);
 
         // Provide the reset link so frontend app can handle it
         try
@@ -361,65 +359,6 @@ public class AccountController : ControllerBase
         
         return Ok(new ApiResponse<string> { Success = true, Message = "Reset email sent." });
     }
-    
-    /// <summary>
-    /// Reset password code verification.
-    /// </summary>
-    [HttpPost]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-    public async Task<IActionResult> CodeVerification(VerifyCodeRequest model)
-    {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
-            return BadRequest("User not found.");
-
-        // Retrieve the code claim
-        var codeClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "ResetCode");
-        if (codeClaim == null || codeClaim.Value.Split('|')[0] != model.Code)
-            return BadRequest("Invalid code.");
-
-        // Check expiration time
-        var expirationTime = DateTime.Parse(codeClaim.Value.Split('|')[1]);
-        if (expirationTime < DateTime.UtcNow)
-            return BadRequest("Code has expired.");
-
-        return Ok(new ApiResponse<string> { Success = true, Message = "Verify Code successful." });
-    } 
-  /* 
-    /// <summary>
-    /// Reset password using claim.
-    /// </summary>
-    [HttpPost]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
-    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
-    public async Task<IActionResult> ResetPasswordWithClaim(ResetPasswordRequest model)
-    {
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
-            return BadRequest("User not found.");
-
-        // Retrieve the code claim
-        var codeClaim = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(c => c.Type == "ResetCode");
-        if (codeClaim == null || codeClaim.Value.Split('|')[0] != model.Code)
-            return BadRequest("Invalid code.");
-
-        // Check expiration time
-        var expirationTime = DateTime.Parse(codeClaim.Value.Split('|')[1]);
-        if (expirationTime < DateTime.UtcNow)
-            return BadRequest("Code has expired.");
-
-        // Proceed with password reset
-        var resetResult = await _userManager.ChangePasswordAsync(user, user.PasswordHash, model.Password);
-        _logger.LogInformation("ResetPasswordWithClaim result:{Result}", resetResult);
-        if (!resetResult.Succeeded)
-            return IdentityErrorResponse(resetResult);
-
-        return Ok("Password reset successful.");
-    }
-*/
     
     /// <summary>
     /// Reset password using token.
@@ -567,22 +506,6 @@ public class AccountController : ControllerBase
         await Task.CompletedTask;
     }
     
-    [HttpPost]
-    public async Task StoreResetCodeInClaim(ApplicationUser user, string code)
-    {
-        var expiration = DateTime.UtcNow.AddMinutes(5);
-        var claims = await _userManager.GetClaimsAsync(user);
-    
-        // Remove old claims if they exist
-        var existingCodeClaim = claims.FirstOrDefault(c => c.Type == "ResetCode");
-        if (existingCodeClaim != null)
-            await _userManager.RemoveClaimAsync(user, existingCodeClaim);
-
-        // Add new claim with code and expiration time
-        var codeClaim = new Claim("ResetCode", $"{code}|{expiration:O}");
-        await _userManager.AddClaimAsync(user, codeClaim);
-    }
-
     private IActionResult IdentityErrorResponse(IdentityResult result)
     {
         var errors = result.Errors.Select(e => e.Description);
