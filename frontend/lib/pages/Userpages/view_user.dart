@@ -2,18 +2,17 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/guest.dart';
-import 'package:frontend/pages/settings.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
-import 'package:frontend/pages/Service/authstorage.dart';
 
-class Profile extends StatefulWidget {
-  const Profile({super.key});
+class ViewUser extends StatefulWidget {
+  final String? username;
+  const ViewUser({super.key, required this.username});
 
   @override
-  State<Profile> createState() => _ProfileState();
+  State<ViewUser> createState() => _ViewUserState();
 }
 
-class _ProfileState extends State<Profile> {
+class _ViewUserState extends State<ViewUser> {
   String? uid;
   final UserService userapi = UserService();
   Map<String, dynamic>? user;
@@ -35,8 +34,8 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _loadUserId() async {
-    String? userId = await AuthStorage.getUserName();
-    log('in profile page, userId is $userId');
+    String? userId = widget.username;
+    log('in ViewUser page, userId is $userId');
 
     if (userId != null) {
       final fetchedUser = await userapi.fetchUserData(userId);
@@ -55,7 +54,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     if (user != null) {
       return Scaffold(
-        appBar: AppBar(title: Text('Profile')),
+        appBar: AppBar(title: Text('ViewUser')),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,21 +91,16 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      log('Settings button pressed');
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => Settings()),
-                      );
-                    },
-                    icon: Icon(Icons.settings),
-                  ),
                 ],
               ),
             ),
             const Divider(height: 10, thickness: 2, color: Colors.black),
-            Expanded(child: PostsPage(ownProfile: true)),
+            Expanded(
+              child: PostsPage(
+                otheruserProfile: true,
+                otheruserUsername: widget.username,
+              ),
+            ),
           ],
         ),
       );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
+import 'package:frontend/pages/Userpages/view_user.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:frontend/pages/Postpages/deletepost.dart';
 import 'package:frontend/pages/Postpages/editpost.dart';
@@ -49,26 +50,45 @@ class _AvatarState extends State<Avatar> {
 
     return Row(
       children: [
-        GFAvatar(
-          radius: isPost ? 25 : 15,
-          backgroundImage: user?['image'] != null
-              ? NetworkImage('https://localhost:5259${user!['image']}')
-              : null,
-
-          child: user?['image'] == null
-              ? Icon(Icons.person, size: isPost ? 30 : 20)
-              : null,
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ViewUser(username: user?['userName']),
+              ),
+            );
+          },
+          child: GFAvatar(
+            radius: isPost ? 25 : 15,
+            backgroundImage: user?['image'] != null
+                ? NetworkImage('https://localhost:5259${user!['image']}')
+                : null,
+            child: user?['image'] == null
+                ? Icon(Icons.person, size: isPost ? 30 : 20)
+                : null,
+          ),
         ),
+
         const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                user?['userName'] ?? "No username",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              TextButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ViewUser(username: user?['userName']),
+                  ),
+                ),
+
+                child: Text(
+                  user?['userName'] ?? "No username",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(height: 2),
