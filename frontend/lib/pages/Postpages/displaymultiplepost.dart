@@ -97,6 +97,8 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                       );
                     },
                   ),
+                  const SizedBox(height: 10),
+
                   Text(
                     post['content'] ?? 'No Content',
                     maxLines: 5,
