@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Postpages/community_banner.dart';
 import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
@@ -126,11 +127,24 @@ class _FullPostPageState extends State<FullPostPage> {
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    CommunityBanner(
+                      data: post['community'] ?? "",
+                      isPost: true,
+                    ),
+                    const SizedBox(height: 3),
+
+                    const Divider(height: 0, thickness: 1, color: Colors.grey),
+                    const SizedBox(height: 10),
+
                     Avatar(data: post, isPost: true, selfPost: widget.state),
                     Text(
                       post['title'] ?? 'No Title',
-                      style: TextStyle(fontSize: 20),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
+
                     Text(
                       post['location'] ?? 'No Location',
                       style: TextStyle(fontSize: 12),
@@ -142,9 +156,12 @@ class _FullPostPageState extends State<FullPostPage> {
                         final formattedDate = parsedDate != null
                             ? DateFormat('yyyy-MM-dd').format(parsedDate)
                             : 'Invalid date';
-                        return Text(
-                          formattedDate,
-                          style: TextStyle(fontSize: 12),
+                        return Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            formattedDate,
+                            style: TextStyle(fontSize: 12),
+                          ),
                         );
                       },
                     ),

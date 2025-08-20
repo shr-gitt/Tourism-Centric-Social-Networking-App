@@ -28,7 +28,7 @@ class Apiconnect {
   });
 
   Future<void> submitPost(BuildContext context) async {
-    String posturl=Constants.posturl;
+    String posturl = Constants.posturl;
     try {
       final uri = isEditing
           ? Uri.parse('$posturl/edit/${id!}')
@@ -41,7 +41,7 @@ class Apiconnect {
       request.fields['UserId'] = userId ?? '';
       request.fields['title'] = titleController.text;
       request.fields['location'] = locationController.text;
-      request.fields['county'] = community;
+      request.fields['community'] = community;
       request.fields['content'] = contentController.text;
       log('post title:${request.fields['title']}');
       if (pickedImage != null && pickedImage!.isNotEmpty) {

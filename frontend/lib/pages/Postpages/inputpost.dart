@@ -150,6 +150,7 @@ class _InputpostState extends State<Inputpost> {
           contentController: widget.contentController,
           pickedImage: pickedImage,
         ).submitPost(context);
+        log('in try block, community: ${widget.communityController},');
 
         if (mounted) {
           Navigator.pop(context); // Close loading
@@ -211,7 +212,7 @@ class _InputpostState extends State<Inputpost> {
                         widget.locationController.text = address;
                         widget.communityController = community ?? "";
                         log(
-                          'In input post, community name is ${address.split(',')[address.split(',').length - 3]}',
+                          'In input post, community name is ${widget.communityController}',
                         );
                       },
                   frompost: true,

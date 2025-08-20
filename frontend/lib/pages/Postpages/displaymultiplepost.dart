@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Postpages/community_banner.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbacks.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
@@ -51,7 +52,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
-    log('Full post object: ${post['postId']}');
+    log('Full post object: $post');
     return GestureDetector(
       onTap: () {
         Navigator.pushReplacement(
@@ -71,19 +72,31 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            CommunityBanner(data: post['community'] ?? "", isPost: true),
+            const SizedBox(height: 3),
+            const Divider(height: 5, thickness: 1, color: Colors.grey),
+            const SizedBox(height: 8),
+
             Avatar(data: post, isPost: true, selfPost: widget.state),
-            ListTile(
-              title: Text(
-                post['title'] ?? 'No Title',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              subtitle: Column(
+            const SizedBox(height: 5),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(post['location'] ?? 'No Location'),
+                  Text(
+                    post['title'] ?? 'No Title',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+
+                  Text(
+                    post['location'] ?? 'No Location',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   Builder(
                     builder: (context) {
                       final rawDate = post['created'];
@@ -91,18 +104,22 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                       final formattedDate = parsedDate != null
                           ? DateFormat('yyyy-MM-dd').format(parsedDate)
                           : 'Invalid date';
-                      return Text(
-                        formattedDate,
-                        style: TextStyle(fontSize: 12),
+                      return Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          formattedDate,
+                          style: TextStyle(fontSize: 12),
+                        ),
                       );
                     },
                   ),
-                  const SizedBox(height: 10),
 
+                  const SizedBox(height: 10),
                   Text(
                     post['content'] ?? 'No Content',
                     maxLines: 5,
                     overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 16),
                   ),
                   TextButton(
                     onPressed: () {
@@ -132,11 +149,13 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                     ),
                   ] else
                     const SizedBox.shrink(),
+                  const Divider(height: 0, thickness: 1, color: Colors.grey),
                 ],
               ),
             ),
           ],
         ),
+
         buttonBar: GFButtonBar(children: [Feedbacks(post: post)]),
       ),
     );

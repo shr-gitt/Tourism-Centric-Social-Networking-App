@@ -60,7 +60,7 @@ class _AvatarState extends State<Avatar> {
             );
           },
           child: GFAvatar(
-            radius: isPost ? 25 : 15,
+            radius: isPost ? 20 : 15,
             backgroundImage: user?['image'] != null
                 ? NetworkImage('https://localhost:5259${user!['image']}')
                 : null,
@@ -70,12 +70,18 @@ class _AvatarState extends State<Avatar> {
           ),
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(width: 5),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  alignment: Alignment.centerLeft,
+                ),
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -87,7 +93,8 @@ class _AvatarState extends State<Avatar> {
                   user?['userName'] ?? "No username",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 15,
+                    color: Colors.black87,
                   ),
                 ),
               ),
@@ -95,7 +102,7 @@ class _AvatarState extends State<Avatar> {
               if (isPost)
                 Text(
                   user?['name'] ?? "No name",
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  style: const TextStyle(fontSize: 14, color: Colors.black),
                 ),
             ],
           ),

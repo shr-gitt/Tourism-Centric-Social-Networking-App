@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/Postpages/inputpost.dart';
 import 'dart:developer';
 import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Postpages/displaymultiplepost.dart';
-import 'package:frontend/pages/decorhelper.dart';
 
 class CommunityPage extends StatefulWidget {
   final String communityName;
