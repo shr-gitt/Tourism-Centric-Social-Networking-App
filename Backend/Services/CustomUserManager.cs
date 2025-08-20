@@ -25,4 +25,9 @@ public class CustomUserManager : UserManager<ApplicationUser>
         // Use your custom provider explicitly
         return GenerateUserTokenAsync(user, "TokenProvider", ResetPasswordTokenPurpose);
     }
+
+    public override Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
+    {
+        return GenerateUserTokenAsync(user, "TokeProvider", ConfirmEmailTokenPurpose);
+    }
 }

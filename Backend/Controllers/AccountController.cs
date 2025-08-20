@@ -86,9 +86,7 @@ public class AccountController : ControllerBase
     {
         if (!ModelState.IsValid)
             return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
-
-        // Rate limiting / CAPTCHA recommended here
-
+        
         var user = await _userManager.FindByEmailAsync(model.Email.ToLowerInvariant());
         if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             return Unauthorized(new ApiResponse<object> { Success = false, Message = "Invalid email or password." });
@@ -358,6 +356,29 @@ public class AccountController : ControllerBase
         }
         
         return Ok(new ApiResponse<string> { Success = true, Message = "Reset email sent." });
+    }
+    
+    /// <summary>
+    /// Reset password code verification.
+    /// </summary>
+    [HttpPost]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+    [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+    public async Task<IActionResult> CodeVerification(VerifyCodeRequest model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+            return BadRequest("User not found.");
+
+        // Use ValidateAsync from TokenProvider for code verification and expiration check
+        var tokenProvider = new TokenProvider<ApplicationUser>(); // or inject this dependency
+        var isValid = await tokenProvider.ValidateAsync("ResetPassword", model.Code, _userManager, user);
+    
+        if (!isValid)
+            return BadRequest("Invalid code or code has expired.");
+
+        return Ok(new ApiResponse<string> { Success = true, Message = "Verify Code successful." });
     }
     
     /// <summary>

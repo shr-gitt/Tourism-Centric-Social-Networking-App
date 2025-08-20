@@ -131,7 +131,8 @@ class UserService {
       log('token is $token');
       await AuthStorage.saveToken(token);
 
-      final twofa = data['Code'];
+      final twofa = data['code'];
+      log('In ApiService, twofa is $twofa');
       final username = await AuthStorage.getUserName();
       return (username, twofa);
     } else {
