@@ -76,6 +76,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     try {
       final success = await UserService().verifyCode(
         _emailController.text.trim(),
+        "ResetPassword",
         _codeController.text.trim(),
       );
 

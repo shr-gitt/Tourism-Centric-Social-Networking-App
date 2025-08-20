@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
+import 'package:frontend/pages/Authenticationpages/verifycode.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Service/usersettings_apiservice.dart';
@@ -126,10 +127,10 @@ class _SettingsState extends State<Settings> {
                       title: 'Verify Email',
                       subtitle: 'Verify your email',
                       icon: Icons.lock_outline,
-                      onTap: () => Navigator.pushReplacement(
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ChangePasswordPage(),
+                          builder: (_) => const VerifyCodePage(),
                         ),
                       ),
                       iconColor: Colors.blue.shade600,

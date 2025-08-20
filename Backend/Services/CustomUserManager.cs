@@ -28,6 +28,6 @@ public class CustomUserManager : UserManager<ApplicationUser>
 
     public override Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
     {
-        return GenerateUserTokenAsync(user, "TokeProvider", ConfirmEmailTokenPurpose);
+        return GenerateUserTokenAsync(user, "TokenProvider", "TwoFactor");
     }
 }

@@ -111,7 +111,7 @@ public class AccountController : ControllerBase
         
         if (user.TwoFactorEnabled)
         {
-            var code = await _customUserManager.GeneratePasswordResetTokenAsync(user);
+            var code = await _customUserManager.GenerateEmailConfirmationTokenAsync(user);
             c = true;
             try
             {
@@ -120,7 +120,7 @@ public class AccountController : ControllerBase
                     user.Email, 
                     "Login Attempt",
                     $"Your code for logging in is:<br><strong>{code}</strong><br>" +
-                    "This code is valid for 5 minutes. Copy this code into the app to login.");
+                    $"This code is valid for 5 minutes from now i.e. upto <br><strong>{DateTime.UtcNow}</strong></br> UTC. Copy this code into the app to login.");
             }
             catch (Exception ex)
             {
@@ -373,7 +373,7 @@ public class AccountController : ControllerBase
 
         // Use ValidateAsync from TokenProvider for code verification and expiration check
         var tokenProvider = new TokenProvider<ApplicationUser>(); // or inject this dependency
-        var isValid = await tokenProvider.ValidateAsync("ResetPassword", model.Code, _userManager, user);
+        var isValid = await tokenProvider.ValidateAsync(model.Purpose, model.Code, _userManager, user);
     
         if (!isValid)
             return BadRequest("Invalid code or code has expired.");

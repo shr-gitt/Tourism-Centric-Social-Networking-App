@@ -204,12 +204,12 @@ class UserService {
   }
 
   /// Reset password and 2FA code verification
-  Future<bool> verifyCode(String email, String code) async {
+  Future<bool> verifyCode(String email, String purpose, String code) async {
     try {
       final response = await http.post(
         Uri.parse('$userurl/CodeVerification'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'Email': email, 'Code': code}),
+        body: jsonEncode({'Email': email, 'Purpose': purpose, 'Code': code}),
       );
 
       if (response.statusCode == 200) {

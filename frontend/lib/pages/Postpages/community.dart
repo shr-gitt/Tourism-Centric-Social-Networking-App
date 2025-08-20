@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Postpages/inputpost.dart';
 import 'dart:developer';
 import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Postpages/displaymultiplepost.dart';
-import 'package:frontend/pages/search.dart';
+import 'package:frontend/pages/decorhelper.dart';
 
 class CommunityPage extends StatefulWidget {
   final String communityName;
@@ -34,23 +35,28 @@ class _CommunityPageState extends State<CommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.state
-          ? null
-          : AppBar(
-              title: Text(widget.communityName),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Search()),
-                    );
-                  },
+      appBar: widget.state ? null : AppBar(title: Text(widget.communityName)),
+      body: /*Column(
+        children: [
+          DecorHelper().buildGradientButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => Inputpost(
+                    titleController: TextEditingController(),
+                    locationController: TextEditingController(
+                      text: widget.communityName,
+                    ),
+                    communityController: widget.communityName,
+                    contentController: TextEditingController(),
+                    isEditing: true,
+                  ),
                 ),
-              ],
-            ),
-      body: FutureBuilder<List<dynamic>>(
+              );
+            },
+            child: const Text('Create Post'),
+          ),*/ FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -89,8 +95,8 @@ class _CommunityPageState extends State<CommunityPage> {
                     log('userId:$postUserId and uid:$uid');
                     return state
                         ? postUserId == uid
-                        : postUserId != uid &&
-                              postCommunity != widget.communityName;
+                        : postCommunity == widget.communityName &&
+                              postUserId != uid;
                   })
                   .cast<Map<String, dynamic>>()
                   .toList();
@@ -108,6 +114,8 @@ class _CommunityPageState extends State<CommunityPage> {
           );
         },
       ),
+      //],
+      //),
     );
   }
 }
