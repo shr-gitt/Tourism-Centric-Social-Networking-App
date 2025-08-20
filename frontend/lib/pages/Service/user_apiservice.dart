@@ -143,12 +143,13 @@ class UserService {
 
   Future logoutUser() async {
     final headers = await _getHeaders();
+    log('Sending logout request with headers: $headers');
+
     final response = await http.post(
       Uri.parse('$userurl/Logout'),
       headers: headers,
     );
 
-    log('Sending logout request with headers: $headers');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('logout service data is $data');

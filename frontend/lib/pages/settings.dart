@@ -27,21 +27,59 @@ class _SettingsState extends State<Settings> {
   String? error;
 
   Future<void> _logoutUser() async {
-    try {
-      await UserService().logoutUser();
-      await AuthStorage.logout();
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Log out'),
+        content: Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Log out',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    bool isSubmitting = false;
+    if (confirmed == true && !isSubmitting && mounted) {
+      setState(() {
+        isSubmitting = true;
+      });
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Center(child: CircularProgressIndicator()),
       );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Logged out successfully')));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+
+      try {
+        await UserService().logoutUser();
+        await AuthStorage.logout();
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logged out successfully')),
+        );
+      } catch (e) {
+        if (mounted) {
+          Navigator.pop(context); // Close loading
+          log('Error: $e');
+        }
+      }
     }
   }
 
