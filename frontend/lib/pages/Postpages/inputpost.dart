@@ -15,21 +15,25 @@ class Inputpost extends StatefulWidget {
   final String? id;
   final bool isEditing;
   final TextEditingController titleController;
-  final TextEditingController locationController;
+  TextEditingController locationController;
+  String communityController;
   final TextEditingController contentController;
   final List<String>? existingImageUrls;
   final String? uid;
 
-  const Inputpost({
+  Inputpost({
     super.key,
     this.id,
     required this.titleController,
-    required this.locationController,
+    TextEditingController? locationController,
+    String? communityController,
     required this.contentController,
     this.existingImageUrls,
     required this.isEditing,
     this.uid,
-  });
+  }) : locationController =
+           locationController ?? TextEditingController(text: 'Nepal'),
+       communityController = communityController ?? 'Nepal';
 
   @override
   State<Inputpost> createState() => _InputpostState();
@@ -45,6 +49,7 @@ class _InputpostState extends State<Inputpost> {
   @override
   void initState() {
     super.initState();
+
     existingImages = widget.existingImageUrls ?? [];
     _initializeUid();
   }
@@ -141,6 +146,7 @@ class _InputpostState extends State<Inputpost> {
           isEditing: widget.isEditing,
           titleController: widget.titleController,
           locationController: widget.locationController,
+          community: widget.communityController,
           contentController: widget.contentController,
           pickedImage: pickedImage,
         ).submitPost(context);
@@ -199,9 +205,15 @@ class _InputpostState extends State<Inputpost> {
 
                 Text('Location', style: TextStyle(fontWeight: FontWeight.bold)),
                 LocationSearchBar(
-                  onLocationSelected: (LatLng position, String address) {
-                    log('Selected location: $address');
-                  },
+                  onLocationSelected:
+                      (LatLng position, String address, String? community) {
+                        log('Selected location: $address');
+                        widget.locationController.text = address;
+                        widget.communityController = community ?? "";
+                        log(
+                          'In input post, community name is ${address.split(',')[address.split(',').length - 3]}',
+                        );
+                      },
                   frompost: true,
                 ),
 

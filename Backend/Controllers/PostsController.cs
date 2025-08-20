@@ -62,6 +62,7 @@ namespace Backend.Controllers
                 UserId = request.UserId ?? "",
                 Title = request.Title ?? "",
                 Location = request.Location,
+                Community = request.Community,
                 Content = request.Content ?? "",
                 Created = DateTime.Now,
                 Image = imagePaths
@@ -108,6 +109,7 @@ namespace Backend.Controllers
                 UserId = request.UserId ?? "",
                 Title = request.Title ?? "",
                 Location = request.Location,
+                Community = request.Community,
                 Content = request.Content ?? "",
                 Image = imagePaths,
                 Created = existingPost.Created

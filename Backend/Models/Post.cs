@@ -13,6 +13,7 @@ namespace Backend.Models
         public required string UserId { get; set; }
         public required string Title { get; set; }
         public string? Location { get; set; }
+        public string? Community { get; set; }
         public required string Content { get; set; }
         public DateTime? Created { get; set; } = DateTime.Now;
         public List<string>? Image { get; set; }

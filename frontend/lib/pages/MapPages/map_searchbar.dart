@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../Service/map_apiservice.dart';
 
 class LocationSearchBar extends StatefulWidget {
-  final Function(LatLng position, String address) onLocationSelected;
+  final Function(LatLng position, String address, String? county) onLocationSelected;
   final bool enabled;
   final bool frompost;
 
@@ -75,6 +75,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> {
                         widget.onLocationSelected(
                           selectedPosition,
                           data['display_name'],
+                          data['address']['county'],
                         );
                       }
                     },
@@ -116,7 +117,7 @@ class _LocationSearchBarState extends State<LocationSearchBar> {
           final position = LatLng(lat, lon);
           final address = suggestion['display_name'];
           _controller.text = address;
-          widget.onLocationSelected(position, address);
+          widget.onLocationSelected(position, address, suggestion['address']['county']);
         }
       },
     );

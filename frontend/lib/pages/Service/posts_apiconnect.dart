@@ -12,6 +12,7 @@ class Apiconnect {
   final bool isEditing;
   final TextEditingController titleController;
   final TextEditingController locationController;
+  final String community;
   final TextEditingController contentController;
   final List<XFile>? pickedImage;
 
@@ -21,6 +22,7 @@ class Apiconnect {
     required this.isEditing,
     required this.titleController,
     required this.locationController,
+    required this.community,
     required this.contentController,
     required this.pickedImage,
   });
@@ -39,6 +41,7 @@ class Apiconnect {
       request.fields['UserId'] = userId ?? '';
       request.fields['title'] = titleController.text;
       request.fields['location'] = locationController.text;
+      request.fields['county'] = community;
       request.fields['content'] = contentController.text;
       log('post title:${request.fields['title']}');
       if (pickedImage != null && pickedImage!.isNotEmpty) {

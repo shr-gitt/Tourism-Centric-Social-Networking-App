@@ -1,11 +1,15 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/pages/Postpages/community.dart';
+import 'package:frontend/pages/Service/map_apiservice.dart';
+import 'package:frontend/pages/decorhelper.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:frontend/pages/MapPages/map_searchbar.dart';
 
 class Map extends StatefulWidget {
   const Map({super.key});
+
   @override
   MapState createState() => MapState();
 }
@@ -13,6 +17,46 @@ class Map extends StatefulWidget {
 class MapState extends State<Map> {
   final MapController _mapController = MapController();
   LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
+  String _selectedLocationAddress = "Kathmandu, Nepal"; // Default address
+
+  // Method to show bottom sheet
+  void _showLocationDetails(LatLng position, String address, String city) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "${address.split(',')[0]},${address.split(',')[1]}",
+                style: TextStyle(fontSize: 25),
+              ),
+              Text(city, style: TextStyle(fontSize: 20)),
+              SizedBox(height: 10),
+              DecorHelper().buildGradientButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CommunityPage(communityName: city),
+                    ),
+                  );
+                },
+                child: const Text('Go to community'),
+              ),
+              SizedBox(height: 16),
+
+              Text("Latitude: ${position.latitude}"),
+              Text("Longitude: ${position.longitude}"),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +69,24 @@ class MapState extends State<Map> {
             options: MapOptions(
               initialCenter: _selectedLocation,
               initialZoom: 13.0,
-              onTap: (_, latLng) {
+              onTap: (_, latLng) async {
                 setState(() {
                   _selectedLocation = latLng;
                 });
+                // You can use a geocoding service here to get the address
+                _selectedLocationAddress =
+                    "New Address for the tapped location";
+                // Show bottom sheet with location details
+                final data = await MapApiservice().fetchLocationDetails(
+                  _selectedLocation,
+                );
+                final name = data['address'];
+
+                _showLocationDetails(
+                  _selectedLocation,
+                  data['display_name'],
+                  name['county'],
+                );
               },
             ),
             children: [
@@ -36,7 +94,6 @@ class MapState extends State<Map> {
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 tileProvider: NetworkTileProvider(),
               ),
-
               MarkerLayer(
                 markers: [
                   Marker(
@@ -60,13 +117,20 @@ class MapState extends State<Map> {
             left: 16,
             right: 16,
             child: LocationSearchBar(
-              onLocationSelected: (LatLng position, String address) {
-                setState(() {
-                  _selectedLocation = position;
-                  _mapController.move(position, 15.0);
-                });
-                log('Selected location: $address');
-              },
+              onLocationSelected:
+                  (LatLng position, String address, String? county) {
+                    setState(() {
+                      _selectedLocation = position;
+                      _mapController.move(position, 15.0);
+                      _selectedLocationAddress = address;
+                    });
+                    log('Selected location: $address');
+                    _showLocationDetails(
+                      position,
+                      address,
+                      county ?? "",
+                    ); // Show bottom sheet when search is used
+                  },
               frompost: false,
             ),
           ),
