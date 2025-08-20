@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
 import 'package:frontend/pages/MapPages/map.dart';
 import 'package:frontend/pages/Postpages/createpost.dart';
-import 'package:frontend/pages/notification.dart';
 import 'package:frontend/pages/Userpages/profile.dart';
+import 'package:frontend/pages/search.dart';
 
 // ignore: must_be_immutable
 class MainScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   int index = 0;
   late int currentIndex;
 
-  List pages = [PostsPage(), Map(), Createpost(), Notify(), Profile()];
+  List pages = [PostsPage(), Search(), Createpost(), Map(), Profile()];
 
   @override
   void initState() {
@@ -42,12 +42,9 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: currentIndex,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Feed'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: 'New Post'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notification_add),
-            label: 'Notification',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
         backgroundColor: Colors.grey,

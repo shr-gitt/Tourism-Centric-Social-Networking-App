@@ -28,22 +28,7 @@ class _PostsPageState extends State<PostsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.state
-          ? null
-          : AppBar(
-              title: const Text('Posts'),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => Search()),
-                    );
-                  },
-                ),
-              ],
-            ),
+      appBar: widget.state ? null : AppBar(title: const Text('Posts')),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
