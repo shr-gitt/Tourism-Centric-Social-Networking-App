@@ -83,11 +83,12 @@ class UsersettingsApiservice {
     }
   }
 
-  Future<bool> enableTwoFactor() async {
+  Future<bool> twoFactor({required bool state}) async {
     try {
       final response = await http.post(
         Uri.parse('$manageUrl/EnableTwoFactor'),
         headers: await _getHeaders(),
+        body: jsonEncode(state)
       );
 
       if (response.statusCode == 200) {
@@ -102,74 +103,6 @@ class UsersettingsApiservice {
     } catch (e) {
       log('Exception in enableTwoFactor: $e');
       return false;
-    }
-  }
-
-  Future<bool> disableTwoFactor() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$manageUrl/DisableTwoFactor'),
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        log('2FA disabled');
-        return true;
-      } else {
-        log('Failed to disable 2FA: ${response.statusCode}');
-        log('Error body: ${response.body}');
-
-        return false;
-      }
-    } catch (e) {
-      log('Exception in disableTwoFactor: $e');
-      return false;
-    }
-  }
-
-  Future<bool> resetAuthenticatorKey() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$manageUrl/ResetAuthenticatorKey'),
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        log('Authenticator key reset');
-        return true;
-      } else {
-        log('Failed to reset key: ${response.statusCode}');
-        log('Error body: ${response.body}');
-
-        return false;
-      }
-    } catch (e) {
-      log('Exception in resetAuthenticatorKey: $e');
-
-      return false;
-    }
-  }
-
-  Future<List<String>?> generateRecoveryCodes() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$manageUrl/GenerateRecoveryCodes'),
-        headers: await _getHeaders(),
-      );
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        final codes = List<String>.from(result['codes']);
-        log('Recovery codes generated');
-        return codes;
-      } else {
-        log('Failed to generate codes: ${response.statusCode}');
-        log('Error body: ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      log('Exception in generateRecoveryCodes: $e');
-      return null;
     }
   }
 }

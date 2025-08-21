@@ -72,17 +72,17 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API for managing users, posts and feedbacks."
     });
     c.EnableAnnotations();
-    
+   
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,  // Changed from ApiKey to Http
-        Scheme = "bearer",  // Changed to lowercase
-        BearerFormat = "JWT"  // Added this
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
-
+    
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -126,7 +126,9 @@ builder.Services.AddAuthentication(options =>
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? ""))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
+            NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         };
     })
     .AddGoogle(googleOptions =>
@@ -134,7 +136,6 @@ builder.Services.AddAuthentication(options =>
         googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
         googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     });
-
 
 builder.Services
     .AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -146,6 +147,7 @@ builder.Services
         options.Password.RequireDigit = true;
 
         options.Tokens.PasswordResetTokenProvider = "TokenProvider";
+        options.Tokens.EmailConfirmationTokenProvider = "TokenProvider";
     })
     .AddTokenProvider<TokenProvider<ApplicationUser>>("TokenProvider")
     .AddUserManager<CustomUserManager>()

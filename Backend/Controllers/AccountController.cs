@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Backend.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
@@ -347,7 +348,7 @@ public class AccountController : ControllerBase
                 user.Email, 
                 "Reset Password",
                 $"Your password reset code is:<br><strong>{code}</strong><br>" +
-                "This code is valid for 5 minutes. Copy this code into the app to reset your password.");
+                $"This code is valid for 5 minutes from {DateTime.UtcNow} Utc. Copy this code into the app to reset your password.");
         }
         catch (Exception ex)
         {
@@ -450,8 +451,6 @@ public class AccountController : ControllerBase
     }
 
     #region Helpers
-
-    
     private async Task EnsureRolesExist()
     {
         var roles = new[]
@@ -540,11 +539,6 @@ public class AccountController : ControllerBase
         public DateTime ExpiresAt { get; set; }
     }
 
-    public class ApiResponse<T>
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = null!;
-        public T Data { get; set; }
-    }
+    
     #endregion
 }

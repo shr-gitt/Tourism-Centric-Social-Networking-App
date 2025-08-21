@@ -3,6 +3,8 @@ using Backend.Models;
 using Backend.DTO.Manage;
 using Backend.Services.userAccount;
 using System.Security.Claims;
+using Backend.DTO;
+using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,17 +21,20 @@ namespace Backend.Controllers
     public class ManageController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CustomUserManager _customUserManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ManageController> _logger;
 
         public ManageController(
             UserManager<ApplicationUser> userManager,
+            CustomUserManager customUserManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<ManageController> logger)
         {
             _userManager = userManager;
+            _customUserManager = customUserManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
@@ -81,7 +86,93 @@ namespace Backend.Controllers
             _logger.LogInformation("User changed their password.");
             return Ok(new { Message = "Password changed successfully." });
         }
+        
+        /// <summary>
+        /// Request verify email link via email.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        public async Task<IActionResult> RequestVerifyEmail(RequestVerifyEmailRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
 
+            _logger.LogInformation("Verify Email request: {Email}",  model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email.ToLowerInvariant());
+            _logger.LogInformation("VerifyEmail user email: {Email}", user.Email);
+            if (user == null)// || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Always return success to avoid email enumeration
+                return Ok(new ApiResponse<string> { Success = true, Message = "If this email exists, a reset link has been sent." });
+            }
+
+            //var code = GenerateSixDigitCode();
+            var code = await _customUserManager.GenerateEmailConfirmationTokenAsync(user);
+
+            // Provide the reset link so frontend app can handle it
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    user.Name,
+                    user.Email, 
+                    "Verify Email",
+                    $"Your password reset code is:<br><strong>{code}</strong><br>" +
+                    $"This code is valid for 5 minutes from {DateTime.UtcNow} Utc. Copy this code into the app to reset your password.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send verify email mail to {Email}", user.Email);
+                return StatusCode(500, new ApiResponse<object> { Success = false, Message = "Failed to send email." });
+            }
+        
+            return Ok(new ApiResponse<string> { Success = true, Message = "Verify email sent." });
+        }
+
+        /// <summary>
+        /// Verify email via email.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+        [ProducesResponseType(typeof(ApiResponse<object>), 400)]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailRequest model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
+
+            _logger.LogInformation("Verify Email request: {Email}",  model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email.ToLowerInvariant());
+            _logger.LogInformation("VerifyEmail user email: {Email}", user.Email);
+            if (user == null)// || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Always return success to avoid email enumeration
+                return Ok(new ApiResponse<string> { Success = true, Message = "If this email exists, a reset link has been sent." });
+            }
+
+            //var code = GenerateSixDigitCode();
+            var code = await _userManager.ConfirmEmailAsync(user,model.Code);
+
+            // Provide the reset link so frontend app can handle it
+            try
+            {
+                await _emailSender.SendEmailAsync(
+                    user.Name,
+                    user.Email,
+                    "Email Verified",
+                    $"Your email has been verified");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to verify email {Email}", user.Email);
+                return StatusCode(500, new ApiResponse<object> { Success = false, Message = "Failed to verify email." });
+            }
+        
+            return Ok(new ApiResponse<string> { Success = true, Message = "Email Verified." });
+        }
+        
+        /*
         /// <summary>Sets a password for a user without one.</summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -102,9 +193,9 @@ namespace Backend.Controllers
             await _signInManager.SignInAsync(user, false);
             return Ok(new { Message = "Password set successfully." });
         }
-
+        
         /// <summary>Sends a verification SMS to the provided phone number.</summary>
-        /*[HttpPost]
+        [HttpPost]
         public async Task<IActionResult> AddPhone(AddPhoneNumberRequest model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

@@ -4,7 +4,9 @@ import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/decorhelper.dart';
 
 class VerifyCodePage extends StatefulWidget {
-  const VerifyCodePage({super.key});
+  final String purpose;
+  final String? email;
+  const VerifyCodePage({super.key, required this.purpose, this.email});
 
   @override
   State<VerifyCodePage> createState() => _VerifyCodePageState();
@@ -35,20 +37,14 @@ class _VerifyCodePageState extends State<VerifyCodePage>
     setState(() => _isLoading = true);
 
     try {
-      final success = await UserService().verifyCode(
-        _emailController.text.trim(),
-        "TwoFactor",
+      final success = await UserService().verifyEmail(
+        widget.email!,
+        widget.purpose,
         _codeController.text.trim(),
       );
 
       if (success) {
-        _showSuccessSnackBar('Code verified! Please create a new password.');
-
-        /*if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-        );*/
+        _showSuccessSnackBar('Code verified!');
       } else {
         _showErrorSnackBar(
           'Failed to verify code. Please check your code and try again.',

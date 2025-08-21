@@ -20,10 +20,12 @@ class UserService {
   }
 
   Future<Map<String, dynamic>?> getUserSettings() async {
+    final headers = await _getHeaders();
+    log('header is: $headers');
     try {
       final response = await http.get(
         Uri.parse('$manageurl/Index'),
-        headers: await _getHeaders(),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -177,6 +179,52 @@ class UserService {
       log(
         'Failed to login as guest user: ${response.body} - ${response.statusCode}',
       );
+      return false;
+    }
+  }
+
+  Future<bool> requestVerifyEmail(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$manageurl/RequestVerifyEmail'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        log('Verify Email response: ${result['message']}');
+        return result['success'] ?? true;
+      } else {
+        log('Verify Email failed: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in verifyEmail: $e');
+      return false;
+    }
+  }
+
+  Future<bool> verifyEmail(String email, String purpose, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$manageurl/VerifyEmail'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'Email': email, 'Code': code}),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        log('Verify Email response: ${result['message']}');
+        return result['success'] ?? true;
+      } else {
+        log('Verify Email failed: ${response.statusCode}');
+        log('Error body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in verifyEmail: $e');
       return false;
     }
   }

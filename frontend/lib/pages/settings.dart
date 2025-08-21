@@ -20,7 +20,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   final UserService _userService = UserService();
-  final UsersettingsApiservice _settings = UsersettingsApiservice();
+  //final UsersettingsApiservice _settings = UsersettingsApiservice();
 
   Map<String, dynamic>? settings;
   bool isLoading = false;
@@ -85,10 +85,11 @@ class _SettingsState extends State<Settings> {
 
   Future<void> _loadSettings() async {
     setState(() => isLoading = true);
-    final token = await AuthStorage.getToken();
-    log('Token used for settings request: $token');
+    //final token = await AuthStorage.getToken();
+    //log('Token used for settings request: $token');
 
     final result = await _userService.getUserSettings();
+    log('In load settings, result is $result');
     setState(() {
       settings = result;
       isLoading = false;
@@ -109,6 +110,40 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  Future<void> _verifyemail() async {
+    log("Settings info: $settings");
+    String userId = await AuthStorage.getUserName() ?? "";
+    final fetchedUser = await UserService().fetchUserData(userId);
+    try {
+      final success = await UserService().requestVerifyEmail(fetchedUser?['email']);
+
+      if (success) {
+        _showSnackBar('Code verified!');
+      } else {
+        _showSnackBar(
+          'Failed to verify email. Please check your code and try again.',
+          isError: true,
+        );
+      }
+    } catch (e) {
+      _showSnackBar(
+        'An error occurred while trying to verify email. Please try again.',
+        isError: true,
+      );
+      log('Verify email error: $e');
+    } finally {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VerifyCodePage(
+            purpose: "VerifyEmail",
+            email: fetchedUser?['email'],
+          ),
+        ),
+      );
+    }
+  }
+
   void _showSnackBar(String msg, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -119,6 +154,12 @@ class _SettingsState extends State<Settings> {
         margin: const EdgeInsets.all(16),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
   }
 
   @override
@@ -165,12 +206,8 @@ class _SettingsState extends State<Settings> {
                       title: 'Verify Email',
                       subtitle: 'Verify your email',
                       icon: Icons.lock_outline,
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const VerifyCodePage(),
-                        ),
-                      ),
+                      onTap: _verifyemail,
+
                       iconColor: Colors.blue.shade600,
                     ),
 
@@ -197,15 +234,18 @@ class _SettingsState extends State<Settings> {
                           ? 'Enabled - Your account is protected'
                           : 'Disabled - Enhance your security',
                       icon: Icons.security_outlined,
-                      onTap: () {
+                      onTap: () async {
                         if (settings?['twoFactorEnabled'] == true) {
                           _handleAction(
-                            _settings.disableTwoFactor,
+                            () => UsersettingsApiservice().twoFactor(
+                              state: false,
+                            ),
                             '2FA disabled.',
                           );
                         } else {
                           _handleAction(
-                            _settings.enableTwoFactor,
+                            () =>
+                                UsersettingsApiservice().twoFactor(state: true),
                             '2FA enabled.',
                           );
                         }
