@@ -117,6 +117,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
+        options.RequireHttpsMetadata = false; // Allow HTTP in dev if needed
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -128,7 +129,53 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
             NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role",
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("JwtAuth");
+
+                // Prefer standard Authorization header
+                var authHeader = context.Request.Headers["Authorization"].ToString();
+                if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                    logger.LogInformation("JWT extracted from Authorization header. Length: {Length}", context.Token?.Length);
+                }
+                // Fallback to access_token query param (useful for some mobile/web clients)
+                else if (context.Request.Query.TryGetValue("access_token", out var tokenValues))
+                {
+                    context.Token = tokenValues.ToString();
+                    logger.LogInformation("JWT extracted from access_token query parameter. Length: {Length}", context.Token?.Length);
+                }
+                else
+                {
+                    logger.LogWarning("No JWT found in request.");
+                }
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("JwtAuth");
+                logger.LogError(context.Exception, "JWT authentication failed: {Message}", context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("JwtAuth");
+                logger.LogWarning("JWT challenge. Error: {Error}, Description: {Description}", context.Error, context.ErrorDescription);
+                return Task.CompletedTask;
+            }
         };
     })
     .AddGoogle(googleOptions =>
