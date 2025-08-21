@@ -27,7 +27,9 @@ class UserService {
         Uri.parse('$manageurl/Index'),
         headers: headers,
       );
+      log('for index,        ${Uri.parse('$manageurl/Index')},');
 
+      log('Trying to fetch settings');
       if (response.statusCode == 200) {
         log('User settings fetched');
         return jsonDecode(response.body);

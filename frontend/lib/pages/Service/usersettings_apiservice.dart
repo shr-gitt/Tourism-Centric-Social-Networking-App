@@ -86,7 +86,7 @@ class UsersettingsApiservice {
   Future<bool> twoFactor({required bool state}) async {
     try {
       final response = await http.post(
-        Uri.parse('$manageUrl/EnableTwoFactor'),
+        Uri.parse('$manageUrl/TwoFactor'),
         headers: await _getHeaders(),
         body: jsonEncode(state)
       );

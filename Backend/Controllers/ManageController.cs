@@ -52,6 +52,7 @@ namespace Backend.Controllers
                 _logger.LogInformation("User not found in Index of ManageController.");
                 return Unauthorized();
             }
+            _logger.LogInformation("User found in Index of ManageController");
 
             var response = new
             {

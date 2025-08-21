@@ -225,4 +225,15 @@ app.UseStaticFiles();
 
 app.MapControllers();
 
+// Log all routes after mapping
+var routeBuilder = new StringBuilder();
+foreach (var dataSource in app.Services.GetRequiredService<EndpointDataSource>().Endpoints)
+{
+    if (dataSource is RouteEndpoint route)
+    {
+        routeBuilder.AppendLine(route.RoutePattern.RawText);
+    }
+}
+Console.WriteLine("Registered Routes:\n" + routeBuilder);
+
 app.Run();
