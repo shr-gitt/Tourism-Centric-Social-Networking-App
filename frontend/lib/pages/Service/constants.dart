@@ -3,5 +3,5 @@ class Constants {
   static const String userurl = '$baseurl/Account';
   static const String manageurl = '$baseurl/Manage';
   static const String posturl = '$baseurl/posts';
-  static const String feedbackurl = '$baseurl/feedbacks';
+  static const String feedbackurl = '$baseurl/Feedbacks';
 }

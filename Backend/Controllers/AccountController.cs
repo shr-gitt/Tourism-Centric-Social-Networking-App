@@ -283,11 +283,11 @@ public class AccountController : ControllerBase
         var userPosts = await _postServices.GetByUserIdAsync(user.Id.ToString()); 
         foreach (var post in userPosts)
             await _postServices.DeleteAsync(post.PostId, post);
-
+/*
         var userFeedbacks = await _feedbacksService.GetByUserIdAsync(user.Id.ToString()); 
         foreach (var feedback in userFeedbacks)
             await _feedbacksService.DeleteAsync(feedback.FeedbackId);
-
+*/
         // 🗑️ Delete the account
         var deleteResult = await _userManager.DeleteAsync(user);
 

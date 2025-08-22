@@ -40,6 +40,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Services\userPostFeedbacksService\" />
       <Folder Include="wwwroot\Images\" />
       <Folder Include="wwwroot\image\" />
     </ItemGroup>
