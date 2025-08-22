@@ -11,6 +11,7 @@ import 'package:frontend/pages/mainscreen.dart';
 import 'package:frontend/pages/MapPages/map_searchbar.dart';
 import 'package:latlong2/latlong.dart';
 
+// ignore: must_be_immutable
 class Inputpost extends StatefulWidget {
   final String? id;
   final bool isEditing;

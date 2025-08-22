@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
 
 class Search extends StatefulWidget {

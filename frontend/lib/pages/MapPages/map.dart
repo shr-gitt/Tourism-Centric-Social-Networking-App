@@ -17,6 +17,7 @@ class Map extends StatefulWidget {
 class MapState extends State<Map> {
   final MapController _mapController = MapController();
   LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
+  // ignore: unused_field
   String _selectedLocationAddress = "Kathmandu, Nepal"; // Default address
 
   // Method to show bottom sheet

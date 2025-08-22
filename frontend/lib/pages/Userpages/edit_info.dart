@@ -19,15 +19,32 @@ class _EditInformationPageState extends State<EditInformationPage> {
   String? uid;
   final UserService userapi = UserService();
   Map<String, dynamic>? user;
+
+  // Controllers initialized once
   final _usernameController = TextEditingController();
   final _fullnameController = TextEditingController();
   final _phonenumberController = TextEditingController();
   final _emailController = TextEditingController();
 
+  // Image picker variables
+  final ImagePicker _picker = ImagePicker();
+  NetworkImage? _previmage;
+  File? _image;
+
   @override
   void initState() {
     super.initState();
     _loadUserId();
+  }
+
+  @override
+  void dispose() {
+    // Dispose controllers when widget removed
+    _usernameController.dispose();
+    _fullnameController.dispose();
+    _phonenumberController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserId() async {
@@ -39,8 +56,17 @@ class _EditInformationPageState extends State<EditInformationPage> {
       if (!mounted) return;
       setState(() {
         user = fetchedUser;
-        if (user?['image'] != null) {
-          _previmage = NetworkImage('https://localhost:5259${user!['image']}');
+
+        // Initialize controllers with fetched user data
+        _usernameController.text = user?['userName'] ?? '';
+        _fullnameController.text = user?['name'] ?? '';
+        _phonenumberController.text = user?['phoneNumber'] ?? '';
+        _emailController.text = user?['email'] ?? '';
+
+        if (user?['image'] != null && user!['image'].toString().isNotEmpty) {
+          _previmage = NetworkImage('https://localhost:5259/${user!['image']}');
+        } else {
+          _previmage = null;
         }
       });
     } else {
@@ -50,12 +76,6 @@ class _EditInformationPageState extends State<EditInformationPage> {
     }
   }
 
-  // Add Image Picker related variables
-  final ImagePicker _picker = ImagePicker();
-  NetworkImage? _previmage;
-  File? _image;
-
-  // Pick an image
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -70,66 +90,76 @@ class _EditInformationPageState extends State<EditInformationPage> {
 
   Widget buildProfileImage() {
     if (_image != null) {
-      return GFAvatar(
-        radius: 75, 
-        backgroundImage: FileImage(_image!),
-      );
+      return GFAvatar(radius: 75, backgroundImage: FileImage(_image!));
     } else if (_previmage != null) {
       return GFAvatar(radius: 75, backgroundImage: _previmage);
     } else {
       return GFAvatar(
         radius: 75,
-        backgroundImage: NetworkImage(
+        backgroundImage: const NetworkImage(
           'https://localhost:5259/Images/profile_placeholder.jpg',
         ),
-        child: Icon(Icons.person, size: 50),
+        child: const Icon(Icons.person, size: 50),
       );
     }
   }
 
-  // Submit the form
   void _submitForm() async {
     final username = _usernameController.text.trim();
     final fullname = _fullnameController.text.trim();
     final phonenumber = _phonenumberController.text.trim();
     final email = _emailController.text.trim();
 
-    if (username.isEmpty ||
-        fullname.isEmpty ||
-        phonenumber.isEmpty ||
-        email.isEmpty) {
+    if (username.isEmpty &&
+        fullname.isEmpty &&
+        phonenumber.isEmpty &&
+        email.isEmpty &&
+        _image == null) {
       GFToast.showToast(
-        'Please fill in all fields',
+        'Please make at least one change to update',
         context,
         toastPosition: GFToastPosition.BOTTOM,
       );
       return;
     }
 
-    // Prepare the data for submission
-    final Map<String, dynamic> data = {
-      "UserName": username,
-      "Name": fullname,
-      "PhoneNumber": phonenumber,
-      "Email": email,
-    };
+    final Map<String, dynamic> data = {};
 
-    log('Email:$email');
+    if (username.isNotEmpty && username != (user?['userName'] ?? '')) {
+      data["UserName"] = username;
+    }
+    if (fullname.isNotEmpty && fullname != (user?['name'] ?? '')) {
+      data["Name"] = fullname;
+    }
+    if (phonenumber.isNotEmpty && phonenumber != (user?['phoneNumber'] ?? '')) {
+      data["PhoneNumber"] = phonenumber;
+    }
+    if (email.isNotEmpty && email != (user?['email'] ?? '')) {
+      data["Email"] = email;
+    }
+
+    if (data.isEmpty && _image == null) {
+      GFToast.showToast(
+        'No changes detected to update',
+        context,
+        toastPosition: GFToastPosition.BOTTOM,
+      );
+      return;
+    }
 
     final success = await UserService().updateUser(username, data, _image);
 
     if (!mounted) return;
     if (success) {
       GFToast.showToast(
-        'Post updated successfully!',
+        'Information updated successfully!',
         context,
         toastPosition: GFToastPosition.BOTTOM,
       );
-      // Navigate to the previous page or wherever you need
       Navigator.pop(context);
     } else {
       GFToast.showToast(
-        'Post update failed. Please try again.',
+        'Update failed. Please try again.',
         context,
         toastPosition: GFToastPosition.BOTTOM,
       );
@@ -157,7 +187,6 @@ class _EditInformationPageState extends State<EditInformationPage> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
               child: Column(
                 children: [
-                  //const SizedBox(height: 10),
                   const Text(
                     'Edit User',
                     style: TextStyle(
@@ -175,60 +204,45 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Display the picked image
                   buildProfileImage(),
                   const SizedBox(height: 20),
 
-                  // Image Picker Button
                   ElevatedButton(
                     onPressed: _pickImage,
                     child: const Text("Pick Profile Image"),
                   ),
                   const SizedBox(height: 20),
 
-                  // Username Field
                   DecorHelper().buildModernTextField(
-                    controller: TextEditingController(
-                      text: user?['userName'] ?? '',
-                    ),
+                    controller: _usernameController,
                     label: 'Username',
                     icon: Icons.person_2_outlined,
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Full Name Field
                   DecorHelper().buildModernTextField(
-                    controller: TextEditingController(
-                      text: user?['name'] ?? '',
-                    ),
+                    controller: _fullnameController,
                     label: 'Full Name',
                     icon: Icons.person,
                   ),
                   const SizedBox(height: 16),
 
-                  // Phone Number Field
                   DecorHelper().buildModernTextField(
-                    controller: TextEditingController(
-                      text: user?['phoneNumber'] ?? '',
-                    ),
+                    controller: _phonenumberController,
                     label: 'Phone Number',
                     icon: Icons.phone,
                   ),
                   const SizedBox(height: 16),
 
-                  // Email Field
                   DecorHelper().buildModernTextField(
-                    controller: TextEditingController(
-                      text: user?['email'] ?? '',
-                    ),
+                    controller: _emailController,
                     label: 'Email',
                     icon: Icons.email_outlined,
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Update Post Button
                   DecorHelper().buildGradientButton(
                     onPressed: _submitForm,
                     child: const Text(

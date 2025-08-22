@@ -227,6 +227,36 @@ public class AccountController : ControllerBase
     }
     
     /// <summary>
+    /// Update a user's profile information.
+    /// </summary>
+    [HttpPut]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateUserRequest model)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Immutable
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return Unauthorized(new ApiResponse<object> { Success = false, Message = "User not found." });
+
+        // Now update fields safely:
+        if (model.Image != null)
+            user.Image = _uploadImage.Upload(model.Image);
+
+        user.UserName = model.UserName.ToLowerInvariant();  
+        user.Email = model.Email.ToLowerInvariant();
+        user.Name = model.Name;
+        user.PhoneNumber = model.Phone;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            return IdentityErrorResponse(result);
+
+        return Ok(new ApiResponse<string> { Success = true, Message = "Profile updated successfully." });
+    }
+    
+    /// <summary>
     /// Deleted the user.
     /// </summary>
     [HttpPost]

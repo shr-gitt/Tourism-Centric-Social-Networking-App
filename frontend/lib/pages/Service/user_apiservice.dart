@@ -337,30 +337,40 @@ class UserService {
   ) async {
     Dio dio = Dio();
 
+    String? token = await AuthStorage.getToken();
+    if (token == null || token.isEmpty) {
+      log('No valid token found for updateUser');
+      return false;
+    }
+
+    final headers = {
+      'Authorization': 'Bearer $token',
+      // No 'Content-Type' here! Dio will set multipart boundary automatically
+    };
+    log('Token used for update: $token');
+
+    // Prepare multipart form data
     FormData formData = FormData.fromMap({
       'UserName': updatedData['UserName'],
       'Name': updatedData['Name'],
-      'Phone': updatedData['PhoneNumber'],
+      'Phone': updatedData['Phone'],
       'Email': updatedData['Email'],
-      'Password': updatedData['Password'],
-      'ConfirmPassword': updatedData['ConfirmPassword'],
     });
 
     if (image != null) {
       formData.files.add(
         MapEntry(
-          'Image', // Field name expected by the server
+          'Image',
           await MultipartFile.fromFile(image.path, filename: 'profile.jpg'),
         ),
       );
     }
 
     try {
-      //final headers = await _getHeaders();
       final response = await dio.put(
-        Uri.parse('$userurl/$username') as String,
-        //headers: headers,
-        data: jsonEncode(updatedData),
+        '$userurl/UpdateProfile',
+        data: formData,
+        options: Options(headers: headers),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -368,6 +378,7 @@ class UserService {
         return true;
       } else {
         log('Failed to update user information: ${response.statusCode}');
+        log('Response data: ${response.data}');
         return false;
       }
     } catch (e) {

@@ -53,7 +53,10 @@ class FeedbackService {
 
   /// Fetch all feedbacks from the backend
   Future<List<dynamic>> fetchAllFeedbacks() async {
-    final response = await http.get(Uri.parse(feedbackurl), headers: _headers);
+    final response = await http.get(
+      Uri.parse('$feedbackurl/GetAll'),
+      headers: _headers,
+    );
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
