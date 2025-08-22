@@ -30,6 +30,11 @@ namespace Backend.Services
         public async Task<List<Feedback>> GetByPostIdAsync(string postId) =>
             await _feedbacksCollection.Find(f => f.PostId == postId).ToListAsync();
 
+        public async Task<List<Feedback>> GetByUserIdAsync(string userId)
+        {
+            return await _feedbacksCollection.Find(f => f.UserId == userId).ToListAsync();
+        }
+        
         public async Task<bool> CreateAsync(Feedback feedback)
         {
             if (feedback == null) 

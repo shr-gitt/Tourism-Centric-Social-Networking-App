@@ -6,6 +6,7 @@ import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Service/usersettings_apiservice.dart';
 import 'package:frontend/pages/Userpages/change_password.dart';
+import 'package:frontend/pages/Userpages/confirmation.dart';
 import 'package:frontend/pages/Userpages/user_settings_page.dart';
 import 'package:frontend/pages/decorhelper.dart';
 import 'package:frontend/pages/help_center.dart';
@@ -175,7 +176,7 @@ class _SettingsState extends State<Settings> {
           ),
         ),
       ).then((_) {
-        _loadSettings(); 
+        _loadSettings();
       });
     } catch (e) {
       _showSnackBar(
@@ -311,7 +312,9 @@ class _SettingsState extends State<Settings> {
                       onTap: () => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const HelpCenterPage(),
+                          builder: (_) => ConfirmDeleteAccountPage(
+                            email: settings?['email'],
+                          ),
                         ),
                       ),
                       iconColor: Colors.blue.shade600,

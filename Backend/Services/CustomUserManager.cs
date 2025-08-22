@@ -36,4 +36,10 @@ public class CustomUserManager : UserManager<ApplicationUser>
         ThrowIfDisposed();
         return GenerateUserTokenAsync(user, "TokenProvider", "TwoFactor");
     }
+    
+    public Task<string> GenerateDeleteAccountTokenAsync(ApplicationUser user, string tokenProvider)
+    {
+        ThrowIfDisposed();
+        return GenerateUserTokenAsync(user, "TokenProvider", "DeleteAccount");
+    } 
 }

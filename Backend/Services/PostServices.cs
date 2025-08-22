@@ -21,6 +21,11 @@ namespace Backend.Services
 
         public async Task<Post?> GetByIdAsync(string id) =>
             await _postsCollection.Find(p => p.PostId == id).FirstOrDefaultAsync();
+       
+        public async Task<List<Post>> GetByUserIdAsync(string userId)
+        {
+            return await _postsCollection.Find(p => p.UserId == userId).ToListAsync();
+        }
         
         public async Task CreateAsync(Post post) => 
             await _postsCollection.InsertOneAsync(post);

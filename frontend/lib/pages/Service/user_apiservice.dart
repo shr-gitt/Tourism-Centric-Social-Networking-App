@@ -376,14 +376,17 @@ class UserService {
     }
   }
 
-  Future<bool> deleteUser(String username) async {
+  Future<bool> deleteUser(String email, String password) async {
     final headers = await _getHeaders();
-    final response = await http.delete(
-      Uri.parse('$userurl/$username'),
+    final uri = Uri.parse('$userurl/DeleteAccount');
+
+    final response = await http.post(
+      uri,
       headers: headers,
+      body: jsonEncode({'email': email, 'password': password}),
     );
 
-    if (response.statusCode == 204) {
+    if (response.statusCode == 200) {
       log('User deleted successfully.');
       return true;
     } else {

@@ -31,6 +31,8 @@ public class AccountController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly UploadImage _uploadImage;
+    private readonly PostServices _postServices;
+    private readonly FeedbacksService _feedbacksService;
 
     public AccountController(
         AccountServices accountServices,
@@ -41,7 +43,9 @@ public class AccountController : ControllerBase
         ILogger<AccountController> logger,
         IConfiguration configuration,
         RoleManager<ApplicationRole> roleManager,
-        UploadImage uploadImage)
+        UploadImage uploadImage,
+        PostServices postServices,
+        FeedbacksService feedbacksService)
     {
         _accountServices = accountServices;
         _customUserManager = customUserManager;
@@ -52,6 +56,8 @@ public class AccountController : ControllerBase
         _configuration = configuration;
         _roleManager = roleManager;
         _uploadImage = uploadImage;
+        _postServices = postServices;
+        _feedbacksService = feedbacksService;
     }
     
     [HttpGet]
@@ -219,6 +225,52 @@ public class AccountController : ControllerBase
         _logger.LogInformation("User {UserId} logged out.", User.FindFirstValue(ClaimTypes.NameIdentifier));
         return Ok(new ApiResponse<string> { Success = true, Message = "User logged out." });
     }
+    
+    /// <summary>
+    /// Deleted the user.
+    /// </summary>
+    [HttpPost]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [ProducesResponseType(typeof(ApiResponse<string>), 200)]
+    public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
+
+        var user = await _userManager.FindByEmailAsync(request.Email.ToLowerInvariant());
+
+        if (user == null)
+            return Unauthorized(new ApiResponse<object> { Success = false, Message = "User not found." });
+
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (!passwordValid)
+            return Unauthorized(new ApiResponse<object> { Success = false, Message = "Incorrect password." });
+
+        if (await _userManager.IsLockedOutAsync(user))
+            return StatusCode(403, new ApiResponse<object> { Success = false, Message = "Account is locked." });
+
+        // 🧹 Delete related data (posts, feedbacks)
+        var userPosts = await _postServices.GetByUserIdAsync(user.Id.ToString()); 
+        foreach (var post in userPosts)
+            await _postServices.DeleteAsync(post.PostId, post);
+
+        var userFeedbacks = await _feedbacksService.GetByUserIdAsync(user.Id.ToString()); 
+        foreach (var feedback in userFeedbacks)
+            await _feedbacksService.DeleteAsync(feedback.FeedbackId);
+
+        // 🗑️ Delete the account
+        var deleteResult = await _userManager.DeleteAsync(user);
+
+        if (!deleteResult.Succeeded)
+            return IdentityErrorResponse(deleteResult);
+
+        _logger.LogInformation("User {UserId} deleted.", user.Id);
+
+        return Ok(new ApiResponse<string> { Success = true, Message = "Account deleted successfully." });
+    }
+
+
+    
 /*
     /// <summary>
     /// Initiate external login challenge.
