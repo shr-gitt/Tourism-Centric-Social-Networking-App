@@ -67,14 +67,13 @@ class _ProfileState extends State<Profile> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundImage: user?['image'] != null
+                    backgroundImage: user!['image'].toString().isNotEmpty
                         ? NetworkImage(
                             'https://localhost:5259${user!['image']}',
                           )
-                        : null,
-                    child: user?['image'] == null
-                        ? const Icon(Icons.person, size: 40)
-                        : null,
+                        : NetworkImage(
+                            'https://localhost:5259/Images/profile_placeholder.jpg',
+                          ),
                   ),
                   SizedBox(width: 16),
                   Expanded(

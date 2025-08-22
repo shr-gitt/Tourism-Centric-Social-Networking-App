@@ -209,7 +209,7 @@ class _SignupPageState extends State<SignupPage> {
                     // Confirm Password Field
                     DecorHelper().buildModernTextField(
                       controller: _confirmpasswordController,
-                      label: 'Password',
+                      label: 'Confirm Password',
                       icon: Icons.lock_outline,
                       obscureText: !_isconfirmPasswordVisible,
                       suffixIcon: IconButton(

@@ -61,9 +61,11 @@ class _AvatarState extends State<Avatar> {
           },
           child: GFAvatar(
             radius: isPost ? 20 : 15,
-            backgroundImage: user?['image'] != null
+            backgroundImage: user!['image'].toString().isNotEmpty
                 ? NetworkImage('https://localhost:5259${user!['image']}')
-                : null,
+                : NetworkImage(
+                    'https://localhost:5259/Images/profile_placeholder.jpg',
+                  ),
             child: user?['image'] == null
                 ? Icon(Icons.person, size: isPost ? 30 : 20)
                 : null,
