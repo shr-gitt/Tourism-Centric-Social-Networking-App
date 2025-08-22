@@ -180,8 +180,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: const Color(0xFF718096),
                       ),
                       onPressed: () => setState(
@@ -261,7 +261,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                           ),
                   ),
-
+                  /*
                   const SizedBox(height: 15),
 
                   ElevatedButton.icon(
@@ -271,7 +271,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       // Call your external login API, or open the OAuth URL
                     },
                   ),
-
+                */
                   const SizedBox(height: 20),
 
                   // Divider

@@ -181,10 +181,9 @@ class _InputpostState extends State<Inputpost> {
     }
 
     return Scaffold(
-      appBar: GFAppBar(
+      appBar: AppBar(
         title: Text(widget.isEditing ? 'Edit Post' : 'Create Post'),
         centerTitle: true,
-        backgroundColor: Colors.grey,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -239,7 +238,7 @@ class _InputpostState extends State<Inputpost> {
                       onPressed: pickedImage.length >= 5 ? null : _pickImages,
                       text: 'Pick Image (${pickedImage.length}/5)',
                       textColor: Colors.black,
-                      color: const Color(0xFFF5E17A),
+                      color: Color.fromARGB(255, 196, 184, 210),
                       size: GFSize.SMALL,
                     ),
                   ],

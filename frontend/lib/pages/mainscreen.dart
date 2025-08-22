@@ -47,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Map'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
-        backgroundColor: Colors.grey,
+        backgroundColor: Color.fromARGB(255, 197, 183, 211),
         type: BottomNavigationBarType.fixed,
       ),
     );

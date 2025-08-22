@@ -15,13 +15,7 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     List list = ["Kathmandu", "Lalitpur", "Bhaktapur", "Pokhara"];
     return Scaffold(
-      appBar: AppBar(leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
-          ),
-        ),title:Text('Search Page'),),
+      appBar: AppBar(title: Text('Search Page')),
       body: GFSearchBar(
         searchList: list,
         searchQueryBuilder: (query, list) {

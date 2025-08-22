@@ -109,7 +109,8 @@ class _SignupPageState extends State<SignupPage> {
             MaterialPageRoute(builder: (_) => LoginPage()),
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 233, 224, 143),
+        backgroundColor: Color.fromARGB(255, 179, 151, 208),
+
         //title: const Text("Sign Up"),
         //centerTitle: true,
       ),
@@ -186,8 +187,8 @@ class _SignupPageState extends State<SignupPage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: const Color(0xFF718096),
                         ),
                         onPressed: () => setState(
@@ -215,8 +216,8 @@ class _SignupPageState extends State<SignupPage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isconfirmPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: const Color(0xFF718096),
                         ),
                         onPressed: () => setState(
@@ -239,6 +240,20 @@ class _SignupPageState extends State<SignupPage> {
                     // Image Picker Button
                     ElevatedButton(
                       onPressed: _pickImage,
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                          Color.fromARGB(255, 208, 199, 218),
+                        ),
+                        foregroundColor: WidgetStateProperty.all<Color>(
+                          Colors.black,
+                        ),
+                        textStyle: WidgetStateProperty.all<TextStyle>(
+                          const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
                       child: const Text("Pick Profile Image"),
                     ),
                     const SizedBox(height: 10),

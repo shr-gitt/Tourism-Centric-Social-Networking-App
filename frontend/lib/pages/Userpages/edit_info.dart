@@ -68,28 +68,21 @@ class _EditInformationPageState extends State<EditInformationPage> {
     }
   }
 
-  // Check if there is an image or not and build the widget properly
   Widget buildProfileImage() {
     if (_image != null) {
       return GFAvatar(
-        radius: 75, // Adjust size as needed
-        backgroundImage: FileImage(_image!), // Display picked image
-        child: null, // No child since we want to display the image only
+        radius: 75, 
+        backgroundImage: FileImage(_image!),
       );
     } else if (_previmage != null) {
-      return GFAvatar(
-        radius: 75, // Adjust size as needed
-        backgroundImage: _previmage, // Display previous image
-        child: null, // No child since we want to display the image only
-      );
+      return GFAvatar(radius: 75, backgroundImage: _previmage);
     } else {
       return GFAvatar(
-        radius: 75, // Adjust size as needed
-        backgroundImage: null, // No image available
-        child: Icon(
-          Icons.person, // Fallback icon
-          size: 50, // Adjust size as needed
+        radius: 75,
+        backgroundImage: NetworkImage(
+          'https://localhost:5259/Images/profile_placeholder.jpg',
         ),
+        child: Icon(Icons.person, size: 50),
       );
     }
   }
@@ -146,7 +139,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: GFAppBar(
+      appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacement(
@@ -154,7 +147,6 @@ class _EditInformationPageState extends State<EditInformationPage> {
             MaterialPageRoute(builder: (_) => const UserSettingsPage()),
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 233, 224, 143),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -167,7 +159,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
                 children: [
                   //const SizedBox(height: 10),
                   const Text(
-                    'Edit Post',
+                    'Edit User',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -240,7 +232,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   DecorHelper().buildGradientButton(
                     onPressed: _submitForm,
                     child: const Text(
-                      'Update Post',
+                      'Update Information',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

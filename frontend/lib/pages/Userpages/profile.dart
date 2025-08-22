@@ -54,6 +54,14 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     if (user != null) {
+      String? imageUrl;
+      if (user != null &&
+          user!['image'] != null &&
+          user!['image'].toString().isNotEmpty) {
+        imageUrl = 'https://localhost:5259${user!['image']}';
+      } else {
+        imageUrl = 'https://localhost:5259/Images/profile_placeholder.jpg';
+      }
       return Scaffold(
         appBar: AppBar(title: Text('Profile')),
         body: Column(
@@ -67,13 +75,7 @@ class _ProfileState extends State<Profile> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundImage: user!['image'].toString().isNotEmpty
-                        ? NetworkImage(
-                            'https://localhost:5259${user!['image']}',
-                          )
-                        : NetworkImage(
-                            'https://localhost:5259/Images/profile_placeholder.jpg',
-                          ),
+                    backgroundImage: NetworkImage(imageUrl),
                   ),
                   SizedBox(width: 16),
                   Expanded(

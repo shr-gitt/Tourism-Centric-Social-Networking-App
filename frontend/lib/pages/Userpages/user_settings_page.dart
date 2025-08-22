@@ -47,6 +47,14 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    String? imageUrl;
+    if (user != null &&
+        user!['image'] != null &&
+        user!['image'].toString().isNotEmpty) {
+      imageUrl = 'https://localhost:5259${user!['image']}';
+    } else {
+      imageUrl = 'https://localhost:5259/Images/profile_placeholder.jpg';
+    }
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -116,14 +124,7 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                       padding: EdgeInsetsGeometry.fromLTRB(110, 0, 0, 0),
                       child: CircleAvatar(
                         radius: 80,
-                        backgroundImage: user?['image'] != null
-                            ? NetworkImage(
-                                'https://localhost:5259${user!['image']}',
-                              )
-                            : null,
-                        child: user?['image'] == null
-                            ? const Icon(Icons.person, size: 40)
-                            : null,
+                        backgroundImage: NetworkImage(imageUrl),
                       ),
                     ),
 

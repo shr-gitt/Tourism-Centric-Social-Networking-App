@@ -47,6 +47,14 @@ class _AvatarState extends State<Avatar> {
     final isPost = widget.isPost;
     final data = widget.data;
     final selfPost = widget.selfPost;
+    String? imageUrl;
+    if (user != null &&
+        user!['image'] != null &&
+        user!['image'].toString().isNotEmpty) {
+      imageUrl = 'https://localhost:5259${user!['image']}';
+    } else {
+      imageUrl = 'https://localhost:5259/Images/profile_placeholder.jpg';
+    }
 
     return Row(
       children: [
@@ -61,14 +69,7 @@ class _AvatarState extends State<Avatar> {
           },
           child: GFAvatar(
             radius: isPost ? 20 : 15,
-            backgroundImage: user!['image'].toString().isNotEmpty
-                ? NetworkImage('https://localhost:5259${user!['image']}')
-                : NetworkImage(
-                    'https://localhost:5259/Images/profile_placeholder.jpg',
-                  ),
-            child: user?['image'] == null
-                ? Icon(Icons.person, size: isPost ? 30 : 20)
-                : null,
+            backgroundImage: NetworkImage(imageUrl),
           ),
         ),
 
