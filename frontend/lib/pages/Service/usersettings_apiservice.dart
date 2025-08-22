@@ -83,12 +83,15 @@ class UsersettingsApiservice {
     }
   }
 
-  Future<bool> twoFactor({required bool state}) async {
+  Future<bool> twoFactor({String? email, required bool state}) async {
+    log('in twoFactor, $email and $state');
+    final headers = await _getHeaders();
+    log('in twoFactor, $headers');
     try {
       final response = await http.post(
         Uri.parse('$manageUrl/TwoFactor'),
-        headers: await _getHeaders(),
-        body: jsonEncode(state)
+        headers: headers,
+        body: jsonEncode({'email': email, 'state': state}),
       );
 
       if (response.statusCode == 200) {

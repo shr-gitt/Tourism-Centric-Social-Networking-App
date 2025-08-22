@@ -19,9 +19,6 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  final UserService _userService = UserService();
-  //final UsersettingsApiservice _settings = UsersettingsApiservice();
-
   Map<String, dynamic>? settings;
   bool isLoading = false;
   String? error;
@@ -88,7 +85,8 @@ class _SettingsState extends State<Settings> {
     //final token = await AuthStorage.getToken();
     //log('Token used for settings request: $token');
 
-    final result = await _userService.getUserSettings();
+    String userId = await AuthStorage.getUserName() ?? "";
+    final result = await UserService().fetchUserData(userId);
     log('In load settings, result is $result');
     setState(() {
       settings = result;
@@ -110,12 +108,10 @@ class _SettingsState extends State<Settings> {
     }
   }
 
-  Future<void> _verifyemail() async {
+  Future<void> _verifyemail(String email) async {
     log("Settings info: $settings");
-    String userId = await AuthStorage.getUserName() ?? "";
-    final fetchedUser = await UserService().fetchUserData(userId);
     try {
-      final success = await UserService().requestVerifyEmail(fetchedUser?['email']);
+      final success = await UserService().requestVerifyEmail(email);
 
       if (success) {
         _showSnackBar('Code verified!');
@@ -137,10 +133,56 @@ class _SettingsState extends State<Settings> {
         MaterialPageRoute(
           builder: (_) => VerifyCodePage(
             purpose: "VerifyEmail",
-            email: fetchedUser?['email'],
+            email: email,
+            onVerified: () async {
+              _showSnackBar("Email verified successfully!");
+              await _loadSettings();
+            },
           ),
         ),
       );
+    }
+  }
+
+  Future<void> _toggle2FA(String email, bool state) async {
+    log("Settings info: $settings");
+
+    try {
+      final success = await UserService().requestVerifyEmail(email);
+
+      if (!success) {
+        _showSnackBar('Failed to send verification code.', isError: true);
+        return;
+      }
+
+      _showSnackBar('Verification code sent to email.');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VerifyCodePage(
+            purpose: "TwoFactor",
+            email: email,
+            onVerified: () async {
+              await _handleAction(
+                () => UsersettingsApiservice().twoFactor(
+                  email: email,
+                  state: !state, // Toggle
+                ),
+                state ? '2FA disabled.' : '2FA enabled.',
+              );
+            },
+          ),
+        ),
+      ).then((_) {
+        _loadSettings(); // ✅ Refresh when coming back
+      });
+    } catch (e) {
+      _showSnackBar(
+        'An error occurred while sending the verification code.',
+        isError: true,
+      );
+      log('2FA error: $e');
     }
   }
 
@@ -165,6 +207,10 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     log('Settings page reached');
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -201,18 +247,16 @@ class _SettingsState extends State<Settings> {
                     ),
 
                     const SizedBox(height: 20),
-
-                    DecorHelper().buildSettingCard(
-                      title: 'Verify Email',
-                      subtitle: 'Verify your email',
-                      icon: Icons.lock_outline,
-                      onTap: _verifyemail,
-
-                      iconColor: Colors.blue.shade600,
-                    ),
-
-                    const SizedBox(height: 20),
-
+                    if (settings?['emailConfirmed'] != true) ...[
+                      DecorHelper().buildSettingCard(
+                        title: 'Verify Email',
+                        subtitle: 'Verify your email',
+                        icon: Icons.lock_outline,
+                        onTap: () => _verifyemail(settings?['email']),
+                        iconColor: Colors.blue.shade600,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     DecorHelper().buildSettingCard(
                       title: 'Change Password',
                       subtitle: 'Update your account password',
@@ -234,22 +278,10 @@ class _SettingsState extends State<Settings> {
                           ? 'Enabled - Your account is protected'
                           : 'Disabled - Enhance your security',
                       icon: Icons.security_outlined,
-                      onTap: () async {
-                        if (settings?['twoFactorEnabled'] == true) {
-                          _handleAction(
-                            () => UsersettingsApiservice().twoFactor(
-                              state: false,
-                            ),
-                            '2FA disabled.',
-                          );
-                        } else {
-                          _handleAction(
-                            () =>
-                                UsersettingsApiservice().twoFactor(state: true),
-                            '2FA enabled.',
-                          );
-                        }
-                      },
+                      onTap: () => _toggle2FA(
+                        settings?['email'],
+                        settings?['twoFactorEnabled'],
+                      ),
                       iconColor: settings?['twoFactorEnabled'] == true
                           ? Colors.green.shade600
                           : Colors.orange.shade600,

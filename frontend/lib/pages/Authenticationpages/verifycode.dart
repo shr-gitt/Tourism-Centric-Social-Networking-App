@@ -6,7 +6,14 @@ import 'package:frontend/pages/decorhelper.dart';
 class VerifyCodePage extends StatefulWidget {
   final String purpose;
   final String? email;
-  const VerifyCodePage({super.key, required this.purpose, this.email});
+  final VoidCallback? onVerified;
+
+  const VerifyCodePage({
+    super.key,
+    required this.purpose,
+    this.email,
+    this.onVerified,
+  });
 
   @override
   State<VerifyCodePage> createState() => _VerifyCodePageState();
@@ -45,16 +52,21 @@ class _VerifyCodePageState extends State<VerifyCodePage>
 
       if (success) {
         _showSuccessSnackBar('Code verified!');
+        widget.onVerified?.call();
+
+        await Future.delayed(const Duration(seconds: 1));
       } else {
         _showErrorSnackBar(
           'Failed to verify code. Please check your code and try again.',
         );
+        await Future.delayed(const Duration(seconds: 1));
       }
     } catch (e) {
       _showErrorSnackBar('An error occurred. Please try again.');
       log('Verify code error: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
+      if (mounted) Navigator.pop(context);
     }
   }
 
@@ -171,7 +183,7 @@ class _VerifyCodePageState extends State<VerifyCodePage>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Code sent to ${_emailController.text}',
+                        'Code sent to ${widget.email ?? 'your email'}',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF718096),
@@ -196,7 +208,12 @@ class _VerifyCodePageState extends State<VerifyCodePage>
                       const SizedBox(height: 32),
 
                       DecorHelper().buildGradientButton(
-                        onPressed: _isLoading ? null : _verifyCode,
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                await _verifyCode();
+                              },
+
                         child: _isLoading
                             ? const SizedBox(
                                 height: 20,

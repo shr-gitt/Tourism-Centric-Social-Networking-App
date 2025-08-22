@@ -309,6 +309,27 @@ class UserService {
     }
   }
 
+  Future<bool> twofactor(bool state) async {
+    final headers = await _getHeaders();
+    final response = await http.post(
+      Uri.parse('$userurl/TwoFactor'),
+      headers: headers,
+      body: jsonEncode(state),
+    );
+    log('Trying to log in user');
+
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      log('decoded data is $decoded');
+      log('Reset password successful: ${decoded['message']}');
+
+      return decoded;
+    } else {
+      log('Failed to login user: ${response.body}-${response.statusCode}');
+      return false;
+    }
+  }
+
   Future<bool> updateUser(
     String username,
     Map<String, dynamic> updatedData,

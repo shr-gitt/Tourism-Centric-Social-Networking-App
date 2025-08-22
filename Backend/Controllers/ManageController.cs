@@ -244,14 +244,22 @@ namespace Backend.Controllers
 
         /// <summary>Enables or Disables two-factor authentication for the user.</summary>
         [HttpPost]
-        public async Task<IActionResult> TwoFactor(bool ans)
+        public async Task<IActionResult> TwoFactor(ConfigureTwoFactorRequest model)
         {
-            var user = await GetCurrentUserAsync();
-            if (user == null) return Unauthorized();
+            _logger.LogInformation("Inside Two-factor authentication enabled");
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<object> { Success = false, Message = "Invalid data", Data = ModelState });
 
-            await _userManager.SetTwoFactorEnabledAsync(user, ans);
+            _logger.LogInformation("Verify Email request: {Email}",  model.email);
+            var user = await _userManager.FindByEmailAsync(model.email.ToLowerInvariant());
+            if (user == null)// || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Always return success to avoid email enumeration
+                return Ok(new ApiResponse<string> { Success = true, Message = "If this email exists, a reset link has been sent." });
+            }
+            await _userManager.SetTwoFactorEnabledAsync(user, model.state);
             await _signInManager.SignInAsync(user, false);
-            _logger.LogInformation("User changed to 2FA.{value}",ans);
+            _logger.LogInformation("User changed to 2FA.{value}",model.state);
             return Ok(new { Message = "Two-factor authentication enabled." });
         }
 /*
