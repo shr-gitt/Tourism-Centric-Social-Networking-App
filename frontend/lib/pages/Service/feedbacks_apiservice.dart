@@ -29,7 +29,7 @@ class FeedbackService {
 
     try {
       final response = await http.post(
-        Uri.parse(feedbackurl),
+        Uri.parse('$feedbackurl/AddFeedback'),
         headers: _headers,
         body: jsonEncode(body),
       );
@@ -67,7 +67,7 @@ class FeedbackService {
   /// Fetch a specific feedback by its id
   Future<Map<String, dynamic>> fetchFeedbackById(String feedbackid) async {
     final response = await http.get(
-      Uri.parse('$feedbackurl/$feedbackid'),
+      Uri.parse('$feedbackurl/GetById/$feedbackid'),
       headers: _headers,
     );
     if (response.statusCode == 200) {
@@ -80,7 +80,7 @@ class FeedbackService {
   /// Fetch all feedbacks for a specific postId
   Future<List<dynamic>> fetchFeedbacksByPostId(String postId) async {
     final response = await http.get(
-      Uri.parse('$feedbackurl/post/$postId'),
+      Uri.parse('$feedbackurl/GetByPostId/post/$postId'),
       headers: _headers,
     );
     if (response.statusCode == 200) {
@@ -102,7 +102,7 @@ class FeedbackService {
       return false;
     }
 
-    final url = Uri.parse('$feedbackurl/$feedbackId');
+    final url = Uri.parse('$feedbackurl/UpdateFeedback/$feedbackId');
 
     final body = <String, dynamic>{};
     if (like != null) body['like'] = like;
@@ -129,7 +129,7 @@ class FeedbackService {
   /// Delete feedback by feedbackId
   Future<bool> deleteFeedbackById(String feedbackId) async {
     final response = await http.delete(
-      Uri.parse('$feedbackurl/$feedbackId'),
+      Uri.parse('$feedbackurl/DeleteFeedback/$feedbackId'),
       headers: _headers,
     );
 

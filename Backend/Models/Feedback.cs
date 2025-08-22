@@ -11,8 +11,7 @@ public class Feedback
     [BsonElement("id")] 
     public string? FeedbackId { get; set; }
     
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string? UserId { get; set; }
+    public string? Username { get; set; }
     
     [BsonRepresentation(BsonType.ObjectId)]
     [BsonElement("PostId")]

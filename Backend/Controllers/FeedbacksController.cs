@@ -67,23 +67,39 @@ namespace Backend.Controllers
             }
         }
 
+        public class AddFeedbackRequest
+        {
+            public string UserId { get; set; }
+            public string PostId { get; set; }
+            public bool? Like { get; set; }
+            public string? Comment { get; set; }
+        }
+
         [HttpPost]
         [Authorize(Roles = "LoggedIn")]
-        public async Task<ActionResult> AddFeedback([FromBody] Feedback feedback)
+        public async Task<ActionResult> AddFeedback([FromBody] AddFeedbackRequest request)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(feedback.PostId))
+                if (string.IsNullOrWhiteSpace(request.PostId))
                     return BadRequest("Post ID is required.");
 
-                if (string.IsNullOrWhiteSpace(feedback.Comment) && feedback.Like == null)
+                if (string.IsNullOrWhiteSpace(request.Comment) && request.Like == null)
                     return BadRequest("Either comment or like/dislike must be provided.");
+
+                var feedback = new Feedback
+                {
+                    Username = request.UserId,
+                    PostId = request.PostId,
+                    Like = request.Like,
+                    Comment = request.Comment
+                };
 
                 var created = await _feedbacksService.CreateAsync(feedback);
                 if (!created)
                     return BadRequest("Post not found. Feedback cannot be added.");
 
-                return CreatedAtAction(nameof(GetById), new { feedbackid = feedback.FeedbackId }, feedback);
+                return CreatedAtAction(nameof(GetById), new { feedbackid = feedback.FeedbackId }, request);
             }
             catch (Exception ex)
             {
