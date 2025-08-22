@@ -30,4 +30,10 @@ public class CustomUserManager : UserManager<ApplicationUser>
     {
         return GenerateUserTokenAsync(user, "TokenProvider", ConfirmEmailTokenPurpose);
     }
+
+    public override Task<string> GenerateTwoFactorTokenAsync(ApplicationUser user, string tokenProvider)
+    {
+        ThrowIfDisposed();
+        return GenerateUserTokenAsync(user, "TokenProvider", "TwoFactor");
+    }
 }

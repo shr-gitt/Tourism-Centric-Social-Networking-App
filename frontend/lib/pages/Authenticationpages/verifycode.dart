@@ -173,7 +173,7 @@ class _VerifyCodePageState extends State<VerifyCodePage>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
-                        'Create New Password',
+                        'Verify Code',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -195,11 +195,11 @@ class _VerifyCodePageState extends State<VerifyCodePage>
 
                       DecorHelper().buildModernTextField(
                         controller: _codeController,
-                        label: 'Reset Code',
+                        label: 'Code',
                         icon: Icons.security,
                         validator: (value) {
                           if (value?.isEmpty ?? true) {
-                            return 'Reset code is required';
+                            return 'Code is required';
                           }
                           return null;
                         },

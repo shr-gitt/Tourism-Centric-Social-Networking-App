@@ -112,7 +112,7 @@ public class AccountController : ControllerBase
         
         if (user.TwoFactorEnabled)
         {
-            var code = await _customUserManager.GenerateEmailConfirmationTokenAsync(user);
+            var code = await _customUserManager.GenerateTwoFactorTokenAsync(user,"TokenProvider");
             c = true;
             try
             {

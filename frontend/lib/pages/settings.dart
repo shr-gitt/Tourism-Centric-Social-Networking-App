@@ -169,13 +169,13 @@ class _SettingsState extends State<Settings> {
                   email: email,
                   state: !state, // Toggle
                 ),
-                state ? '2FA disabled.' : '2FA enabled.',
+                state ? '2FA enabled.' : '2FA disabled.',
               );
             },
           ),
         ),
       ).then((_) {
-        _loadSettings(); // ✅ Refresh when coming back
+        _loadSettings(); 
       });
     } catch (e) {
       _showSnackBar(

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/signup.dart';
 import 'package:frontend/pages/Authenticationpages/forgot_password.dart';
+import 'package:frontend/pages/Authenticationpages/verifycode.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/decorhelper.dart';
 import 'package:frontend/pages/mainscreen.dart';
@@ -50,11 +51,23 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         if (!mounted) return;
 
         if (twofa) {
-          _showSuccessSnackBar("Welcome back! Login successful");
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 2)),
-          );
+            MaterialPageRoute(
+              builder: (_) => VerifyCodePage(
+                purpose: "TwoFactor",
+                email: _emailController.text.trim(),
+                onVerified: () {
+                  _showSuccessSnackBar("Welcome back! Login successful");
+                },
+              ),
+            ),
+          ).then((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => MainScreen(currentIndex: 0)),
+            );
+          });
         } else {
           _showSuccessSnackBar("Welcome back! Login successful");
           Navigator.pushReplacement(
