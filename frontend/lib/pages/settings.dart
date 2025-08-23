@@ -309,7 +309,7 @@ class _SettingsState extends State<Settings> {
                       title: 'Delete Account',
                       subtitle: 'Delete your account',
                       icon: Icons.lock_outline,
-                      onTap: () => Navigator.pushReplacement(
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => ConfirmDeleteAccountPage(

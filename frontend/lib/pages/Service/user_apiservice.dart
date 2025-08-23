@@ -390,18 +390,27 @@ class UserService {
   Future<bool> deleteUser(String email, String password) async {
     final headers = await _getHeaders();
     final uri = Uri.parse('$userurl/DeleteAccount');
+    try {
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: jsonEncode({'email': email, 'password': password}),
+      );
 
-    final response = await http.post(
-      uri,
-      headers: headers,
-      body: jsonEncode({'email': email, 'password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      log('User deleted successfully.');
-      return true;
-    } else {
-      log('Failed to delete user: ${response.body}');
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        log('decoded data is $decoded');
+        log('Reset password successful: ${decoded['message']}');
+        return true;
+      } else {
+        final decoded = jsonDecode(response.body);
+        log('decoded data is $decoded');
+        log('Reset password successful: ${decoded['message']}');
+        log('Failed to delete user: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in resetPassword: $e');
       return false;
     }
   }

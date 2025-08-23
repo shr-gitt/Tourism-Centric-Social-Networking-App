@@ -257,7 +257,7 @@ public class AccountController : ControllerBase
     }
     
     /// <summary>
-    /// Deleted the user.
+    /// Delete the user.
     /// </summary>
     [HttpPost]
     [Authorize(AuthenticationSchemes = "Bearer")]
@@ -278,25 +278,40 @@ public class AccountController : ControllerBase
 
         if (await _userManager.IsLockedOutAsync(user))
             return StatusCode(403, new ApiResponse<object> { Success = false, Message = "Account is locked." });
+ 
+        try
+        {
+            
+            // Delete related data (posts, feedbacks)
+            var userPosts = await _postServices.GetByUserIdAsync(user.UserName); 
+            foreach (var post in userPosts)
+                await _postServices.DeleteAsync(post.PostId, post);
 
-        // 🧹 Delete related data (posts, feedbacks)
-        var userPosts = await _postServices.GetByUserIdAsync(user.Id.ToString()); 
-        foreach (var post in userPosts)
-            await _postServices.DeleteAsync(post.PostId, post);
-/*
-        var userFeedbacks = await _feedbacksService.GetByUserIdAsync(user.Id.ToString()); 
-        foreach (var feedback in userFeedbacks)
-            await _feedbacksService.DeleteAsync(feedback.FeedbackId);
-*/
-        // 🗑️ Delete the account
-        var deleteResult = await _userManager.DeleteAsync(user);
+            var userFeedbacks = await _feedbacksService.GetByUserIdAsync(user.UserName); 
+            foreach (var feedback in userFeedbacks)
+                await _feedbacksService.DeleteAsync(feedback.FeedbackId);
+            
+            await _emailSender.SendEmailAsync(
+                user.Name,
+                user.Email,
+                "Account Deletion",
+                $"Your account has been deleted");
+            
+            // Delete the account
+            var deleteResult = await _userManager.DeleteAsync(user);
 
-        if (!deleteResult.Succeeded)
-            return IdentityErrorResponse(deleteResult);
+            if (!deleteResult.Succeeded)
+                return IdentityErrorResponse(deleteResult);
 
-        _logger.LogInformation("User {UserId} deleted.", user.Id);
+            _logger.LogInformation("User {UserId} deleted.", user.Id);
 
-        return Ok(new ApiResponse<string> { Success = true, Message = "Account deleted successfully." });
+            return Ok(new ApiResponse<string> { Success = true, Message = "Account deleted successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete account {Email}", user.Email);
+            return StatusCode(500, new ApiResponse<object> { Success = false, Message = "Failed to send email." });
+        }
     }
 
 
