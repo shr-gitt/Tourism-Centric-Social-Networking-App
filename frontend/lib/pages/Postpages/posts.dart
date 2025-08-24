@@ -90,6 +90,10 @@ class _PostsPageState extends State<PostsPage> {
                   })
                   .toList();
 
+              if (!widget.ownProfile) {
+                filteredPosts.shuffle();
+              }
+
               return filteredPosts.isEmpty
                   ? const Center(child: Text("No posts available"))
                   : ListView.builder(

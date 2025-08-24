@@ -34,27 +34,7 @@ class _CommunityPageState extends State<CommunityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: widget.state ? null : AppBar(title: Text(widget.communityName)),
-      body: /*Column(
-        children: [
-          DecorHelper().buildGradientButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => Inputpost(
-                    titleController: TextEditingController(),
-                    locationController: TextEditingController(
-                      text: widget.communityName,
-                    ),
-                    communityController: widget.communityName,
-                    contentController: TextEditingController(),
-                    isEditing: true,
-                  ),
-                ),
-              );
-            },
-            child: const Text('Create Post'),
-          ),*/ FutureBuilder<List<dynamic>>(
+      body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -85,19 +65,23 @@ class _CommunityPageState extends State<CommunityPage> {
                 return Center(child: Text('Error: ${userIdSnapshot.error}'));
               }
               final String? uid = userIdSnapshot.data;
-              final bool state = widget.state;
               List<Map<String, dynamic>> filteredPosts = posts
                   .where((post) {
                     final String? postUserId = post['userId'];
                     final String? postCommunity = post['community'];
-                    log('userId:$postUserId and uid:$uid');
-                    return state
-                        ? postUserId == uid
-                        : postCommunity == widget.communityName &&
-                              postUserId != uid;
+
+                    // Filter out own posts and select posts only from the specified community
+                    return postCommunity == widget.communityName &&
+                        postUserId != uid; // Exclude the current user's posts
                   })
                   .cast<Map<String, dynamic>>()
                   .toList();
+
+              filteredPosts.shuffle();
+
+              if (filteredPosts.isEmpty) {
+                return const Center(child: Text("No posts available"));
+              }
 
               return ListView.builder(
                 itemCount: filteredPosts.length,
@@ -112,8 +96,6 @@ class _CommunityPageState extends State<CommunityPage> {
           );
         },
       ),
-      //],
-      //),
     );
   }
 }
