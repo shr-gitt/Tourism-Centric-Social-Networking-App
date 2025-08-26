@@ -62,7 +62,7 @@ class MapState extends State<Map> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Map')),
+      appBar: AppBar(title: Text('Map'), automaticallyImplyLeading: false),
       body: Stack(
         children: [
           FlutterMap(

@@ -99,7 +99,7 @@ class _SignupPageState extends State<SignupPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => LoginPage(asguest: false,)),
       );
     } else {
       GFToast.showToast(
@@ -118,7 +118,7 @@ class _SignupPageState extends State<SignupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => LoginPage()),
+            MaterialPageRoute(builder: (_) => LoginPage(asguest: false,)),
           ),
         ),
         backgroundColor: Color.fromARGB(255, 179, 151, 208),

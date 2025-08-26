@@ -6,11 +6,14 @@ class Createpost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Inputpost(
-      titleController: TextEditingController(),
-      locationController: TextEditingController(),
-      contentController: TextEditingController(),
-      isEditing: false,
+    return Scaffold(
+      appBar: AppBar(automaticallyImplyLeading: false),
+      body: Inputpost(
+        titleController: TextEditingController(),
+        locationController: TextEditingController(),
+        contentController: TextEditingController(),
+        isEditing: false,
+      ),
     );
   }
 }

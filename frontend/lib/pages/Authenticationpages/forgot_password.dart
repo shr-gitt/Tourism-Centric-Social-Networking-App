@@ -127,7 +127,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
+          MaterialPageRoute(builder: (_) => const LoginPage(asguest: false,)),
         );
       } else {
         _showErrorSnackBar('Failed to reset password.');
@@ -194,7 +194,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
                     TextButton(
                       onPressed: () => Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        MaterialPageRoute(builder: (_) => const LoginPage(asguest: false,)),
                       ),
                       child: const Text(
                         'Back to Sign In',

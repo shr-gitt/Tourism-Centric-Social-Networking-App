@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
-import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/settings.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
@@ -28,7 +28,7 @@ class _ProfileState extends State<Profile> {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Guest()),
+          MaterialPageRoute(builder: (context) => LoginPage(asguest: true)),
         );
       }
     });
@@ -63,7 +63,10 @@ class _ProfileState extends State<Profile> {
         imageUrl = 'https://localhost:5259/Images/profile_placeholder.jpg';
       }
       return Scaffold(
-        appBar: AppBar(title: Text('Profile')),
+        appBar: AppBar(
+          title: Text('Profile'),
+          automaticallyImplyLeading: false,
+        ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,

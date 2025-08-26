@@ -37,7 +37,10 @@ class _PostsPageState extends State<PostsPage> {
     return Scaffold(
       appBar: (widget.ownProfile || widget.otheruserProfile)
           ? null
-          : AppBar(title: const Text('Posts')),
+          : AppBar(
+              title: const Text('Posts'),
+              automaticallyImplyLeading: false,
+            ),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {

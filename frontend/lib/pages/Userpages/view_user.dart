@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Postpages/posts.dart';
-import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 
 class ViewUser extends StatefulWidget {
@@ -27,7 +27,7 @@ class _ViewUserState extends State<ViewUser> {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Guest()),
+          MaterialPageRoute(builder: (context) => LoginPage(asguest: true)),
         );
       }
     });

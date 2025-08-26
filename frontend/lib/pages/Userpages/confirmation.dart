@@ -49,7 +49,7 @@ class _ConfirmDeleteAccountPageState extends State<ConfirmDeleteAccountPage> {
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => LoginPage()),
+            MaterialPageRoute(builder: (_) => LoginPage(asguest: false,)),
           );
         }
       } else {

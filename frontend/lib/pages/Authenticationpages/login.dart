@@ -9,7 +9,8 @@ import 'package:frontend/pages/mainscreen.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool asguest;
+  const LoginPage({super.key, required this.asguest});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -123,6 +124,19 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: widget.asguest
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MainScreen(currentIndex: 0),
+                  ),
+                ),
+              )
+            : null,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(
@@ -130,13 +144,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 250),
+              const SizedBox(height: 150),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Welcome Back',
-                    style: TextStyle(
+                  Text(
+                    widget.asguest ? 'Login' : 'Welcome Back',
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF2D3748),
@@ -261,17 +275,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             ),
                           ),
                   ),
-                  /*
-                  const SizedBox(height: 15),
 
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.g_mobiledata),
-                    label: Text('Continue with Google'),
-                    onPressed: () {
-                      // Call your external login API, or open the OAuth URL
-                    },
-                  ),
-                */
                   const SizedBox(height: 20),
 
                   // Divider
@@ -295,29 +299,30 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   const SizedBox(height: 20),
 
                   // Guest Access Button
-                  _buildOutlineButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MainScreen(currentIndex: 0),
+                  if (!widget.asguest)
+                    _buildOutlineButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainScreen(currentIndex: 0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person_outline, color: Color(0xFF667eea)),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Continue as Guest',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF667eea),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person_outline, color: Color(0xFF667eea)),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Continue as Guest',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF667eea),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
 

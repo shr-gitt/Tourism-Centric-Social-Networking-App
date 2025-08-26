@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/detailpages.dart';
 
 class Search extends StatefulWidget {
@@ -74,7 +73,10 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Search Page')),
+      appBar: AppBar(
+        title: const Text('Search Page'),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

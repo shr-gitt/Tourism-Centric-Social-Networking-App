@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/decorhelper.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/pages/Service/posts_apiconnect.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
-import 'package:frontend/pages/guest.dart';
 import 'package:frontend/pages/mainscreen.dart';
 import 'package:frontend/pages/MapPages/map_searchbar.dart';
 import 'package:latlong2/latlong.dart';
@@ -62,7 +62,7 @@ class _InputpostState extends State<Inputpost> {
       if (uid == null && mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => Guest()),
+          MaterialPageRoute(builder: (_) => LoginPage(asguest: true)),
         );
       }
     });
@@ -182,10 +182,6 @@ class _InputpostState extends State<Inputpost> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit Post' : 'Create Post'),
-        centerTitle: true,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Card(
@@ -195,6 +191,18 @@ class _InputpostState extends State<Inputpost> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Text(
+                    widget.isEditing ? 'Edit Post' : 'Create Post',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
                 Text('Title', style: TextStyle(fontWeight: FontWeight.bold)),
 
                 DecorHelper().buildModernTextField(
