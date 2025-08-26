@@ -6,6 +6,7 @@ import 'package:frontend/pages/decorhelper.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -23,6 +24,10 @@ class _SignupPageState extends State<SignupPage> {
   final _confirmpasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isconfirmPasswordVisible = false;
+
+  String? _completePhoneNumber;
+  String? _countryCode;
+  String? _purePhoneNumber;
 
   // Add Image Picker related variables
   final ImagePicker _picker = ImagePicker();
@@ -45,14 +50,21 @@ class _SignupPageState extends State<SignupPage> {
   void _submitForm() async {
     final username = _usernameController.text.trim();
     final fullname = _fullnameController.text.trim();
-    final phonenumber = _phonenumberController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirmpassword = _confirmpasswordController.text;
 
+    if (_purePhoneNumber == null || _purePhoneNumber!.length != 10) {
+      GFToast.showToast(
+        'Enter a valid 10-digit phone number',
+        context,
+        toastPosition: GFToastPosition.BOTTOM,
+      );
+      return;
+    }
+
     if (username.isEmpty ||
         fullname.isEmpty ||
-        phonenumber.isEmpty ||
         email.isEmpty ||
         password.isEmpty ||
         confirmpassword.isEmpty) {
@@ -68,7 +80,7 @@ class _SignupPageState extends State<SignupPage> {
     final Map<String, dynamic> data = {
       "UserName": username,
       "Name": fullname,
-      "PhoneNumber": phonenumber,
+      "PhoneNumber": '$_countryCode$_purePhoneNumber',
       "Email": email,
       "Password": password,
       "ConfirmPassword": confirmpassword,
@@ -163,11 +175,65 @@ class _SignupPageState extends State<SignupPage> {
                     const SizedBox(height: 16),
 
                     // Phone Number Field
-                    DecorHelper().buildModernTextField(
-                      controller: _phonenumberController,
-                      label: 'Phone Number',
-                      icon: Icons.phone,
+                    IntlPhoneField(
+                      initialCountryCode: 'IN',
+                      dropdownIcon: const Icon(Icons.arrow_drop_down),
+                      style: const TextStyle(fontSize: 16),
+                      decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        prefixIcon: const Icon(
+                          Icons.phone,
+                          color: Color.fromARGB(255, 113, 128, 150),
+                        ),
+                        counterText: '',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          borderSide: BorderSide(
+                            color: Color(0xFF667eea),
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.red.shade400),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.red.shade400,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 12,
+                        ),
+                      ),
+                      onChanged: (phone) {
+                        setState(() {
+                          _completePhoneNumber = phone.completeNumber;
+                          _countryCode = phone.countryCode;
+                          _purePhoneNumber = phone.number;
+                        });
+                      },
+                      validator: (phone) {
+                        if (phone == null || phone.number.length != 10) {
+                          return 'Phone number must be exactly 10 digits';
+                        }
+                        return null;
+                      },
                     ),
+
                     const SizedBox(height: 16),
 
                     // Email Field
