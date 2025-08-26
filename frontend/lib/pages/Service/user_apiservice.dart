@@ -116,6 +116,28 @@ class UserService {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchAllUsers() async {
+    final headers = await _getHeaders();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$userurl/GetAll'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        log('Failed to fetch users: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      log('Error fetching all users: $e');
+      return [];
+    }
+  }
+
   Future loginUser(Map<String, dynamic> data) async {
     final headers = await _getHeaders();
     final response = await http.post(
