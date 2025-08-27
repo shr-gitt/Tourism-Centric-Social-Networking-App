@@ -300,12 +300,16 @@ class _InputpostState extends State<Inputpost> {
                 ),
                 const SizedBox(height: 20),
 
-                GFButton(
-                  onPressed: isSubmitting ? null : _confirmSubmission,
-                  text: 'Submit',
-                  color: const Color.fromARGB(255, 95, 92, 95),
-                  blockButton: true,
-                  fullWidthButton: true,
+                DecorHelper().buildGradientButton(
+                  onPressed: _confirmSubmission,
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),

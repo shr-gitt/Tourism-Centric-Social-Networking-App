@@ -316,12 +316,6 @@ class _FeedbacksState extends State<Feedbacks> {
                     icon: Icon(Icons.comment_outlined),
                     type: GFButtonType.transparent,
                   ),
-                  GFButton(
-                    onPressed: () {},
-                    text: "",
-                    icon: Icon(Icons.share),
-                    type: GFButtonType.transparent,
-                  ),
                 ],
               ),
             ],

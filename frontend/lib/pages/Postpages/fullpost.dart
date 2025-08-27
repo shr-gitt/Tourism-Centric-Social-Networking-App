@@ -110,12 +110,12 @@ class _FullPostPageState extends State<FullPostPage> {
             title: Text(post['title'] ?? 'Post Details'),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pushReplacement(
+              onPressed: () => Navigator.pop(
                 context,
-                MaterialPageRoute(
+                /*MaterialPageRoute(
                   builder: (_) =>
                       MainScreen(currentIndex: widget.state ? 4 : 0),
-                ),
+                ),*/
               ),
             ),
           ),

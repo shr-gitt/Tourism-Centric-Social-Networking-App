@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   ),
                 ),
               )
-            : null,
+            : AppBar(automaticallyImplyLeading: false),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),

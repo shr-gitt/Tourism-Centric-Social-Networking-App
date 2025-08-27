@@ -55,7 +55,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
     log('Full post object: $post');
     return GestureDetector(
       onTap: () {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => FullPostPage(
@@ -123,7 +123,7 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => FullPostPage(
@@ -149,6 +149,8 @@ class _DisplaymultiplepostState extends State<Displaymultiplepost> {
                     ),
                   ] else
                     const SizedBox.shrink(),
+
+                  const SizedBox(height: 10),
                   const Divider(height: 0, thickness: 1, color: Colors.grey),
                 ],
               ),
