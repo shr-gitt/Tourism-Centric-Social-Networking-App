@@ -25,7 +25,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _isPasswordVisible = false;
   bool _isconfirmPasswordVisible = false;
 
-  String? _completePhoneNumber;
+  //String? _completePhoneNumber;
   String? _countryCode;
   String? _purePhoneNumber;
 
@@ -99,7 +99,7 @@ class _SignupPageState extends State<SignupPage> {
       );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage(asguest: false,)),
+        MaterialPageRoute(builder: (context) => LoginPage(asguest: false)),
       );
     } else {
       GFToast.showToast(
@@ -118,7 +118,7 @@ class _SignupPageState extends State<SignupPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => LoginPage(asguest: false,)),
+            MaterialPageRoute(builder: (_) => LoginPage(asguest: false)),
           ),
         ),
         backgroundColor: Color.fromARGB(255, 179, 151, 208),
@@ -221,7 +221,7 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       onChanged: (phone) {
                         setState(() {
-                          _completePhoneNumber = phone.completeNumber;
+                          //_completePhoneNumber = phone.completeNumber;
                           _countryCode = phone.countryCode;
                           _purePhoneNumber = phone.number;
                         });

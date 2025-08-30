@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
-  bool _isRememberMe = false;
+  final bool _isRememberMe = true;
   bool _isLoading = false;
 
   @override
@@ -218,7 +218,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   // Remember Me & Forgot Password
                   Row(
                     children: [
-                      Checkbox(
+                      /*Checkbox(
                         value: _isRememberMe,
                         onChanged: (value) =>
                             setState(() => _isRememberMe = value ?? false),
@@ -230,7 +230,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       const Text(
                         'Remember me',
                         style: TextStyle(color: Color(0xFF718096)),
-                      ),
+                      ),*/
                       const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.push(

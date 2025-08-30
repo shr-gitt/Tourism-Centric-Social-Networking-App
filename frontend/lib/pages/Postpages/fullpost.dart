@@ -4,7 +4,6 @@ import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbackscomments.dart';
-import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 
