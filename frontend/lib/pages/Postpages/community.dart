@@ -30,6 +30,13 @@ class _CommunityPageState extends State<CommunityPage> {
     postsFuture = api.fetchPosts();
   }
 
+  Future<void> _refreshPosts() async {
+    final newPosts = await api.fetchPosts();
+    setState(() {
+      postsFuture = Future.value(newPosts);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,14 +104,17 @@ class _CommunityPageState extends State<CommunityPage> {
                 return const Center(child: Text("No posts available"));
               }
 
-              return ListView.builder(
-                itemCount: filteredPosts.length,
-                itemBuilder: (context, index) {
-                  return Displaymultiplepost(
-                    post: filteredPosts[index],
-                    state: widget.state,
-                  );
-                },
+              return RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: ListView.builder(
+                  itemCount: filteredPosts.length,
+                  itemBuilder: (context, index) {
+                    return Displaymultiplepost(
+                      post: filteredPosts[index],
+                      state: widget.state,
+                    );
+                  },
+                ),
               );
             },
           );

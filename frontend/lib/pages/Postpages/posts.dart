@@ -33,6 +33,13 @@ class _PostsPageState extends State<PostsPage> {
     postsFuture = api.fetchPosts();
   }
 
+  Future<void> _refreshPosts() async {
+    final newPosts = await api.fetchPosts();
+    setState(() {
+      postsFuture = Future.value(newPosts);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,14 +120,17 @@ class _PostsPageState extends State<PostsPage> {
 
               return filteredPosts.isEmpty
                   ? const Center(child: Text("No posts available"))
-                  : ListView.builder(
-                      itemCount: filteredPosts.length,
-                      itemBuilder: (context, index) {
-                        return Displaymultiplepost(
-                          post: filteredPosts[index],
-                          state: widget.ownProfile,
-                        );
-                      },
+                  : RefreshIndicator(
+                      onRefresh: _refreshPosts,
+                      child: ListView.builder(
+                        itemCount: filteredPosts.length,
+                        itemBuilder: (context, index) {
+                          return Displaymultiplepost(
+                            post: filteredPosts[index],
+                            state: widget.ownProfile,
+                          );
+                        },
+                      ),
                     );
             },
           );
