@@ -22,6 +22,7 @@ class CommunityPage extends StatefulWidget {
 class _CommunityPageState extends State<CommunityPage> {
   final ApiService api = ApiService();
   late Future<List<dynamic>> postsFuture;
+  String _sortMode = 'Latest'; // 'Latest' or 'Explore'
 
   @override
   void initState() {
@@ -32,7 +33,12 @@ class _CommunityPageState extends State<CommunityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.state ? null : AppBar(title: Text(widget.communityName)),
+      appBar: widget.state
+          ? null
+          : AppBar(
+              title: Text(widget.communityName),
+              actions: [_buildSortDropdown()],
+            ),
       body: FutureBuilder<List<dynamic>>(
         future: postsFuture,
         builder: (context, snapshot) {
@@ -76,8 +82,17 @@ class _CommunityPageState extends State<CommunityPage> {
                   .cast<Map<String, dynamic>>()
                   .toList();
 
-              filteredPosts.shuffle();
-
+              if (_sortMode == 'Latest') {
+                filteredPosts.sort((a, b) {
+                  final aDate =
+                      DateTime.tryParse(a['created'] ?? '') ?? DateTime(2000);
+                  final bDate =
+                      DateTime.tryParse(b['created'] ?? '') ?? DateTime(2000);
+                  return bDate.compareTo(aDate);
+                });
+              } else if (_sortMode == 'Explore') {
+                filteredPosts.shuffle();
+              }
               if (filteredPosts.isEmpty) {
                 return const Center(child: Text("No posts available"));
               }
@@ -95,6 +110,31 @@ class _CommunityPageState extends State<CommunityPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildSortDropdown() {
+    return DropdownButton<String>(
+      value: _sortMode,
+      underline: const SizedBox(),
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _sortMode = newValue;
+          });
+        }
+      },
+      items: <String>['Latest', 'Explore'].map<DropdownMenuItem<String>>((
+        String value,
+      ) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(value),
+          ),
+        );
+      }).toList(),
     );
   }
 }
