@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:developer';
 import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
@@ -25,19 +26,62 @@ class PostsPage extends StatefulWidget {
 class _PostsPageState extends State<PostsPage> {
   final ApiService api = ApiService();
   late Future<List<dynamic>> postsFuture;
+  Timer? _pollingTimer;
   String _sortMode = 'Latest'; // 'Latest' or 'Explore'
+  List<Map<String, dynamic>> _shuffledExplorePosts = [];
+  bool _hasShuffledOnce = false;
 
   @override
   void initState() {
     super.initState();
     postsFuture = api.fetchPosts();
+    _startPolling();
+  }
+
+  void _startPolling() {
+    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      final newPosts = await api.fetchPosts();
+      log('Posts refreshed at ${DateTime.now()}');
+
+      setState(() {
+        postsFuture = Future.value(newPosts);
+
+        if (_sortMode == 'Explore' && _hasShuffledOnce) {
+          final fetchedPosts = newPosts.cast<Map<String, dynamic>>();
+          final newFiltered = fetchedPosts.where((post) {
+            final String? postUserId = post['userId'];
+            return !(widget.ownProfile ||
+                postUserId == widget.otheruserUsername);
+          }).toList();
+
+          // Add only new posts that aren't already in _shuffledExplorePosts
+          final existingIds = _shuffledExplorePosts.map((e) => e['id']).toSet();
+          final newOnes = newFiltered
+              .where((post) => !existingIds.contains(post['id']))
+              .toList();
+
+          newOnes.shuffle(); // Shuffle only the new additions
+          _shuffledExplorePosts.addAll(
+            newOnes,
+          ); // Add to existing shuffled list
+        }
+      });
+    });
   }
 
   Future<void> _refreshPosts() async {
     final newPosts = await api.fetchPosts();
+
     setState(() {
       postsFuture = Future.value(newPosts);
+      _hasShuffledOnce = false; // reset shuffle on manual refresh
     });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -115,7 +159,11 @@ class _PostsPageState extends State<PostsPage> {
                   return bDate.compareTo(aDate);
                 });
               } else if (_sortMode == 'Explore') {
-                filteredPosts.shuffle();
+                if (!_hasShuffledOnce) {
+                  _shuffledExplorePosts = List.from(filteredPosts)..shuffle();
+                  _hasShuffledOnce = true;
+                }
+                filteredPosts = _shuffledExplorePosts;
               }
 
               return filteredPosts.isEmpty
@@ -147,9 +195,11 @@ class _PostsPageState extends State<PostsPage> {
         if (newValue != null) {
           setState(() {
             _sortMode = newValue;
+            _hasShuffledOnce = false; // reset on mode switch
           });
         }
       },
+
       items: <String>['Latest', 'Explore'].map<DropdownMenuItem<String>>((
         String value,
       ) {
