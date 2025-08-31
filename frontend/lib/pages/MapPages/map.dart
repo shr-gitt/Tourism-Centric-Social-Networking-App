@@ -6,6 +6,7 @@ import 'package:frontend/pages/Service/map_apiservice.dart';
 import 'package:frontend/pages/decorhelper.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:frontend/pages/MapPages/map_searchbar.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Map extends StatefulWidget {
   const Map({super.key});
@@ -19,6 +20,14 @@ class MapState extends State<Map> {
   LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
   // ignore: unused_field
   String _selectedLocationAddress = "Kathmandu, Nepal"; // Default address
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _goToUserLocation();
+    });
+  }
 
   String generateLocationDescription(String city, String country) {
     if (city.toLowerCase() == 'kathmandu') {
@@ -48,7 +57,15 @@ class MapState extends State<Map> {
 
   // Method to show bottom sheet
   void _showLocationDetails(LatLng position, String address, String city) {
-    String locationDescription = generateLocationDescription(city, "Nepal");
+    String locationDescription = generateLocationDescription(
+      city.isNotEmpty ? city : "Unknown",
+      "Nepal",
+    );
+
+    final parts = address.split(',');
+    final displayAddress = parts.length >= 2
+        ? "${parts[0]},${parts[1]}"
+        : address;
 
     showModalBottomSheet(
       context: context,
@@ -59,31 +76,79 @@ class MapState extends State<Map> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(displayAddress, style: TextStyle(fontSize: 25)),
               Text(
-                "${address.split(',')[0]},${address.split(',')[1]}",
-                style: TextStyle(fontSize: 25),
+                city.isNotEmpty ? city : "Nepal",
+                style: TextStyle(fontSize: 20),
               ),
-              Text(city, style: TextStyle(fontSize: 20)),
               SizedBox(height: 10),
               DecorHelper().buildGradientButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CommunityPage(communityName: city),
+                      builder: (_) => CommunityPage(
+                        communityName: city.isNotEmpty ? city : "Nepal",
+                      ),
                     ),
                   );
                 },
                 child: const Text('Go to community'),
               ),
               SizedBox(height: 16),
-
               Text(locationDescription),
             ],
           ),
         );
       },
     );
+  }
+
+  Future<void> _goToUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please enable location services')),
+        );
+      }
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location permissions are denied')),
+          );
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Location permissions are permanently denied'),
+          ),
+        );
+      }
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+
+    setState(() {
+      _selectedLocation = LatLng(position.latitude, position.longitude);
+    });
+
+    _mapController.move(_selectedLocation, 15.0);
   }
 
   @override
@@ -96,7 +161,7 @@ class MapState extends State<Map> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _selectedLocation,
-              initialZoom: 13.0,
+              initialZoom: 15.0,
               onTap: (_, latLng) async {
                 setState(() {
                   _selectedLocation = latLng;
@@ -105,23 +170,38 @@ class MapState extends State<Map> {
                 _selectedLocationAddress =
                     "New Address for the tapped location";
                 // Show bottom sheet with location details
-                final data = await MapApiservice().fetchLocationDetails(
-                  _selectedLocation,
-                );
-                final name = data['address'];
-
-                _showLocationDetails(
-                  _selectedLocation,
-                  data['display_name'],
-                  name['county'],
-                );
+                try {
+                  final data = await MapApiservice().fetchLocationDetails(
+                    _selectedLocation,
+                  );
+                  final name = data['address'];
+                  _showLocationDetails(
+                    _selectedLocation,
+                    data['display_name'],
+                    name['county'],
+                  );
+                } catch (e) {
+                  log('Failed to fetch location details: $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Failed to get location details. Please try again.',
+                        ),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                }
               },
             ),
             children: [
               TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                urlTemplate:
+                    "https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=7cvVQJWrkuxmQg34BCzg",
                 tileProvider: NetworkTileProvider(),
               ),
+
               MarkerLayer(
                 markers: [
                   Marker(

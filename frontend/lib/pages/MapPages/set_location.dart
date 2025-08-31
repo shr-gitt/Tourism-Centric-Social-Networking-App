@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:frontend/pages/decorhelper.dart';
+import 'package:geolocator/geolocator.dart';
 
 class SetLocation extends StatefulWidget {
   const SetLocation({super.key});
@@ -12,9 +13,67 @@ class SetLocation extends StatefulWidget {
 
 class _SetLocationState extends State<SetLocation> {
   final MapController _mapController = MapController();
-  final LatLng _selectedLocation = LatLng(27.7172, 85.3240); // Kathmandu default
+  LatLng _selectedLocation = LatLng(
+    27.7172,
+    85.3240,
+  ); // Kathmandu default
   LatLng _tempSelectedLocation = LatLng(27.7172, 85.3240);
   final bool _selectingOnMap = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _goToUserLocation();
+    });
+  }
+
+  Future<void> _goToUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please enable location services')),
+        );
+      }
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location permissions are denied')),
+          );
+        }
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Location permissions are permanently denied'),
+          ),
+        );
+      }
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition();
+
+    setState(() {
+      _selectedLocation = LatLng(position.latitude, position.longitude);
+    });
+
+    _mapController.move(_selectedLocation, 15.0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +109,9 @@ class _SetLocationState extends State<SetLocation> {
             ),
             children: [
               TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                urlTemplate:
+                    "https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=7cvVQJWrkuxmQg34BCzg",
+                tileProvider: NetworkTileProvider(),
               ),
             ],
           ),
