@@ -4,7 +4,6 @@ import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Authenticationpages/verifycode.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
-import 'package:frontend/pages/Service/usersettings_apiservice.dart';
 import 'package:frontend/pages/Userpages/change_password.dart';
 import 'package:frontend/pages/Userpages/confirmation.dart';
 import 'package:frontend/pages/Userpages/user_settings_page.dart';
@@ -67,7 +66,7 @@ class _SettingsState extends State<Settings> {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage(asguest: false,)),
+          MaterialPageRoute(builder: (context) => LoginPage(asguest: false)),
         );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Logged out successfully')),
@@ -166,11 +165,11 @@ class _SettingsState extends State<Settings> {
             email: email,
             onVerified: () async {
               await _handleAction(
-                () => UsersettingsApiservice().twoFactor(
+                () => UserService().twoFactor(
                   email: email,
                   state: !state, // Toggle
                 ),
-                state ? '2FA enabled.' : '2FA disabled.',
+                state ? '2FA disabled.' : '2FA enabled.',
               );
             },
           ),

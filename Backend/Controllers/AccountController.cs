@@ -127,7 +127,7 @@ public class AccountController : ControllerBase
                     user.Email, 
                     "Login Attempt",
                     $"Your code for logging in is:<br><strong>{code}</strong><br>" +
-                    $"This code is valid for 5 minutes from now i.e. upto <br><strong>{DateTime.UtcNow}</strong></br> UTC. Copy this code into the app to login.");
+                    $"This code is valid for 5 minutes from now i.e. upto <br><strong>{DateTime.Now}</strong></br> UTC. Copy this code into the app to login.");
             }
             catch (Exception ex)
             {
@@ -445,7 +445,7 @@ public class AccountController : ControllerBase
                 user.Email, 
                 "Reset Password",
                 $"Your password reset code is:<br><strong>{code}</strong><br>" +
-                $"This code is valid for 5 minutes from {DateTime.UtcNow} Utc. Copy this code into the app to reset your password.");
+                $"This code is valid for 5 minutes from {DateTime.Now} Utc. Copy this code into the app to reset your password.");
         }
         catch (Exception ex)
         {

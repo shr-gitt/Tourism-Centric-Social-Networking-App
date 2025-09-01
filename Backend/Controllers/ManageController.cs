@@ -120,7 +120,7 @@ namespace Backend.Controllers
                     user.Email, 
                     "Verify Email",
                     $"Your password reset code is:<br><strong>{code}</strong><br>" +
-                    $"This code is valid for 5 minutes from {DateTime.UtcNow} Utc. Copy this code into the app to reset your password.");
+                    $"This code is valid for 5 minutes from {DateTime.Now} Utc. Copy this code into the app to reset your password.");
             }
             catch (Exception ex)
             {

@@ -331,23 +331,28 @@ class UserService {
     }
   }
 
-  Future<bool> twofactor(bool state) async {
+  Future<bool> twoFactor({String? email, required bool state}) async {
+    log('in twoFactor, $email and $state');
     final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$userurl/TwoFactor'),
-      headers: headers,
-      body: jsonEncode(state),
-    );
-    log('Trying to log in user');
+    log('in twoFactor, $headers');
+    try {
+      final response = await http.post(
+        Uri.parse('$manageurl/TwoFactor'),
+        headers: headers,
+        body: jsonEncode({'email': email, 'state': state}),
+      );
 
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      log('decoded data is $decoded');
-      log('Reset password successful: ${decoded['message']}');
+      if (response.statusCode == 200) {
+        log('2FA enabled');
+        return true;
+      } else {
+        log('Failed to enable 2FA: ${response.statusCode}');
+        log('Error body: ${response.body}');
 
-      return decoded;
-    } else {
-      log('Failed to login user: ${response.body}-${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      log('Exception in enableTwoFactor: $e');
       return false;
     }
   }
