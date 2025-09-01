@@ -36,4 +36,25 @@ class MapApiservice {
       return throw (Exception("Failed to fetch location details"));
     }
   }
+
+  Future<List<LatLng>> fetchRoute(LatLng start, LatLng end) async {
+    final url = Uri.parse(
+      'https://us1.locationiq.com/v1/directions/driving/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?alternatives=true&steps=true&annotations=distance,duration&geometries=geojson&key=pk.1c1968f8d4c3b0690ae417a1735c6ce4',
+    );
+
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final coords = data['routes'][0]['geometry']['coordinates'] as List;
+
+      // Convert to list of LatLng
+      List<LatLng> routePoints = coords.map((point) {
+        return LatLng(point[1], point[0]); // geojson is [lng, lat]
+      }).toList();
+
+      return routePoints;
+    } else {
+      throw Exception('Failed to load driving directions');
+    }
+  }
 }

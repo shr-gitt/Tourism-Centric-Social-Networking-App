@@ -8,13 +8,11 @@ import '../Service/map_apiservice.dart';
 class LocationSearchBar extends StatefulWidget {
   final Function(LatLng position, String address, String? county)
   onLocationSelected;
-  final bool enabled;
   final bool frompost;
 
   const LocationSearchBar({
     super.key,
     required this.onLocationSelected,
-    this.enabled = true,
     this.frompost = false,
   });
 
@@ -130,6 +128,8 @@ class _LocationSearchBarState extends State<LocationSearchBar> {
             suggestion['address']['county'],
           );
         }
+        _focusNode.unfocus(); // removes focus from the search bar
+        FocusScope.of(context).unfocus(); // dismisses keyboard
       },
     );
   }

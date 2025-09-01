@@ -17,9 +17,14 @@ class Map extends StatefulWidget {
 
 class MapState extends State<Map> {
   final MapController _mapController = MapController();
-  LatLng _selectedLocation = LatLng(27.7172, 85.3240); //default to kathmandu
+  LatLng _selectedLocation = LatLng(
+    27.678236,
+    85.316853,
+  ); //default to kathmandu
   // ignore: unused_field
   String _selectedLocationAddress = "Kathmandu, Nepal"; // Default address
+  List<LatLng> _routePoints = [];
+  LatLng? _tempSelectedLocation;
 
   @override
   void initState() {
@@ -67,38 +72,59 @@ class MapState extends State<Map> {
         ? "${parts[0]},${parts[1]}"
         : address;
 
+    FocusScope.of(context).unfocus();
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(displayAddress, style: TextStyle(fontSize: 25)),
-              Text(
-                city.isNotEmpty ? city : "Nepal",
-                style: TextStyle(fontSize: 20),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.2,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(displayAddress, style: TextStyle(fontSize: 25)),
+                  Text(
+                    city.isNotEmpty ? city : "Nepal",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  SizedBox(height: 10),
+                  DecorHelper().buildGradientButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CommunityPage(
+                            communityName: city.isNotEmpty ? city : "Nepal",
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Go to community'),
+                  ),
+
+                  SizedBox(height: 10),
+
+                  DecorHelper().buildGradientButton(
+                    onPressed: () {
+                      Navigator.of(context).maybePop();
+                      _getRoute();
+                    },
+                    child: const Text('Drive to location'),
+                  ),
+                  SizedBox(height: 16),
+                  Text(locationDescription),
+                ],
               ),
-              SizedBox(height: 10),
-              DecorHelper().buildGradientButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CommunityPage(
-                        communityName: city.isNotEmpty ? city : "Nepal",
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Go to community'),
-              ),
-              SizedBox(height: 16),
-              Text(locationDescription),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -145,10 +171,46 @@ class MapState extends State<Map> {
     Position position = await Geolocator.getCurrentPosition();
 
     setState(() {
-      _selectedLocation = LatLng(position.latitude, position.longitude);
+      _tempSelectedLocation = LatLng(position.latitude, position.longitude);
     });
 
     _mapController.move(_selectedLocation, 15.0);
+  }
+
+  void _getRoute() async {
+    if (_tempSelectedLocation == null) {
+      log('Start or destination is null');
+      return;
+    }
+
+    try {
+      final route = await MapApiservice().fetchRoute(
+        _selectedLocation,
+        _tempSelectedLocation!,
+      );
+      setState(() {
+        _routePoints = route;
+      });
+      _fitMapToRoute();
+    } catch (e) {
+      log('Error getting route: $e');
+    }
+  }
+
+  void _fitMapToRoute() {
+    if (_routePoints.length < 2) {
+      log("Not enough route points to create bounds.");
+      return;
+    }
+
+    try {
+      final bounds = LatLngBounds.fromPoints(_routePoints);
+      _mapController.fitCamera(
+        CameraFit.bounds(bounds: bounds, padding: EdgeInsets.all(50)),
+      );
+    } catch (e) {
+      log("Error fitting camera to bounds: $e");
+    }
   }
 
   @override
@@ -216,10 +278,21 @@ class MapState extends State<Map> {
                   ),
                 ],
               ),
+
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points:
+                          _routePoints, // The list you get from fetchRoute()
+                      strokeWidth: 4,
+                      color: Colors.blue,
+                    ),
+                  ],
+                ),
             ],
           ),
 
-          /// Step 2 will add the Search bar here
           Positioned(
             top: 16,
             left: 16,
