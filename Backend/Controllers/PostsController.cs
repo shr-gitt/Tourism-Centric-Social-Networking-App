@@ -41,6 +41,18 @@ namespace Backend.Controllers
             return Ok(post);
         }
         
+        [HttpGet("posts")]
+        public async Task<IActionResult> GetPosts(int page = 1, int pageSize = 5)
+        {
+            var result = await _postServices.GetPostsAsync(page, pageSize);
+
+            return Ok(new
+                {
+                    posts = result.posts, totalCount = result.totalCount
+                }
+            );
+        }
+        
         // POST: api/posts
         [HttpPost("create")]
         [Consumes("multipart/form-data")]

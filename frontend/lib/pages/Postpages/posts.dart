@@ -25,8 +25,15 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   final ApiService api = ApiService();
-  late Future<List<dynamic>> postsFuture;
-  Timer? _pollingTimer;
+
+  List<Map<String, dynamic>> posts = [];
+  int currentPage = 1;
+  bool isLoading = false;
+  bool hasMore = true;
+  final int pageSize = 5;
+
+  final ScrollController _scrollController = ScrollController();
+
   String _sortMode = 'Latest'; // 'Latest' or 'Explore'
   List<Map<String, dynamic>> _shuffledExplorePosts = [];
   bool _hasShuffledOnce = false;
@@ -34,53 +41,66 @@ class _PostsPageState extends State<PostsPage> {
   @override
   void initState() {
     super.initState();
-    postsFuture = api.fetchPosts();
-    _startPolling();
-  }
+    _fetchPosts();
 
-  void _startPolling() {
-    _pollingTimer = Timer.periodic(Duration(seconds: 10), (timer) async {
-      final newPosts = await api.fetchPosts();
-      log('Posts refreshed at ${DateTime.now()}');
-
-      setState(() {
-        postsFuture = Future.value(newPosts);
-
-        if (_sortMode == 'Explore' && _hasShuffledOnce) {
-          final fetchedPosts = newPosts.cast<Map<String, dynamic>>();
-          final newFiltered = fetchedPosts.where((post) {
-            final String? postUserId = post['userId'];
-            return !(widget.ownProfile ||
-                postUserId == widget.otheruserUsername);
-          }).toList();
-
-          // Add only new posts that aren't already in _shuffledExplorePosts
-          final existingIds = _shuffledExplorePosts.map((e) => e['id']).toSet();
-          final newOnes = newFiltered
-              .where((post) => !existingIds.contains(post['id']))
-              .toList();
-
-          newOnes.shuffle(); // Shuffle only the new additions
-          _shuffledExplorePosts.addAll(
-            newOnes,
-          ); // Add to existing shuffled list
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent) {
+        log('In scroll controller, isloading:$isLoading and hasmore:$hasMore');
+        // 100 to make it trigger a bit earlier
+        if (!isLoading && hasMore) {
+          log("Reached bottom of the list. Loading more posts...");
+          _fetchPosts();
         }
-      });
+      }
     });
   }
 
-  Future<void> _refreshPosts() async {
-    final newPosts = await api.fetchPosts();
+  Future<void> _fetchPosts() async {
+    if (isLoading || !hasMore) {
+      return; // Prevent fetch if already loading or no more posts
+    }
+
+    log('Fetching posts, currentPage: $currentPage');
 
     setState(() {
-      postsFuture = Future.value(newPosts);
-      _hasShuffledOnce = false; // reset shuffle on manual refresh
+      isLoading = true;
     });
+
+    try {
+      final result = await api.fetchfewPosts(currentPage, pageSize);
+      final newPosts =
+          result['posts']; // assuming your response is structured like this
+      final totalCount = result['totalCount'];
+
+      log('Fetched ${newPosts.length} posts.');
+      log('Total number of posts is $totalCount');
+
+      if (!mounted) return;
+      setState(() {
+        posts.addAll(newPosts.cast<Map<String, dynamic>>());
+
+        if (posts.length >= totalCount || newPosts.isEmpty) {
+          hasMore = false;
+          log('No more posts available.');
+        } else {
+          hasMore = true;
+          currentPage++;
+        }
+
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      log('Error fetching posts: $e');
+    }
   }
 
   @override
   void dispose() {
-    _pollingTimer?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -94,92 +114,70 @@ class _PostsPageState extends State<PostsPage> {
               automaticallyImplyLeading: false,
               actions: [_buildSortDropdown()],
             ),
-      body: FutureBuilder<List<dynamic>>(
-        future: postsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<String?>(
+        future: AuthStorage.getUserName(),
+        builder: (context, userIdSnapshot) {
+          if (userIdSnapshot.connectionState == ConnectionState.waiting ||
+              isLoading && posts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+
+          if (userIdSnapshot.hasError) {
+            return Center(child: Text('Error: ${userIdSnapshot.error}'));
           }
 
-          final posts = snapshot.data ?? [];
+          final String? uid = userIdSnapshot.data;
 
-          // Sort newest first
-          posts.sort((a, b) {
-            final aDate =
-                DateTime.tryParse(a['created'] ?? '') ?? DateTime(2000);
-            final bDate =
-                DateTime.tryParse(b['created'] ?? '') ?? DateTime(2000);
-            return bDate.compareTo(aDate);
-          });
+          // Filter the loaded posts
+          List<Map<String, dynamic>> filteredPosts = posts.where((post) {
+            final String? postUserId = post['userId'];
+            if (widget.ownProfile) {
+              return postUserId == uid;
+            } else if (widget.otheruserProfile &&
+                widget.otheruserUsername != null) {
+              return postUserId == widget.otheruserUsername;
+            } else {
+              return postUserId != uid;
+            }
+          }).toList();
 
-          return FutureBuilder<String?>(
-            future: AuthStorage.getUserName(), // stored uid from JWT
-            builder: (context, userIdSnapshot) {
-              if (userIdSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (userIdSnapshot.hasError) {
-                return Center(child: Text('Error: ${userIdSnapshot.error}'));
-              }
+          // Sort or shuffle
+          if (_sortMode == 'Latest') {
+            filteredPosts.sort((a, b) {
+              final aDate =
+                  DateTime.tryParse(a['created'] ?? '') ?? DateTime(2000);
+              final bDate =
+                  DateTime.tryParse(b['created'] ?? '') ?? DateTime(2000);
+              return bDate.compareTo(aDate);
+            });
+          } else if (_sortMode == 'Explore') {
+            if (!_hasShuffledOnce) {
+              _shuffledExplorePosts = List.from(filteredPosts)..shuffle();
+              _hasShuffledOnce = true;
+            }
+            filteredPosts = _shuffledExplorePosts;
+          }
 
-              final String? uid = userIdSnapshot.data;
+          if (filteredPosts.isEmpty && !hasMore && !isLoading) {
+            return const Center(child: Text("No posts available"));
+          }
 
-              /// FILTERING LOGIC
-              List<Map<String, dynamic>> filteredPosts = posts
-                  .cast<Map<String, dynamic>>()
-                  .where((post) {
-                    final String? postUserId = post['userId'];
-                    log('Checking post: postUserId=$postUserId | uid=$uid');
-
-                    if (widget.ownProfile) {
-                      return postUserId == uid;
-                    } else if (widget.otheruserProfile &&
-                        widget.otheruserUsername != null) {
-                      return postUserId == widget.otheruserUsername;
-                    } else {
-                      // Feed: exclude self’s posts
-                      return postUserId != uid;
-                    }
-                  })
-                  .toList();
-              /*
-              if (!widget.ownProfile) {
-                filteredPosts.shuffle();
-              }*/
-
-              if (_sortMode == 'Latest') {
-                filteredPosts.sort((a, b) {
-                  final aDate =
-                      DateTime.tryParse(a['created'] ?? '') ?? DateTime(2000);
-                  final bDate =
-                      DateTime.tryParse(b['created'] ?? '') ?? DateTime(2000);
-                  return bDate.compareTo(aDate);
-                });
-              } else if (_sortMode == 'Explore') {
-                if (!_hasShuffledOnce) {
-                  _shuffledExplorePosts = List.from(filteredPosts)..shuffle();
-                  _hasShuffledOnce = true;
-                }
-                filteredPosts = _shuffledExplorePosts;
+          return ListView.builder(
+            key: const PageStorageKey<String>('postsList'),
+            controller: _scrollController,
+            itemCount: filteredPosts.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == filteredPosts.length) {
+                return const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
               }
 
-              return filteredPosts.isEmpty
-                  ? const Center(child: Text("No posts available"))
-                  : RefreshIndicator(
-                      onRefresh: _refreshPosts,
-                      child: ListView.builder(
-                        itemCount: filteredPosts.length,
-                        itemBuilder: (context, index) {
-                          return Displaymultiplepost(
-                            post: filteredPosts[index],
-                            state: widget.ownProfile,
-                          );
-                        },
-                      ),
-                    );
+              return Displaymultiplepost(
+                post: filteredPosts[index],
+                state: widget.ownProfile,
+              );
             },
           );
         },

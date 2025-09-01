@@ -27,6 +27,22 @@ namespace Backend.Services
             return await _postsCollection.Find(p => p.UserId == userId).ToListAsync();
         }
         
+        public async Task<(List<Post> posts, long totalCount)> GetPostsAsync(int page, int pageSize)
+        {
+            var skip = (page - 1) * pageSize;
+
+            var totalCount = await _postsCollection.CountDocumentsAsync(FilterDefinition<Post>.Empty);
+
+            var posts = await _postsCollection
+                .Find(FilterDefinition<Post>.Empty)
+                .SortByDescending(p => p.Created)
+                .Skip(skip)
+                .Limit(pageSize)
+                .ToListAsync();
+
+            return (posts, totalCount);
+        }
+        
         public async Task CreateAsync(Post post) => 
             await _postsCollection.InsertOneAsync(post);
         

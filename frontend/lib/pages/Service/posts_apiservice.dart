@@ -35,9 +35,24 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> fetchfewPosts(int page, int pageSize) async {
+    final response = await http.get(
+      Uri.parse('$posturl/posts?page=$page&pageSize=$pageSize'),
+    );
+    log("Request URL: $posturl/posts?page=$page&pageSize=$pageSize");
+
+    if (response.statusCode == 200) {
+      log('Fetched few posts');
+      // Decode the JSON response and return it as a map
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load posts');
+    }
+  }
+
   Future<Map<String, dynamic>> fetchPostById(String id) async {
     final response = await http.get(Uri.parse('$posturl/$id'));
-    if (response.statusCode >= 200 && response.statusCode<300) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
       log('Response body: ${response.body}');
