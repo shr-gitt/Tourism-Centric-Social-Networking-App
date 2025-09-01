@@ -110,7 +110,6 @@ class _PostsPageState extends State<PostsPage> {
       appBar: (widget.ownProfile || widget.otheruserProfile)
           ? null
           : AppBar(
-              title: const Text('Posts'),
               automaticallyImplyLeading: false,
               actions: [_buildSortDropdown()],
             ),

@@ -63,10 +63,7 @@ class _ProfileState extends State<Profile> {
         imageUrl = 'https://localhost:5259/Images/profile_placeholder.jpg';
       }
       return Scaffold(
-        appBar: AppBar(
-          title: Text('Profile'),
-          automaticallyImplyLeading: false,
-        ),
+        appBar: AppBar(automaticallyImplyLeading: false, toolbarHeight: 5),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,

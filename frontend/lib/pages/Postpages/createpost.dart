@@ -7,7 +7,7 @@ class Createpost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(automaticallyImplyLeading: false, toolbarHeight: 30),
       body: Inputpost(
         titleController: TextEditingController(),
         locationController: TextEditingController(),
