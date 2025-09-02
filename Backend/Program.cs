@@ -127,8 +127,8 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "")),
-            NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
-            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            NameClaimType = "nameidentifier",
+            RoleClaimType = "role"
         };
     })
     .AddGoogle(googleOptions =>
