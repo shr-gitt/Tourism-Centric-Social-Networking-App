@@ -1,8 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:frontend/pages/MapPages/path_recorder.dart';
+//import 'package:frontend/pages/MapPages/path_recorder.dart';
 import 'package:frontend/pages/Postpages/community.dart';
 import 'package:frontend/pages/Service/map_apiservice.dart';
 import 'package:frontend/pages/decorhelper.dart';
@@ -34,6 +36,8 @@ class MapState extends State<Map> {
   bool _isRecording = false;
   late DateTime _startTime;
   DateTime? _endTime;
+  bool _showRecordingStats = false;
+  Timer? _updateTimer;
 
   @override
   void initState() {
@@ -49,37 +53,12 @@ class MapState extends State<Map> {
     if (_isRecording) {
       _positionStreamSubscription.cancel();
     }
-  }
-
-  String generateLocationDescription(String city, String country) {
-    if (city.toLowerCase() == 'kathmandu') {
-      return '''Kathmandu, the capital of Nepal, is a vibrant city known for its rich history, temples, and cultural heritage. It is home to UNESCO World Heritage Sites like Swayambhunath (Monkey Temple) and Pashupatinath Temple. The city serves as a gateway to the Himalayas, attracting trekkers and mountaineers from around the world. Kathmandu is also a hub for arts, crafts, and traditional Nepali culture. It is the political, cultural, and economic center of Nepal.''';
-    } else if (city.toLowerCase() == 'lalitpur') {
-      return '''Lalitpur, also known as Patan, is one of the major cities of Nepal, located just south of Kathmandu. It is famous for its rich history, ancient temples, and Newar culture. Patan Durbar Square, a UNESCO World Heritage Site, showcases impressive architecture, art, and sculptures. The city is known for its craftsmanship, especially in metalwork and wood carving, and is home to the beautiful Patan Museum, which houses many religious and cultural artifacts.''';
-    } else if (city.toLowerCase() == 'bhaktapur') {
-      return '''Bhaktapur, an ancient city located east of Kathmandu, is renowned for its well-preserved medieval architecture and culture. The city is home to Bhaktapur Durbar Square, a UNESCO World Heritage Site, with stunning temples, courtyards, and shrines. Bhaktapur is famous for its festivals, arts, and crafts, particularly pottery. The city has a slower pace of life compared to Kathmandu, offering a glimpse into Nepal's traditional heritage.''';
-    } else if (city.toLowerCase() == 'dhulikhel') {
-      return '''Dhulikhel, a scenic town located about 30 kilometers east of Kathmandu, is known for its breathtaking views of the Himalayas, including peaks like Mount Everest and Langtang. It is a popular destination for trekking, hiking, and cultural experiences. Dhulikhel offers a glimpse of rural Nepali life, with its traditional Newar houses and temples. It is a peaceful getaway from the bustling Kathmandu Valley.''';
-    } else if (city.toLowerCase() == 'pokhara') {
-      return '''Pokhara, one of Nepal's most popular tourist destinations, is located in the central region of the country. Known for its stunning lakes like Phewa Lake and incredible views of the Annapurna mountain range, Pokhara is a hub for adventure tourism, including trekking, paragliding, and boating. The city is also famous for its vibrant atmosphere, with numerous restaurants, cafes, and shops catering to trekkers and tourists.''';
-    } else if (city.toLowerCase() == 'lumbini') {
-      return '''Lumbini, the birthplace of Lord Buddha, is located in the southwestern region of Nepal. It is a significant pilgrimage site for Buddhists from all over the world. The Lumbini Garden, where the Maya Devi Temple stands, is home to sacred monuments and peaceful surroundings. The site attracts thousands of visitors each year, who come to learn about Buddha's life and teachings.''';
-    } else if (city.toLowerCase() == 'chitwan') {
-      return '''Chitwan, located in the southern part of Nepal, is famous for the Chitwan National Park, a UNESCO World Heritage Site. The park is home to a diverse range of wildlife, including the endangered one-horned rhinoceros and Bengal tigers. Chitwan also offers opportunities for jungle safaris, bird watching, and canoeing in the Rapti River. It is a popular destination for nature lovers and wildlife enthusiasts.''';
-    } else if (city.toLowerCase() == 'biratnagar') {
-      return '''Biratnagar, located in the southeastern region of Nepal, is the second-largest city in the country. It is an industrial hub, with a growing economy based on agriculture, textiles, and manufacturing. Biratnagar is also known for its cultural diversity, with a mix of Hindu, Buddhist, and Muslim communities. The city is close to the border with India and serves as an important trade and commerce center.''';
-    } else if (city.toLowerCase() == 'itahari') {
-      return '''Itahari, a fast-growing city in the eastern region of Nepal, is known for its strategic location near the East-West Highway. It is an important commercial and transportation hub for the eastern part of the country. The city has a growing population and offers a range of services, including schools, hospitals, and shopping centers. Itahari is known for its pleasant climate and vibrant local markets.''';
-    } else if (city.toLowerCase() == 'himalaya') {
-      return '''The Himalayas, the world's highest mountain range, stretch across Nepal and several other countries in South Asia. Known for its towering peaks, including Mount Everest, the Himalayas are a paradise for trekkers, mountaineers, and nature enthusiasts. The region offers stunning landscapes, unique wildlife, and a rich cultural heritage, with many ethnic communities living in the foothills and valleys. The Himalayas attract adventurers from around the world.''';
-    } else {
-      return 'No detailed description available for this location.';
-    }
+    _updateTimer?.cancel();
   }
 
   // Method to show bottom sheet
   void _showLocationDetails(LatLng position, String address, String city) {
-    String locationDescription = generateLocationDescription(
+    String locationDescription = DecorHelper().generateLocationDescription(
       city.isNotEmpty ? city : "Unknown",
       "Nepal",
     );
@@ -247,27 +226,50 @@ class MapState extends State<Map> {
         Geolocator.getPositionStream(
           locationSettings: LocationSettings(
             accuracy: LocationAccuracy.high,
-            distanceFilter: 10, // Update every 10 meters
+            distanceFilter: 10,
           ),
         ).listen((Position position) {
           setState(() {
             _recordedPath.add(LatLng(position.latitude, position.longitude));
-            log('Adding in recordedpath');
+            log('Adding point to recorded path');
           });
         });
 
+    // Add timer to update UI every second
+    _updateTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_isRecording) {
+        setState(() {
+          // This will trigger a rebuild and update the duration display
+        });
+      }
+    });
+
     setState(() {
-      log('In start recording before, $_isRecording');
       _isRecording = true;
-      log('In start recording after, $_isRecording');
+      _showRecordingStats = true;
+      log('Started recording: $_isRecording');
     });
   }
 
   void _stopRecording() {
     _endTime = DateTime.now();
     _positionStreamSubscription.cancel();
+    _updateTimer?.cancel(); // Stop the update timer
+
     setState(() {
       _isRecording = false;
+      // Keep _showRecordingStats = true so stats remain visible
+    });
+  }
+
+  // Add new method to clear/cancel the recording stats
+  void _clearRecordingStats() {
+    _updateTimer?.cancel(); // Make sure timer is cancelled
+
+    setState(() {
+      _showRecordingStats = false;
+      _recordedPath.clear();
+      _endTime = null;
     });
   }
 
@@ -373,27 +375,13 @@ class MapState extends State<Map> {
                   ],
                 ),
 
-              if (_isRecording)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Distance: ${totalDistance.toStringAsFixed(2)} meters",
-                      ),
-                      Text(
-                        "Duration: ${_formatDuration(totalDurationInSeconds)}",
-                      ),
-                    ],
-                  ),
-                ),
-              if (_isRecording)
+              if (_showRecordingStats) // Changed from _isRecording
                 PolylineLayer(
                   polylines: [
                     Polyline(
-                      points: _recordedPath, // Recorded path
+                      points: _recordedPath,
                       strokeWidth: 4,
-                      color: Colors.red, // Color for the recording path
+                      color: Colors.red,
                     ),
                   ],
                 ),
@@ -422,12 +410,84 @@ class MapState extends State<Map> {
               frompost: false,
             ),
           ),
+          // Distance and Duration Display (Updated)
+          if (_showRecordingStats)
+            Positioned(
+              top: 80,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _isRecording
+                              ? Icons.fiber_manual_record
+                              : Icons.stop_circle,
+                          color: _isRecording ? Colors.red : Colors.grey,
+                          size: 16,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          _isRecording ? "Recording..." : "Recording Complete",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _isRecording ? Colors.red : Colors.green,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        // Clear button
+                        GestureDetector(
+                          onTap: _clearRecordingStats,
+                          child: Icon(
+                            Icons.close,
+                            size: 18,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Distance: ${(totalDistance / 1000).toStringAsFixed(2)} km",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Duration: ${_formatDuration(totalDurationInSeconds)}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
 
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          /*
           FloatingActionButton(
             heroTag: "Record",
 
@@ -444,16 +504,26 @@ class MapState extends State<Map> {
               Icons.radio_button_checked_rounded,
             ), // Use a custom icon for navigation
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8),*/
           FloatingActionButton(
             onPressed: () {
               if (_isRecording) {
                 _stopRecording();
+              } else if (_showRecordingStats) {
+                // If stats are showing but not recording, start new recording
+                _clearRecordingStats(); // Clear previous stats first
+                _startLocationTracking();
               } else {
                 _startLocationTracking();
               }
             },
-            child: Icon(_isRecording ? Icons.stop : Icons.play_arrow),
+            child: Icon(
+              _isRecording
+                  ? Icons.stop
+                  : _showRecordingStats
+                  ? Icons.refresh
+                  : Icons.play_arrow,
+            ),
           ),
           SizedBox(height: 8),
           FloatingActionButton(
