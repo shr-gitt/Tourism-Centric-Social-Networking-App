@@ -49,6 +49,7 @@ builder.Services.AddScoped<IMongoCollection<Feedback>>(sp =>
 builder.Services.AddScoped<PostsContext>();
 builder.Services.AddScoped<FeedbacksContext>();
 builder.Services.AddScoped<AccountContext>();
+builder.Services.AddScoped<ReportContext>();
 
 //Register Account related services
 builder.Services.AddScoped<AccountServices>();
@@ -60,6 +61,8 @@ builder.Services.AddScoped<PostServices>();
 
 // Register Feedback related services
 builder.Services.AddScoped<FeedbacksService>();
+
+builder.Services.AddScoped<ReportServices>();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();

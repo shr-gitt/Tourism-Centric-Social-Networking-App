@@ -8,7 +8,7 @@ public class Report
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     [BsonElement("_id")]
-    public string ReportId { get; set; }
+    public string? ReportId { get; set; }
     
     public required string PostId { get; set; }
     

@@ -36,15 +36,27 @@ class _EditpostState extends State<Editpost> {
         }
 
         final post = snapshot.data!;
-        return Inputpost(
-          id: widget.postId,
-          titleController: TextEditingController(text: post['title'] ?? ''),
-          locationController: TextEditingController(
-            text: post['location'] ?? '',
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
+            automaticallyImplyLeading: false,
+            toolbarHeight: 30,
           ),
-          contentController: TextEditingController(text: post['content'] ?? ''),
-          existingImageUrls: List<String>.from(post['images'] ?? []),
-          isEditing: true,
+          body: Inputpost(
+            id: widget.postId,
+            titleController: TextEditingController(text: post['title'] ?? ''),
+            locationController: TextEditingController(
+              text: post['location'] ?? '',
+            ),
+            contentController: TextEditingController(
+              text: post['content'] ?? '',
+            ),
+            existingImageUrls: List<String>.from(post['images'] ?? []),
+            isEditing: true,
+          ),
         );
       },
     );

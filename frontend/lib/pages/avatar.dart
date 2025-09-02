@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/pages/Service/authstorage.dart';
+import 'package:frontend/pages/Service/report_apiservice.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Userpages/view_user.dart';
 import 'package:getwidget/getwidget.dart';
@@ -39,6 +41,95 @@ class _AvatarState extends State<Avatar> {
       setState(() {
         user = userData;
       });
+    }
+  }
+
+  void _onReported(String postId) async {
+    String? selectedReason;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Report Post'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Why are you reporting this post?'),
+                  RadioListTile<String>(
+                    title: const Text('Wrong Community'),
+                    value: 'Wrong Community',
+                    groupValue: selectedReason,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedReason = value;
+                      });
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text('Spam'),
+                    value: 'Spam',
+                    groupValue: selectedReason,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedReason = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                TextButton(
+                  child: const Text(
+                    'Report',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onPressed: () {
+                    if (selectedReason != null) {
+                      Navigator.of(context).pop(true);
+                    } else {
+                      // Show alert to select a reason
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please select a reason')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (confirm == true) {
+      String? userId = await AuthStorage.getUserName();
+      // Send the reason to your API (if supported)
+      final success = await ReportApiservice().reportPost(
+        userId: userId,
+        postId: postId,
+        reason: selectedReason,
+      );
+
+      if (context.mounted) {
+        //Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Post reported for "$selectedReason"'
+                  : 'Failed to report post',
+            ),
+          ),
+        );
+      }
     }
   }
 
@@ -136,6 +227,20 @@ class _AvatarState extends State<Avatar> {
             itemBuilder: (BuildContext context) => const [
               PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
               PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
+            ],
+          ),
+
+        if (isPost && !selfPost)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {
+              final String? postId = data['postId'];
+              if (postId == null) return;
+
+              _onReported(postId);
+            },
+            itemBuilder: (BuildContext context) => const [
+              PopupMenuItem<String>(value: 'report', child: Text('Report')),
             ],
           ),
       ],

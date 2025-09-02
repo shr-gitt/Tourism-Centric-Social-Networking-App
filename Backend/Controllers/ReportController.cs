@@ -52,7 +52,7 @@ namespace Backend.Controllers
             return CreatedAtAction(nameof(GetById), new { reportid = report.ReportId }, report);
         }
         
-        [HttpDelete("{feedbackid}")]
+        [HttpDelete("{reportId}")]
         public async Task<IActionResult> DeleteReport(string reportId, Report report)
         {
             var deleted = await _reportServices.DeleteAsync(reportId, report);
