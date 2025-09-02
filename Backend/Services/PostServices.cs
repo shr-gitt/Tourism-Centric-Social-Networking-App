@@ -45,8 +45,6 @@ namespace Backend.Services
         
         public async Task CreateAsync(Post post) => 
             await _postsCollection.InsertOneAsync(post);
-        
-        
     
         public async Task DeleteAsync(string id, Post post)=>
             await _postsCollection.DeleteOneAsync(p => p.PostId == post.PostId);
