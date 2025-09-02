@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:frontend/pages/MapPages/path_recorder.dart';
 import 'package:frontend/pages/Postpages/community.dart';
 import 'package:frontend/pages/Service/map_apiservice.dart';
 import 'package:frontend/pages/decorhelper.dart';
@@ -26,12 +28,27 @@ class MapState extends State<Map> {
   List<LatLng> _routePoints = [];
   LatLng? _tempSelectedLocation;
 
+  // ignore: prefer_final_fields
+  List<LatLng> _recordedPath = [];
+  late StreamSubscription<Position> _positionStreamSubscription;
+  bool _isRecording = false;
+  late DateTime _startTime;
+  DateTime? _endTime;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _goToUserLocation();
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (_isRecording) {
+      _positionStreamSubscription.cancel();
+    }
   }
 
   String generateLocationDescription(String city, String country) {
@@ -194,6 +211,11 @@ class MapState extends State<Map> {
       _fitMapToRoute();
     } catch (e) {
       log('Error getting route: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch route. Please try again.')),
+        );
+      }
     }
   }
 
@@ -213,8 +235,68 @@ class MapState extends State<Map> {
     }
   }
 
+  void _startLocationTracking() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return;
+    }
+
+    _startTime = DateTime.now();
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 10, // Update every 10 meters
+          ),
+        ).listen((Position position) {
+          setState(() {
+            _recordedPath.add(LatLng(position.latitude, position.longitude));
+            log('Adding in recordedpath');
+          });
+        });
+
+    setState(() {
+      log('In start recording before, $_isRecording');
+      _isRecording = true;
+      log('In start recording after, $_isRecording');
+    });
+  }
+
+  void _stopRecording() {
+    _endTime = DateTime.now();
+    _positionStreamSubscription.cancel();
+    setState(() {
+      _isRecording = false;
+    });
+  }
+
+  double _calculateTotalDistance() {
+    double totalDistance = 0;
+    for (int i = 1; i < _recordedPath.length; i++) {
+      totalDistance += Geolocator.distanceBetween(
+        _recordedPath[i - 1].latitude,
+        _recordedPath[i - 1].longitude,
+        _recordedPath[i].latitude,
+        _recordedPath[i].longitude,
+      );
+    }
+    return totalDistance;
+  }
+
+  String _formatDuration(int seconds) {
+    int hours = (seconds / 3600).floor();
+    int minutes = ((seconds % 3600) / 60).floor();
+    int remainingSeconds = seconds % 60;
+    return "$hours h $minutes m $remainingSeconds s";
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalDistance = _calculateTotalDistance();
+    int totalDurationInSeconds = _isRecording
+        ? DateTime.now().difference(_startTime).inSeconds
+        : (_endTime != null ? _endTime!.difference(_startTime).inSeconds : 0);
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false, toolbarHeight: 5),
       body: Stack(
@@ -290,6 +372,31 @@ class MapState extends State<Map> {
                     ),
                   ],
                 ),
+
+              if (_isRecording)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Distance: ${totalDistance.toStringAsFixed(2)} meters",
+                      ),
+                      Text(
+                        "Duration: ${_formatDuration(totalDurationInSeconds)}",
+                      ),
+                    ],
+                  ),
+                ),
+              if (_isRecording)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _recordedPath, // Recorded path
+                      strokeWidth: 4,
+                      color: Colors.red, // Color for the recording path
+                    ),
+                  ],
+                ),
             ],
           ),
 
@@ -322,20 +429,54 @@ class MapState extends State<Map> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
-            heroTag: "zoomIn",
-            onPressed: () => _mapController.move(
-              _mapController.camera.center,
-              _mapController.camera.zoom + 1,
-            ),
-            child: Icon(Icons.zoom_in),
+            heroTag: "Record",
+
+            onPressed: () {
+              // Navigate to PathRecorderPage
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PathRecorderPage(),
+                ),
+              );
+            },
+            child: Icon(
+              Icons.radio_button_checked_rounded,
+            ), // Use a custom icon for navigation
           ),
           SizedBox(height: 8),
           FloatingActionButton(
+            onPressed: () {
+              if (_isRecording) {
+                _stopRecording();
+              } else {
+                _startLocationTracking();
+              }
+            },
+            child: Icon(_isRecording ? Icons.stop : Icons.play_arrow),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            heroTag: "zoomIn",
+            onPressed: () {
+              double newZoom = _mapController.camera.zoom + 1;
+              newZoom = newZoom.clamp(
+                3.0,
+                18.0,
+              ); // Clamping zoom level between 3.0 and 18.0
+              _mapController.move(_mapController.camera.center, newZoom);
+            },
+            child: Icon(Icons.zoom_in),
+          ),
+
+          SizedBox(height: 8),
+          FloatingActionButton(
             heroTag: "zoomOut",
-            onPressed: () => _mapController.move(
-              _mapController.camera.center,
-              _mapController.camera.zoom - 1,
-            ),
+            onPressed: () {
+              double newZoom = _mapController.camera.zoom - 1;
+              newZoom = newZoom.clamp(3.0, 18.0);
+              _mapController.move(_mapController.camera.center, newZoom);
+            },
             child: Icon(Icons.zoom_out),
           ),
         ],
