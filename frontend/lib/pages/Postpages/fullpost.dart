@@ -4,6 +4,7 @@ import 'package:frontend/pages/Service/posts_apiservice.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/avatar.dart';
 import 'package:frontend/pages/Feedbackpages/feedbackscomments.dart';
+import 'package:frontend/pages/mainscreen.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 
@@ -109,12 +110,12 @@ class _FullPostPageState extends State<FullPostPage> {
             title: Text(post['title'] ?? 'Post Details'),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(
+              onPressed: () => Navigator.pushReplacement(
                 context,
-                /*MaterialPageRoute(
+                MaterialPageRoute(
                   builder: (_) =>
                       MainScreen(currentIndex: widget.state ? 4 : 0),
-                ),*/
+                ),
               ),
             ),
           ),

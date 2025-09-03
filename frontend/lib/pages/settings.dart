@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/Authenticationpages/login.dart';
 import 'package:frontend/pages/Authenticationpages/verifycode.dart';
+import 'package:frontend/pages/Postpages/reportedPosts.dart';
 import 'package:frontend/pages/Service/authstorage.dart';
 import 'package:frontend/pages/Service/user_apiservice.dart';
 import 'package:frontend/pages/Userpages/change_password.dart';
@@ -288,12 +289,27 @@ class _SettingsState extends State<Settings> {
                     ),
 
                     const SizedBox(height: 20),
+                    if (settings?['email'] == 'mandipshresthaa@gmail.com') ...[
+                      DecorHelper().buildSettingCard(
+                        title: 'Reported Posts',
+                        subtitle: 'Review reported posts',
+                        icon: Icons.lock_outline,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ReportedPostsPage(),
+                          ),
+                        ),
+                        iconColor: Colors.blue.shade600,
+                      ),
 
+                      const SizedBox(height: 20),
+                    ],
                     DecorHelper().buildSettingCard(
                       title: 'Help Center',
                       subtitle: 'Frequently asked questions',
                       icon: Icons.lock_outline,
-                      onTap: () => Navigator.pushReplacement(
+                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => const HelpCenterPage(),

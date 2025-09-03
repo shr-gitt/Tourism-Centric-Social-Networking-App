@@ -37,12 +37,10 @@ public class ReportServices
         return true;
     }
 
-    public async Task<bool> DeleteAsync(string id, Report report)
+    public async Task<bool> DeleteAsync(string reportId)
     {
-        if (report == null) 
-            throw new ArgumentNullException(nameof(report));
-        
-        await _reportCollection.DeleteOneAsync(p => p.ReportId == report.ReportId);
-        return true;
+        var result = await _reportCollection.DeleteOneAsync(p => p.ReportId == reportId);
+        return result.DeletedCount > 0;
     }
+
 }

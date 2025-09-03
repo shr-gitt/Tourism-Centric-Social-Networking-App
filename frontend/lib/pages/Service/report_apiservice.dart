@@ -49,9 +49,7 @@ class ReportApiservice {
         log("Report submitted successfully.");
         return true;
       } else {
-        log(
-          "Failed to submit report: ${response.statusCode} ${response.body}",
-        );
+        log("Failed to submit report: ${response.statusCode} ${response.body}");
         return false;
       }
     } catch (e) {
@@ -59,6 +57,29 @@ class ReportApiservice {
       return false;
     } finally {
       log("reportPost execution completed.");
+    }
+  }
+
+  Future<bool> deleteReportById(String reportId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$reporturl/$reportId'),
+        headers: _headers,
+      );
+
+      if (response.statusCode == 204) {
+        return true;
+      } else {
+        log(
+          "Failed to delete report: ${response.statusCode} - ${response.body}",
+        );
+        return false;
+      }
+    } catch (e) {
+      log("Exception in deleteReportById: $e");
+      return false;
+    } finally {
+      log("deleteReportById execution completed.");
     }
   }
 }

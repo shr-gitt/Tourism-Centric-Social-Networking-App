@@ -53,13 +53,14 @@ namespace Backend.Controllers
         }
         
         [HttpDelete("{reportId}")]
-        public async Task<IActionResult> DeleteReport(string reportId, Report report)
+        public async Task<IActionResult> DeleteReport(string reportId)
         {
-            var deleted = await _reportServices.DeleteAsync(reportId, report);
+            var deleted = await _reportServices.DeleteAsync(reportId);
             if (!deleted)
                 return NotFound("Report not found.");
-    
+
             return NoContent();
         }
+
     }
 }
