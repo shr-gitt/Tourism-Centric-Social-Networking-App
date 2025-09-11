@@ -279,10 +279,19 @@ class _SettingsState extends State<Settings> {
                           ? 'Enabled - Your account is protected'
                           : 'Disabled - Enhance your security',
                       icon: Icons.security_outlined,
-                      onTap: () => _toggle2FA(
-                        settings?['email'],
-                        settings?['twoFactorEnabled'],
-                      ),
+                      onTap: () => {
+                        if (settings?['emailConfirmed'] != false) ...[
+                          log('Enabling/Disabling 2FA'),
+
+                          _toggle2FA(
+                            settings?['email'],
+                            settings?['twoFactorEnabled'],
+                          ),
+                        ] else ...[
+                          log('To enable 2FA, Verify Email first'),
+                          _showSnackBar('Verify Email first', isError: true),
+                        ],
+                      },
                       iconColor: settings?['twoFactorEnabled'] == true
                           ? Colors.green.shade600
                           : Colors.orange.shade600,
